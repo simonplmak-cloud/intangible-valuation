@@ -4,14 +4,14 @@ Monte Carlo simulation, decision trees, purchase price allocation, goodwill, lit
 
 ## Monte Carlo Sensitivity
 
-::: src.advanced.monte_carlo
+::: intangible_valuation.advanced.monte_carlo
     options:
         members:
             - monte_carlo_sensitivity
 
 ## Purchase Price Allocation
 
-::: src.advanced.purchase_price_alloc
+::: intangible_valuation.advanced.purchase_price_alloc
     options:
         members:
             - purchase_price_allocation
@@ -20,7 +20,7 @@ Monte Carlo simulation, decision trees, purchase price allocation, goodwill, lit
 
 ## Goodwill
 
-::: src.advanced.goodwill
+::: intangible_valuation.advanced.goodwill
     options:
         members:
             - goodwill
@@ -28,7 +28,7 @@ Monte Carlo simulation, decision trees, purchase price allocation, goodwill, lit
 
 ## Litigation Damages
 
-::: src.advanced.litigation
+::: intangible_valuation.advanced.litigation
     options:
         members:
             - patent_infringement_damages
@@ -36,7 +36,7 @@ Monte Carlo simulation, decision trees, purchase price allocation, goodwill, lit
 
 ## Royalty Benchmarking
 
-::: src.advanced.royalty_benchmark
+::: intangible_valuation.advanced.royalty_benchmark
     options:
         members:
             - royalty_rate_benchmark
@@ -45,15 +45,15 @@ Monte Carlo simulation, decision trees, purchase price allocation, goodwill, lit
 
 ## Impairment Testing
 
-::: src.advanced.impairment_testing
+::: intangible_valuation.advanced.impairment_testing
 
 ## Transfer Pricing
 
-::: src.advanced.transfer_pricing
+::: intangible_valuation.advanced.transfer_pricing
 
 ## Utility Functions
 
-::: src.utils.formulas
+::: intangible_valuation.utils.formulas
     options:
         members:
             - estimate_useful_life

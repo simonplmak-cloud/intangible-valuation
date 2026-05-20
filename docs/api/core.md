@@ -4,7 +4,7 @@ Time value of money, discount rate construction, and statistical functions.
 
 ## Time Value of Money
 
-::: src.core.time_value
+::: intangible_valuation.core.time_value
     options:
         members:
             - present_value
@@ -19,7 +19,7 @@ Time value of money, discount rate construction, and statistical functions.
 
 ## Discount Rates
 
-::: src.core.discount_rates
+::: intangible_valuation.core.discount_rates
     options:
         members:
             - build_up_discount_rate
@@ -33,7 +33,7 @@ Time value of money, discount rate construction, and statistical functions.
 
 ## Statistics
 
-::: src.core.statistics
+::: intangible_valuation.core.statistics
     options:
         members:
             - monte_carlo_valuation
@@ -45,4 +45,4 @@ Time value of money, discount rate construction, and statistical functions.
 
 ## Constants
 
-::: src.utils.constants
+::: intangible_valuation.utils.constants

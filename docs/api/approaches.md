@@ -4,7 +4,7 @@ Cost approach and market approach methods.
 
 ## Cost Approach
 
-::: src.approaches.cost_approach
+::: intangible_valuation.approaches.cost_approach
     options:
         members:
             - reproduction_cost
@@ -15,4 +15,4 @@ Cost approach and market approach methods.
 
 ## Market Approach
 
-::: src.approaches.market_approach
+::: intangible_valuation.approaches.market_approach
