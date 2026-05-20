@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-from src.core import ValuationResult
+from intangible_valuation.core import ValuationResult
 
 
 class GoodwillInput(BaseModel):

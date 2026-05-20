@@ -8,7 +8,7 @@ Implements the method from Chapter 4 with Tax Amortization Benefit (TAB).
 
 from __future__ import annotations
 
-from src.core.time_value import present_value_of_series
+from intangible_valuation.core.time_value import present_value_of_series
 
 
 def relief_from_royalty(

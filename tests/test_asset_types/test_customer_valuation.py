@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.asset_types.customer_valuation import (
+from intangible_valuation.asset_types.customer_valuation import (
     backlog_valuation,
     churn_impact_analysis,
     customer_lifetime_value,

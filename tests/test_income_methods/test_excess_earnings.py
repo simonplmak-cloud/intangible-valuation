@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.income_methods.excess_earnings import (
+from intangible_valuation.income_methods.excess_earnings import (
     contributory_asset_charges,
     mpeem,
     single_period_excess_earnings,

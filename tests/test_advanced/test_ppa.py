@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.advanced.purchase_price_alloc import (
+from intangible_valuation.advanced.purchase_price_alloc import (
     bargain_purchase_analysis,
     contingent_consideration_valuation,
     deferred_tax_liability_ppa,

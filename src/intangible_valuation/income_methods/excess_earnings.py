@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-from src.core.time_value import present_value_of_series
+from intangible_valuation.core.time_value import present_value_of_series
 
 
 class ContributoryAssetInput(BaseModel):

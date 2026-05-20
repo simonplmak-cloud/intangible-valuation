@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.advanced.litigation import patent_infringement_damages
+from intangible_valuation.advanced.litigation import patent_infringement_damages
 
 
 class TestPatentInfringementDamages:

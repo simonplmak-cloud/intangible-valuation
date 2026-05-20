@@ -601,7 +601,7 @@ def sensitivity_tornado(
     if not parameter_ranges:
         raise ValueError("parameter_ranges must contain at least one parameter")
 
-    from src.utils.formulas import sensitivity_analysis
+    from intangible_valuation.utils.formulas import sensitivity_analysis
 
     base_value = _call_function(function_name, base_params)
 
@@ -792,47 +792,47 @@ def _call_function(function_name: str, params: dict[str, Any]) -> float:
 
 
 def _call_present_value(**kwargs: Any) -> float:
-    from src.core.time_value import present_value
+    from intangible_valuation.core.time_value import present_value
     return present_value(**kwargs).value
 
 
 def _call_future_value(**kwargs: Any) -> float:
-    from src.core.time_value import future_value
+    from intangible_valuation.core.time_value import future_value
     return future_value(**kwargs).value
 
 
 def _call_annuity_pv(**kwargs: Any) -> float:
-    from src.core.time_value import annuity_pv
+    from intangible_valuation.core.time_value import annuity_pv
     return annuity_pv(**kwargs).value
 
 
 def _call_perpetuity_pv(**kwargs: Any) -> float:
-    from src.core.time_value import perpetuity_pv
+    from intangible_valuation.core.time_value import perpetuity_pv
     return perpetuity_pv(**kwargs).value
 
 
 def _call_growing_annuity_pv(**kwargs: Any) -> float:
-    from src.core.time_value import growing_annuity_pv
+    from intangible_valuation.core.time_value import growing_annuity_pv
     return growing_annuity_pv(**kwargs).value
 
 
 def _call_terminal_value(**kwargs: Any) -> float:
-    from src.core.time_value import terminal_value
+    from intangible_valuation.core.time_value import terminal_value
     return terminal_value(**kwargs).value
 
 
 def _call_build_up(**kwargs: Any) -> float:
-    from src.core.discount_rates import build_up_discount_rate
+    from intangible_valuation.core.discount_rates import build_up_discount_rate
     return build_up_discount_rate(**kwargs).value
 
 
 def _call_capm(**kwargs: Any) -> float:
-    from src.core.discount_rates import capm_discount_rate
+    from intangible_valuation.core.discount_rates import capm_discount_rate
     return capm_discount_rate(**kwargs).value
 
 
 def _call_wacc(**kwargs: Any) -> float:
-    from src.core.discount_rates import wacc
+    from intangible_valuation.core.discount_rates import wacc
     return wacc(**kwargs).value
 
 
@@ -875,7 +875,7 @@ def _matrix_vector_multiply(matrix: list[list[float]], vector: list[float]) -> l
 
 def _norm_cdf(x: float) -> float:
     """Approximation of the standard normal cumulative distribution function."""
-    from src.core.discount_rates import _norm_cdf as _ncdf
+    from intangible_valuation.core.discount_rates import _norm_cdf as _ncdf
     return _ncdf(x)
 
 

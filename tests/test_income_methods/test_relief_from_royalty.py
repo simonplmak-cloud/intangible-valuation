@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.income_methods.relief_from_royalty import relief_from_royalty
+from intangible_valuation.income_methods.relief_from_royalty import relief_from_royalty
 
 
 class TestReliefFromRoyalty:

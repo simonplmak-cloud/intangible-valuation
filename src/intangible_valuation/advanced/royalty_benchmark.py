@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-from src.core import ValuationResult, present_value_of_annuity
+from intangible_valuation.core import ValuationResult, present_value_of_annuity
 
 VALID_IP_TYPES = {"patent", "trademark", "copyright", "trade_secret", "technology"}
 

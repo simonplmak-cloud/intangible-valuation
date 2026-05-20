@@ -6,21 +6,21 @@ Covers Chapters 1-4 and Chapter 10 exercises.
 
 import math
 
-from src.advanced.goodwill import goodwill
-from src.advanced.impairment_testing import goodwill_impairment_test, intangible_impairment_test
-from src.advanced.purchase_price_alloc import bargain_purchase_analysis, purchase_price_allocation
-from src.advanced.royalty_benchmark import royalty_rate_benchmark, twenty_five_percent_rule
-from src.approaches.cost_approach import replacement_cost, reproduction_cost
-from src.approaches.market_approach import market_approach_comparables, royalty_capitalization
-from src.asset_types.brand_valuation import brand_strength_index, trademark_valuation
-from src.asset_types.customer_valuation import customer_relationship_valuation
-from src.asset_types.human_capital import assembled_workforce_valuation
-from src.asset_types.technology_valuation import developed_technology_valuation
-from src.core.discount_rates import (
+from intangible_valuation.advanced.goodwill import goodwill
+from intangible_valuation.advanced.impairment_testing import goodwill_impairment_test, intangible_impairment_test
+from intangible_valuation.advanced.purchase_price_alloc import bargain_purchase_analysis, purchase_price_allocation
+from intangible_valuation.advanced.royalty_benchmark import royalty_rate_benchmark, twenty_five_percent_rule
+from intangible_valuation.approaches.cost_approach import replacement_cost, reproduction_cost
+from intangible_valuation.approaches.market_approach import market_approach_comparables, royalty_capitalization
+from intangible_valuation.asset_types.brand_valuation import brand_strength_index, trademark_valuation
+from intangible_valuation.asset_types.customer_valuation import customer_relationship_valuation
+from intangible_valuation.asset_types.human_capital import assembled_workforce_valuation
+from intangible_valuation.asset_types.technology_valuation import developed_technology_valuation
+from intangible_valuation.core.discount_rates import (
     build_up_discount_rate,
 )
-from src.core.statistics import decision_tree_valuation
-from src.core.time_value import (
+from intangible_valuation.core.statistics import decision_tree_valuation
+from intangible_valuation.core.time_value import (
     annuity_pv,
     effective_annual_rate,
     future_value,
@@ -29,10 +29,10 @@ from src.core.time_value import (
     present_value,
     terminal_value,
 )
-from src.income_methods.excess_earnings import contributory_asset_charges, mpeem, single_period_excess_earnings
-from src.income_methods.incremental_cashflow import incremental_cashflow
-from src.income_methods.relief_from_royalty import relief_from_royalty
-from src.utils.formulas import (
+from intangible_valuation.income_methods.excess_earnings import contributory_asset_charges, mpeem, single_period_excess_earnings
+from intangible_valuation.income_methods.incremental_cashflow import incremental_cashflow
+from intangible_valuation.income_methods.relief_from_royalty import relief_from_royalty
+from intangible_valuation.utils.formulas import (
     estimate_useful_life,
 )
 

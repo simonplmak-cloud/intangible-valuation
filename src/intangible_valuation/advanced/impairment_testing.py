@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field, field_validator
 
-from src.core import ValuationResult, present_value, terminal_value
+from intangible_valuation.core import ValuationResult, present_value, terminal_value
 
 
 class GoodwillImpairmentInput(BaseModel):

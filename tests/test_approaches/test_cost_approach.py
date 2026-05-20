@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.approaches.cost_approach import replacement_cost, reproduction_cost
+from intangible_valuation.approaches.cost_approach import replacement_cost, reproduction_cost
 
 
 class TestReproductionCost:

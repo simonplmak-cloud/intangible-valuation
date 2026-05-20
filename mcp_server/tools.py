@@ -9,159 +9,159 @@ import json
 from typing import Any
 
 # Advanced
-from src.advanced.goodwill import goodwill as _goodwill
-from src.advanced.impairment_testing import (
+from intangible_valuation.advanced.goodwill import goodwill as _goodwill
+from intangible_valuation.advanced.impairment_testing import (
     goodwill_impairment_test as _goodwill_impairment_test,
 )
-from src.advanced.impairment_testing import (
+from intangible_valuation.advanced.impairment_testing import (
     intangible_impairment_test as _intangible_impairment_test,
 )
-from src.advanced.litigation import (
+from intangible_valuation.advanced.litigation import (
     patent_infringement_damages as _patent_infringement_damages,
 )
-from src.advanced.monte_carlo import (
+from intangible_valuation.advanced.monte_carlo import (
     monte_carlo_sensitivity as _monte_carlo_sensitivity,
 )
-from src.advanced.purchase_price_alloc import (
+from intangible_valuation.advanced.purchase_price_alloc import (
     purchase_price_allocation as _purchase_price_allocation,
 )
-from src.advanced.royalty_benchmark import (
+from intangible_valuation.advanced.royalty_benchmark import (
     adjust_royalty_rate as _adjust_royalty_rate,
 )
-from src.advanced.royalty_benchmark import (
+from intangible_valuation.advanced.royalty_benchmark import (
     royalty_rate_benchmark as _royalty_rate_benchmark,
 )
-from src.advanced.royalty_benchmark import (
+from intangible_valuation.advanced.royalty_benchmark import (
     twenty_five_percent_rule as _twenty_five_percent_rule,
 )
-from src.advanced.transfer_pricing import (
+from intangible_valuation.advanced.transfer_pricing import (
     cup_transfer_price as _cup_transfer_price,
 )
-from src.approaches.cost_approach import (
+from intangible_valuation.approaches.cost_approach import (
     replacement_cost as _replacement_cost,
 )
 
 # Approaches
-from src.approaches.cost_approach import (
+from intangible_valuation.approaches.cost_approach import (
     reproduction_cost as _reproduction_cost,
 )
-from src.approaches.market_approach import (
+from intangible_valuation.approaches.market_approach import (
     market_approach_comparables as _market_approach_comparables,
 )
-from src.approaches.market_approach import (
+from intangible_valuation.approaches.market_approach import (
     royalty_capitalization as _royalty_capitalization,
 )
 
 # Asset Types - IP
-from src.asset_types.brand_valuation import (
+from intangible_valuation.asset_types.brand_valuation import (
     trademark_valuation as _trademark_valuation,
 )
-from src.asset_types.customer_valuation import (
+from intangible_valuation.asset_types.customer_valuation import (
     customer_relationship_valuation as _customer_relationship_valuation,
 )
-from src.asset_types.customer_valuation import (
+from intangible_valuation.asset_types.customer_valuation import (
     distribution_network_valuation as _distribution_network_valuation,
 )
-from src.asset_types.customer_valuation import (
+from intangible_valuation.asset_types.customer_valuation import (
     non_compete_valuation as _non_compete_valuation,
 )
-from src.asset_types.human_capital import (
+from intangible_valuation.asset_types.human_capital import (
     assembled_workforce_valuation as _assembled_workforce_valuation,
 )
-from src.asset_types.human_capital import (
+from intangible_valuation.asset_types.human_capital import (
     key_person_value as _key_person_value,
 )
-from src.asset_types.ip_valuation import (
+from intangible_valuation.asset_types.ip_valuation import (
     copyright_valuation as _copyright_valuation,
 )
-from src.asset_types.ip_valuation import (
+from intangible_valuation.asset_types.ip_valuation import (
     patent_valuation as _patent_valuation,
 )
-from src.asset_types.ip_valuation import (
+from intangible_valuation.asset_types.ip_valuation import (
     trade_secret_valuation as _trade_secret_valuation,
 )
-from src.asset_types.technology_valuation import (
+from intangible_valuation.asset_types.technology_valuation import (
     data_asset_valuation as _data_asset_valuation,
 )
-from src.asset_types.technology_valuation import (
+from intangible_valuation.asset_types.technology_valuation import (
     developed_technology_valuation as _developed_technology_valuation,
 )
-from src.asset_types.technology_valuation import (
+from intangible_valuation.asset_types.technology_valuation import (
     platform_valuation as _platform_valuation,
 )
-from src.asset_types.technology_valuation import (
+from intangible_valuation.asset_types.technology_valuation import (
     software_valuation as _software_valuation,
 )
 
 # Core Math - Discount Rates
-from src.core.discount_rates import (
+from intangible_valuation.core.discount_rates import (
     build_up_discount_rate as _build_up_discount_rate,
 )
-from src.core.discount_rates import (
+from intangible_valuation.core.discount_rates import (
     capm_discount_rate as _capm_discount_rate,
 )
-from src.core.discount_rates import (
+from intangible_valuation.core.discount_rates import (
     control_premium as _control_premium,
 )
-from src.core.discount_rates import (
+from intangible_valuation.core.discount_rates import (
     currency_adjusted_discount_rate as _currency_adjusted_discount_rate,
 )
-from src.core.discount_rates import (
+from intangible_valuation.core.discount_rates import (
     dlom_finnerty as _dlom_finnerty,
 )
-from src.core.discount_rates import (
+from intangible_valuation.core.discount_rates import (
     tax_amortization_benefit as _tax_amortization_benefit,
 )
-from src.core.discount_rates import (
+from intangible_valuation.core.discount_rates import (
     wacc as _wacc,
 )
-from src.core.statistics import (
+from intangible_valuation.core.statistics import (
     decision_tree_valuation as _decision_tree_valuation,
 )
-from src.core.statistics import (
+from intangible_valuation.core.statistics import (
     monte_carlo_valuation as _monte_carlo_valuation,
 )
 
 # Core Math - Time Value of Money
-from src.core.time_value import (
+from intangible_valuation.core.time_value import (
     annuity_pv as _annuity_pv,
 )
-from src.core.time_value import (
+from intangible_valuation.core.time_value import (
     future_value as _future_value,
 )
-from src.core.time_value import (
+from intangible_valuation.core.time_value import (
     growing_annuity_pv as _growing_annuity_pv,
 )
-from src.core.time_value import (
+from intangible_valuation.core.time_value import (
     perpetuity_pv as _perpetuity_pv,
 )
-from src.core.time_value import (
+from intangible_valuation.core.time_value import (
     present_value as _present_value,
 )
-from src.core.time_value import (
+from intangible_valuation.core.time_value import (
     terminal_value as _terminal_value,
 )
 
 # Income Methods
-from src.income_methods.excess_earnings import (
+from intangible_valuation.income_methods.excess_earnings import (
     contributory_asset_charges as _contributory_asset_charges,
 )
-from src.income_methods.excess_earnings import (
+from intangible_valuation.income_methods.excess_earnings import (
     mpeem as _mpeem,
 )
-from src.income_methods.excess_earnings import (
+from intangible_valuation.income_methods.excess_earnings import (
     single_period_excess_earnings as _single_period_excess_earnings,
 )
-from src.income_methods.incremental_cashflow import (
+from intangible_valuation.income_methods.incremental_cashflow import (
     incremental_cashflow as _incremental_cashflow,
 )
-from src.income_methods.relief_from_royalty import (
+from intangible_valuation.income_methods.relief_from_royalty import (
     relief_from_royalty as _relief_from_royalty,
 )
-from src.utils.formulas import (
+from intangible_valuation.utils.formulas import (
     estimate_useful_life as _estimate_useful_life,
 )
-from src.utils.formulas import (
+from intangible_valuation.utils.formulas import (
     sensitivity_analysis as _sensitivity_analysis,
 )
 

@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.asset_types.brand_valuation import (
+from intangible_valuation.asset_types.brand_valuation import (
     brand_royalty_rate_from_comparables,
     brand_strength_index,
     interbrand_brand_valuation,

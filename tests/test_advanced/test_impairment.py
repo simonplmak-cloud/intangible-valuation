@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.advanced.impairment_testing import (
+from intangible_valuation.advanced.impairment_testing import (
     cash_generating_unit_impairment,
     fair_value_less_costs_to_sell,
     goodwill_impairment_test,

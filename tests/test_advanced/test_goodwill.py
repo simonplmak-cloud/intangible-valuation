@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.advanced.goodwill import goodwill
+from intangible_valuation.advanced.goodwill import goodwill
 
 
 class TestGoodwill:

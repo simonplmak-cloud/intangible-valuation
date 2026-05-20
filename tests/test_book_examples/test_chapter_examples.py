@@ -6,13 +6,13 @@ within an acceptable tolerance (0.5% relative or $1 absolute for small values).
 
 import math
 
-from src.advanced.goodwill import goodwill
-from src.advanced.purchase_price_alloc import purchase_price_allocation
-from src.approaches.cost_approach import replacement_cost
-from src.core.discount_rates import build_up_discount_rate
-from src.core.statistics import decision_tree_valuation, monte_carlo_valuation
-from src.core.time_value import annuity_pv, perpetuity_pv, present_value
-from src.income_methods.relief_from_royalty import relief_from_royalty
+from intangible_valuation.advanced.goodwill import goodwill
+from intangible_valuation.advanced.purchase_price_alloc import purchase_price_allocation
+from intangible_valuation.approaches.cost_approach import replacement_cost
+from intangible_valuation.core.discount_rates import build_up_discount_rate
+from intangible_valuation.core.statistics import decision_tree_valuation, monte_carlo_valuation
+from intangible_valuation.core.time_value import annuity_pv, perpetuity_pv, present_value
+from intangible_valuation.income_methods.relief_from_royalty import relief_from_royalty
 
 TOLERANCE_PCT = 0.005
 
@@ -43,7 +43,7 @@ class TestChapter2Basic:
 
         Verify by computing FV from PV at 10% for 5 years.
         """
-        from src.core.time_value import future_value
+        from intangible_valuation.core.time_value import future_value
         result = future_value(present_value=620_921, discount_rate=0.10, periods=5)
         assert_close(result.value, 1_000_000, pct=0.001)
 

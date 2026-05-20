@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.advanced.royalty_benchmark import (
+from intangible_valuation.advanced.royalty_benchmark import (
     adjust_royalty_rate,
     analytical_method_valuation,
     profit_split_method,

@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.asset_types.technology_valuation import (
+from intangible_valuation.asset_types.technology_valuation import (
     algorithm_valuation,
     api_valuation,
     data_asset_valuation,

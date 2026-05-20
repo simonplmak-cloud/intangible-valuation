@@ -18,7 +18,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
-from src.utils.constants import METHOD_EXIT_MULTIPLE, METHOD_GORDON_GROWTH
+from intangible_valuation.utils.constants import METHOD_EXIT_MULTIPLE, METHOD_GORDON_GROWTH
 
 
 class ValuationResult(BaseModel):

@@ -2,8 +2,8 @@
 
 import pytest
 
-from src.advanced.monte_carlo import monte_carlo_sensitivity
-from src.core.statistics import monte_carlo_valuation
+from intangible_valuation.advanced.monte_carlo import monte_carlo_sensitivity
+from intangible_valuation.core.statistics import monte_carlo_valuation
 
 
 def simple_valuation(revenue, margin):

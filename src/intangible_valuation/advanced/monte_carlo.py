@@ -1,6 +1,6 @@
 """Monte Carlo simulation for valuation under uncertainty.
 
-Re-exports monte_carlo_valuation from src.core.statistics and adds
+Re-exports monte_carlo_valuation from intangible_valuation.core.statistics and adds
 monte_carlo_sensitivity for sensitivity analysis on valuation functions.
 """
 

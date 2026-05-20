@@ -7,7 +7,7 @@ import math
 
 import pytest
 
-from src.core.time_value import (
+from intangible_valuation.core.time_value import (
     ValuationResult,
     annuity_due_pv,
     annuity_pv,
@@ -276,7 +276,7 @@ class TestPresentValueGraduated:
 
     def test_graduated_vs_flat(self):
         """When all rates are equal, should match flat discount PV."""
-        from src.core.time_value import present_value_of_series
+        from intangible_valuation.core.time_value import present_value_of_series
         flat = present_value_of_series([100, 200, 300], discount_rate=0.10)
         graduated = present_value_graduated(
             cash_flows=[100, 200, 300],
@@ -430,7 +430,7 @@ class TestContinuousCompounding:
 
     def test_continuous_vs_discrete(self):
         """Continuous should produce higher FV than annual compounding."""
-        from src.core.time_value import future_value
+        from intangible_valuation.core.time_value import future_value
         discrete = future_value(present_value=1000, discount_rate=0.05, periods=3)
         continuous = continuous_compounding(principal=1000, rate=0.05, time=3)
         assert continuous.value > discrete.value

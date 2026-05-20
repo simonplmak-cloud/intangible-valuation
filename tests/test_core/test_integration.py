@@ -6,60 +6,60 @@ CLV comparisons, and Monte Carlo → sensitivity → tornado pipelines.
 
 import math
 
-from src.advanced.impairment_testing import (
+from intangible_valuation.advanced.impairment_testing import (
     cash_generating_unit_impairment,
     fair_value_less_costs_to_sell,
     value_in_use,
 )
-from src.advanced.purchase_price_alloc import (
+from intangible_valuation.advanced.purchase_price_alloc import (
     deferred_tax_liability_ppa,
     purchase_price_allocation,
 )
-from src.advanced.royalty_benchmark import (
+from intangible_valuation.advanced.royalty_benchmark import (
     analytical_method_valuation,
     profit_split_method,
 )
-from src.approaches.cost_approach import replacement_cost
-from src.approaches.market_approach import market_approach_comparables
-from src.asset_types.brand_valuation import (
+from intangible_valuation.approaches.cost_approach import replacement_cost
+from intangible_valuation.approaches.market_approach import market_approach_comparables
+from intangible_valuation.asset_types.brand_valuation import (
     brand_strength_index,
     interbrand_brand_valuation,
     trademark_valuation,
 )
-from src.asset_types.customer_valuation import (
+from intangible_valuation.asset_types.customer_valuation import (
     churn_impact_analysis,
     customer_lifetime_value,
     customer_relationship_valuation,
 )
-from src.asset_types.ip_valuation import (
+from intangible_valuation.asset_types.ip_valuation import (
     option_pricing_patent,
     patent_portfolio_valuation,
 )
-from src.asset_types.technology_valuation import (
+from intangible_valuation.asset_types.technology_valuation import (
     algorithm_valuation,
     api_valuation,
     technology_obsolescence_curve,
 )
-from src.core.discount_rates import (
+from intangible_valuation.core.discount_rates import (
     build_up_discount_rate,
     wacc,
 )
-from src.core.statistics import (
+from intangible_valuation.core.statistics import (
     monte_carlo_valuation,
     scenario_analysis,
     sensitivity_tornado,
 )
-from src.core.time_value import (
+from intangible_valuation.core.time_value import (
     annuity_pv,
     growing_annuity_pv,
     present_value,
     present_value_of_series,
     terminal_value,
 )
-from src.income_methods.excess_earnings import mpeem, single_period_excess_earnings
-from src.income_methods.incremental_cashflow import incremental_cashflow
-from src.income_methods.relief_from_royalty import relief_from_royalty
-from src.utils.formulas import (
+from intangible_valuation.income_methods.excess_earnings import mpeem, single_period_excess_earnings
+from intangible_valuation.income_methods.incremental_cashflow import incremental_cashflow
+from intangible_valuation.income_methods.relief_from_royalty import relief_from_royalty
+from intangible_valuation.utils.formulas import (
     contributory_asset_charges,
     sensitivity_analysis,
 )

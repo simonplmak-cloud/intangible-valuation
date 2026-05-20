@@ -6,13 +6,13 @@ Complete implementation of all valuation methodologies from
 
 from importlib.metadata import version
 
-from src.exceptions import (
+from intangible_valuation.exceptions import (
     CalculationError,
     ConfigurationError,
     InputValidationError,
     ValuationError,
 )
-from src.logging_config import logger
+from intangible_valuation.logging_config import logger
 
 __version__ = version("intangible-valuation")
 

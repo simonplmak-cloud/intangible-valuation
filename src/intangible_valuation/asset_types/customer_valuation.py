@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-from src.core import present_value
+from intangible_valuation.core import present_value
 
 
 class CustomerRelationshipInputs(BaseModel):

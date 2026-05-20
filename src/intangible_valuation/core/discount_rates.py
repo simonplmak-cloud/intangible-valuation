@@ -18,8 +18,8 @@ import math
 
 from pydantic import BaseModel, field_validator
 
-from src.core.time_value import ValuationResult
-from src.utils.constants import (
+from intangible_valuation.core.time_value import ValuationResult
+from intangible_valuation.utils.constants import (
     METHOD_BUILD_UP,
     METHOD_CAPM,
     METHOD_FINNERTY,

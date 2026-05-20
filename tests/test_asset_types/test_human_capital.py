@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.asset_types.human_capital import (
+from intangible_valuation.asset_types.human_capital import (
     assembled_workforce_valuation,
     key_person_value,
 )

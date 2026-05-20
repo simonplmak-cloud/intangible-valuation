@@ -8,7 +8,7 @@ import math
 
 import pytest
 
-from src.core.discount_rates import (
+from intangible_valuation.core.discount_rates import (
     beta_relevered,
     beta_unlevered,
     build_up_discount_rate,
@@ -22,13 +22,13 @@ from src.core.discount_rates import (
     wacc,
     wacc_with_preferred,
 )
-from src.core.statistics import (
+from intangible_valuation.core.statistics import (
     decision_tree_valuation,
     monte_carlo_valuation,
     scenario_analysis,
     sensitivity_tornado,
 )
-from src.core.time_value import (
+from intangible_valuation.core.time_value import (
     annuity_due_pv,
     annuity_pv,
     continuous_compounding,

@@ -15,39 +15,39 @@ import math
 
 import pytest
 
-from src.advanced.impairment_testing import (
+from intangible_valuation.advanced.impairment_testing import (
     cash_generating_unit_impairment,
     fair_value_less_costs_to_sell,
     value_in_use,
 )
-from src.advanced.purchase_price_alloc import (
+from intangible_valuation.advanced.purchase_price_alloc import (
     bargain_purchase_analysis,
     contingent_consideration_valuation,
     deferred_tax_liability_ppa,
 )
-from src.advanced.royalty_benchmark import (
+from intangible_valuation.advanced.royalty_benchmark import (
     analytical_method_valuation,
     profit_split_method,
 )
-from src.asset_types.brand_valuation import (
+from intangible_valuation.asset_types.brand_valuation import (
     brand_strength_index,
     interbrand_brand_valuation,
 )
-from src.asset_types.customer_valuation import (
+from intangible_valuation.asset_types.customer_valuation import (
     backlog_valuation,
     churn_impact_analysis,
     customer_lifetime_value,
 )
-from src.asset_types.ip_valuation import (
+from intangible_valuation.asset_types.ip_valuation import (
     option_pricing_patent,
     patent_portfolio_valuation,
 )
-from src.asset_types.technology_valuation import (
+from intangible_valuation.asset_types.technology_valuation import (
     algorithm_valuation,
     api_valuation,
     technology_obsolescence_curve,
 )
-from src.core.discount_rates import (
+from intangible_valuation.core.discount_rates import (
     beta_relevered,
     beta_unlevered,
     build_up_with_country_risk,
@@ -55,12 +55,12 @@ from src.core.discount_rates import (
     implied_erp,
     wacc_with_preferred,
 )
-from src.core.statistics import (
+from intangible_valuation.core.statistics import (
     monte_carlo_with_correlation,
     scenario_analysis,
     sensitivity_tornado,
 )
-from src.utils.formulas import (
+from intangible_valuation.utils.formulas import (
     double_declining_balance_amortization,
     straight_line_amortization,
     sum_of_years_digits_amortization,
@@ -576,7 +576,7 @@ class TestWACCWithPreferred:
         assert 0 < result.value < 0.12
 
     def test_no_preferred_equals_standard_wacc(self):
-        from src.core.discount_rates import wacc
+        from intangible_valuation.core.discount_rates import wacc
         result_pref = wacc_with_preferred(
             equity_value=600, debt_value=400, preferred_value=0,
             cost_of_equity=0.12, cost_of_debt=0.06, cost_of_preferred=0.08,

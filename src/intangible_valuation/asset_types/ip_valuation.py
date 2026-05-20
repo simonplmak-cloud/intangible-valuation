@@ -11,7 +11,7 @@ from collections.abc import Sequence
 
 from pydantic import BaseModel, Field, field_validator
 
-from src.core import (
+from intangible_valuation.core import (
     present_value,
     present_value_of_annuity,
     risk_adjusted_value,

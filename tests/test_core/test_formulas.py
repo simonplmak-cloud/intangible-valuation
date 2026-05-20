@@ -4,7 +4,7 @@ import math
 
 import pytest
 
-from src.utils.formulas import (
+from intangible_valuation.utils.formulas import (
     contributory_asset_charges,
     double_declining_balance_amortization,
     estimate_useful_life,

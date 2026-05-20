@@ -7,7 +7,7 @@ import math
 
 import pytest
 
-from src.core.discount_rates import (
+from intangible_valuation.core.discount_rates import (
     beta_relevered,
     beta_unlevered,
     build_up_discount_rate,

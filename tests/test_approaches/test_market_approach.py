@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.approaches.market_approach import market_approach_comparables, royalty_capitalization
+from intangible_valuation.approaches.market_approach import market_approach_comparables, royalty_capitalization
 
 
 class TestMarketApproachComparables:

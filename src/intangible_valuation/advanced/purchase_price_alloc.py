@@ -8,8 +8,8 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field, field_validator
 
-from src.advanced.goodwill import goodwill
-from src.core import ValuationResult, present_value
+from intangible_valuation.advanced.goodwill import goodwill
+from intangible_valuation.core import ValuationResult, present_value
 
 
 class IdentifiedIntangible(BaseModel):

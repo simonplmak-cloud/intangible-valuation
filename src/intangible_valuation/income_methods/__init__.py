@@ -6,7 +6,7 @@ methods from Chapter 4.
 
 from __future__ import annotations
 
-from src.core import (
+from intangible_valuation.core import (
     ValuationResult,
     present_value_of_annuity,
     present_value_of_growing_annuity,

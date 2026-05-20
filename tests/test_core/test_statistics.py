@@ -4,7 +4,7 @@ import math
 
 import pytest
 
-from src.core.statistics import (
+from intangible_valuation.core.statistics import (
     decision_tree_valuation,
     monte_carlo_valuation,
     monte_carlo_with_correlation,
@@ -359,7 +359,7 @@ class TestScenarioAnalysis:
 
     def test_scenario_expected_value(self):
         """Verify expected value calculation."""
-        from src.core.time_value import present_value
+        from intangible_valuation.core.time_value import present_value
 
         base_pv = present_value(future_value=1_000_000, discount_rate=0.10, periods=5).value
         upside_pv = present_value(future_value=1_500_000, discount_rate=0.09, periods=5).value

@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.income_methods.incremental_cashflow import incremental_cashflow
+from intangible_valuation.income_methods.incremental_cashflow import incremental_cashflow
 
 
 class TestIncrementalCashflow:

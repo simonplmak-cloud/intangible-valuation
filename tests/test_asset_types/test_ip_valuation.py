@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.asset_types.ip_valuation import (
+from intangible_valuation.asset_types.ip_valuation import (
     copyright_valuation,
     option_pricing_patent,
     patent_portfolio_valuation,

@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.advanced.transfer_pricing import cup_transfer_price
+from intangible_valuation.advanced.transfer_pricing import cup_transfer_price
 
 
 class TestCUPTransferPrice:
@@ -52,37 +52,37 @@ class TestCUPTransferPrice:
 
 class TestCurrencyAdjustedDiscountRate:
     def test_basic(self):
-        from src.core.discount_rates import currency_adjusted_discount_rate as car
+        from intangible_valuation.core.discount_rates import currency_adjusted_discount_rate as car
         result = car(0.10, 0.02, 0.03)
         assert result.value == 0.15
 
     def test_zero_premiums(self):
-        from src.core.discount_rates import currency_adjusted_discount_rate as car
+        from intangible_valuation.core.discount_rates import currency_adjusted_discount_rate as car
         result = car(0.12, 0, 0)
         assert result.value == 0.12
 
     def test_negative_currency_premium_raises(self):
-        from src.core.discount_rates import currency_adjusted_discount_rate as car
+        from intangible_valuation.core.discount_rates import currency_adjusted_discount_rate as car
         with pytest.raises(ValueError):
             car(0.10, -0.01, 0.02)
 
     def test_negative_country_premium_raises(self):
-        from src.core.discount_rates import currency_adjusted_discount_rate as car
+        from intangible_valuation.core.discount_rates import currency_adjusted_discount_rate as car
         with pytest.raises(ValueError):
             car(0.10, 0.02, -0.01)
 
     def test_zero_base_rate(self):
-        from src.core.discount_rates import currency_adjusted_discount_rate as car
+        from intangible_valuation.core.discount_rates import currency_adjusted_discount_rate as car
         result = car(0, 0.02, 0.03)
         assert result.value == 0.05
 
     def test_base_rate_over_one(self):
-        from src.core.discount_rates import currency_adjusted_discount_rate as car
+        from intangible_valuation.core.discount_rates import currency_adjusted_discount_rate as car
         result = car(1.5, 0.02, 0.03)
         assert result.value == 1.55
 
     def test_returns_steps(self):
-        from src.core.discount_rates import currency_adjusted_discount_rate as car
+        from intangible_valuation.core.discount_rates import currency_adjusted_discount_rate as car
         result = car(0.10, 0.02, 0.03)
         assert len(result.steps) >= 3
         assert "Currency" in result.method

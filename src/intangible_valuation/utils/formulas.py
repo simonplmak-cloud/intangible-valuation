@@ -19,8 +19,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 
-from src.core.time_value import ValuationResult
-from src.utils.constants import DEFAULT_USEFUL_LIVES
+from intangible_valuation.core.time_value import ValuationResult
+from intangible_valuation.utils.constants import DEFAULT_USEFUL_LIVES
 
 
 class ContributoryAssetInput(BaseModel):
@@ -282,47 +282,47 @@ def sensitivity_analysis(
 
 
 def _call_present_value(**kwargs: Any) -> float:
-    from src.core.time_value import present_value
+    from intangible_valuation.core.time_value import present_value
     return present_value(**kwargs).value
 
 
 def _call_future_value(**kwargs: Any) -> float:
-    from src.core.time_value import future_value
+    from intangible_valuation.core.time_value import future_value
     return future_value(**kwargs).value
 
 
 def _call_annuity_pv(**kwargs: Any) -> float:
-    from src.core.time_value import annuity_pv
+    from intangible_valuation.core.time_value import annuity_pv
     return annuity_pv(**kwargs).value
 
 
 def _call_perpetuity_pv(**kwargs: Any) -> float:
-    from src.core.time_value import perpetuity_pv
+    from intangible_valuation.core.time_value import perpetuity_pv
     return perpetuity_pv(**kwargs).value
 
 
 def _call_growing_annuity_pv(**kwargs: Any) -> float:
-    from src.core.time_value import growing_annuity_pv
+    from intangible_valuation.core.time_value import growing_annuity_pv
     return growing_annuity_pv(**kwargs).value
 
 
 def _call_terminal_value(**kwargs: Any) -> float:
-    from src.core.time_value import terminal_value
+    from intangible_valuation.core.time_value import terminal_value
     return terminal_value(**kwargs).value
 
 
 def _call_build_up(**kwargs: Any) -> float:
-    from src.core.discount_rates import build_up_discount_rate
+    from intangible_valuation.core.discount_rates import build_up_discount_rate
     return build_up_discount_rate(**kwargs).value
 
 
 def _call_capm(**kwargs: Any) -> float:
-    from src.core.discount_rates import capm_discount_rate
+    from intangible_valuation.core.discount_rates import capm_discount_rate
     return capm_discount_rate(**kwargs).value
 
 
 def _call_wacc(**kwargs: Any) -> float:
-    from src.core.discount_rates import wacc
+    from intangible_valuation.core.discount_rates import wacc
     return wacc(**kwargs).value
 
 

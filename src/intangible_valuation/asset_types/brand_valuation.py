@@ -10,7 +10,7 @@ from collections.abc import Sequence
 
 from pydantic import BaseModel, Field
 
-from src.core import (
+from intangible_valuation.core import (
     present_value_of_annuity,
 )
 
