@@ -129,6 +129,7 @@ ignore = [
     "PT011",    # pytest.raises too broad (ValueError is specific enough for our use)
     "PT006",    # pytest.mark.parametrize type (existing pattern works)
     "PT012",    # pytest.raises single statement (we have multi-step tests)
+    "E501",     # line too long (ValuationResult calls are long by nature)
 ]
 
 [tool.mypy]
