@@ -6,11 +6,13 @@ monte_carlo_sensitivity for sensitivity analysis on valuation functions.
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 import numpy as np
 
 
 def monte_carlo_sensitivity(
-    valuation_fn,
+    valuation_fn: Callable[[dict], float],
     base_params: dict,
     distributions: dict,
     iterations: int = 10000,

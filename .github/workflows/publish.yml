@@ -2,80 +2,55 @@ name: Publish
 
 on:
   release:
-    types: [published]
+    types: [created]
 
 permissions:
   contents: write
   id-token: write
-  pages: write
 
 jobs:
-  build:
+  build-and-upload:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
-      - name: Install build tools
-        run: |
-          python -m pip install --upgrade pip
-          pip install build
+      - name: Install build
+        run: python -m pip install --upgrade build
 
       - name: Build package
-        run: |
-          python -m build
+        run: python -m build
 
-      - name: Upload dist artifacts
-        uses: actions/upload-artifact@v4
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
         with:
-          name: dist
-          path: dist/
+          files: dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  publish-pypi:
-    needs: build
+  publish-to-pypi:
+    needs: build-and-upload
     runs-on: ubuntu-latest
     environment:
       name: pypi
       url: https://pypi.org/p/intangible-valuation
-
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist/
-
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-
-  deploy-docs:
-    needs: build
-    runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
-      - name: Install docs dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[docs]"
+      - name: Install build
+        run: python -m pip install --upgrade build
 
-      - name: Build docs
-        run: |
-          mkdocs build
+      - name: Build package
+        run: python -m build
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./site
-          force_orphan: true
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

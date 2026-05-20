@@ -58,9 +58,12 @@ plugins:
           options:
             show_source: true
             show_root_heading: true
+            show_root_full_path: false
+            show_signature_annotations: true
             show_category_heading: true
-            members_order: source
+            merge_init_into_class: true
             docstring_style: google
+            docstring_section_style: table
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -81,5 +84,10 @@ nav:
       - Income Methods: api/income_methods.md
       - Asset Types: api/asset_types.md
       - Advanced: api/advanced.md
+  - Examples:
+      - Core Methods: examples/core-methods.md
+      - Advanced Methods: examples/advanced-methods.md
+      - Industry Models: examples/industry-models.md
+  - Chapter Index: chapters.md
   - MCP Server: mcp.md
   - AI Skills: skills.md
