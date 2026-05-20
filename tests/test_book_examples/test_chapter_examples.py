@@ -5,16 +5,14 @@ within an acceptable tolerance (0.5% relative or $1 absolute for small values).
 """
 
 import math
-import pytest
 
-from src.core.time_value import present_value, annuity_pv, perpetuity_pv
-from src.core.discount_rates import build_up_discount_rate
-from src.core.statistics import monte_carlo_valuation, decision_tree_valuation
-from src.approaches.cost_approach import replacement_cost
-from src.income_methods.relief_from_royalty import relief_from_royalty
-from src.advanced.purchase_price_alloc import purchase_price_allocation
 from src.advanced.goodwill import goodwill
-
+from src.advanced.purchase_price_alloc import purchase_price_allocation
+from src.approaches.cost_approach import replacement_cost
+from src.core.discount_rates import build_up_discount_rate
+from src.core.statistics import decision_tree_valuation, monte_carlo_valuation
+from src.core.time_value import annuity_pv, perpetuity_pv, present_value
+from src.income_methods.relief_from_royalty import relief_from_royalty
 
 TOLERANCE_PCT = 0.005
 

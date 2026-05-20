@@ -388,7 +388,7 @@ def growing_annuity_pv(
             f"Discount Rate (r) = {r:.2%}",
             f"Growth Rate (g) = {g:.2%}",
             f"Number of Periods (n) = {n}",
-            f"Special case: r = g, using PV = PMT * n / (1 + r)",
+            "Special case: r = g, using PV = PMT * n / (1 + r)",
             f"PV = ${pmt:,.2f} * {n} / (1 + {r}) = ${pv:,.2f}",
         ]
     else:
@@ -636,7 +636,7 @@ def present_value_graduated(
     steps.append(f"Number of Periods = {len(cash_flows)}")
     steps.append("Using graduated discount rates (yield curve)")
 
-    for t, (cf, rate) in enumerate(zip(cash_flows, discount_rates), 1):
+    for t, (cf, rate) in enumerate(zip(cash_flows, discount_rates, strict=False), 1):
         if rate <= -1:
             raise ValueError(f"Discount rate for period {t} must be > -1.0")
         cumulative_factor *= (1 + rate)
@@ -739,7 +739,7 @@ def annuity_due_pv(
         formula_used = "PV_due = PMT * n [special case: r = 0]"
         steps = [
             f"Payment (PMT) = ${pmt:,.2f}",
-            f"Discount Rate (r) = 0.00%",
+            "Discount Rate (r) = 0.00%",
             f"Number of Periods (n) = {n}",
             f"Special case: r = 0, PV_due = PMT * n = ${pv:,.2f}",
         ]
@@ -765,7 +765,7 @@ def annuity_due_pv(
             "Payments occur at the beginning of each period",
             "Payment amount is constant",
             "Discount rate is constant across all periods",
-            f"First payment occurs immediately (time 0)",
+            "First payment occurs immediately (time 0)",
         ],
     )
 
@@ -972,7 +972,7 @@ def continuous_compounding(
         steps = [
             f"Principal (PV) = ${pv:,.2f}",
             f"Rate (r) = {r:.2%}",
-            f"Time (t) = 0 years",
+            "Time (t) = 0 years",
             f"FV = ${pv:,.2f} (no time elapsed)",
         ]
     else:

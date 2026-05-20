@@ -56,8 +56,16 @@ def goodwill(purchase_price: float, fair_value_net_identifiable_assets: float) -
         formula_reference="Ch 10.1, ASC 805-30-30-1",
         steps=[
             {"step": 1, "description": "Purchase Price", "value": purchase_price},
-            {"step": 2, "description": "Fair Value of Net Identifiable Assets", "value": fair_value_net_identifiable_assets},
-            {"step": 3, "description": "Goodwill = Purchase Price - Net Identifiable Assets", "calculation": f"{purchase_price} - {fair_value_net_identifiable_assets}"},
+            {
+                "step": 2,
+                "description": "Fair Value of Net Identifiable Assets",
+                "value": fair_value_net_identifiable_assets,
+            },
+            {
+                "step": 3,
+                "description": "Goodwill = Purchase Price - Net Identifiable Assets",
+                "calculation": f"{purchase_price} - {fair_value_net_identifiable_assets}",
+            },
             {"step": 4, "description": "Goodwill", "value": round(goodwill_value, 2)},
         ],
         assumptions={

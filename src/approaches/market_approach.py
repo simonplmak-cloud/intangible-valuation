@@ -120,10 +120,7 @@ def market_approach_comparables(
 
     sorted_values = sorted(implied_values)
     n = len(sorted_values)
-    if n % 2 == 0:
-        median_value = (sorted_values[n // 2 - 1] + sorted_values[n // 2]) / 2
-    else:
-        median_value = sorted_values[n // 2]
+    median_value = (sorted_values[n // 2 - 1] + sorted_values[n // 2]) / 2 if n % 2 == 0 else sorted_values[n // 2]
 
     steps.append(f"Implied value range: ${min(implied_values):,.2f} - ${max(implied_values):,.2f}")
     steps.append(f"Median implied value: ${median_value:,.2f}")

@@ -16,7 +16,6 @@ class TestMarketApproachComparables:
             {"sale_price": 12000000, "revenue": 4000000, "asset_type": "trademark"},
         ]
         result = market_approach_comparables(comps, subject_revenue=2500000)
-        implied_values = [6250000, 6666666.67, 7500000]
         assert result["value"] == pytest.approx(6666666.67, rel=1e-4)
         assert result["range"] == pytest.approx((6250000.0, 7500000.0), rel=1e-4)
 
@@ -44,9 +43,15 @@ class TestMarketApproachComparables:
 
     def test_returns_required_keys(self):
         """Result dict should contain all required keys."""
-        comps = [{"sale_price": 5000000, "revenue": 2000000, "asset_type": "trademark"}]
+        comps = [
+            {"sale_price": 5000000, "revenue": 2000000, "asset_type": "trademark"},
+        ]
         result = market_approach_comparables(comps, subject_revenue=2500000)
-        for key in ("value", "method", "formula_reference", "multiples", "implied_values", "range", "steps", "assumptions"):
+        expected_keys = (
+            "value", "method", "formula_reference", "multiples",
+            "implied_values", "range", "steps", "assumptions",
+        )
+        for key in expected_keys:
             assert key in result
 
 

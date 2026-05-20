@@ -8,20 +8,25 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field, field_validator
 
-from src.core import ValuationResult, present_value
 from src.advanced.goodwill import goodwill
+from src.core import ValuationResult, present_value
 
 
 class IdentifiedIntangible(BaseModel):
     name: str = Field(min_length=1, description="Name of the intangible asset")
     value: float = Field(gt=0, description="Fair value of the intangible asset")
-    method: str = Field(min_length=1, description="Valuation method used (e.g., 'relief-from-royalty', 'MPEEM')")
+    method: str = Field(
+        min_length=1,
+        description="Valuation method used (e.g., 'relief-from-royalty', 'MPEEM')",
+    )
 
 
 class PPAInput(BaseModel):
     purchase_price: float = Field(gt=0, description="Total acquisition price")
     tangible_assets_fv: float = Field(ge=0, description="Fair value of tangible assets")
-    identified_intangibles: list[IdentifiedIntangible] = Field(min_length=1, description="List of identified intangible assets")
+    identified_intangibles: list[IdentifiedIntangible] = Field(
+        min_length=1, description="List of identified intangible assets"
+    )
     liabilities_fv: float = Field(ge=0, description="Fair value of assumed liabilities")
 
 
@@ -70,7 +75,7 @@ def purchase_price_allocation(
     gw_result = goodwill(purchase_price, net_identifiable)
     goodwill_value = gw_result.value
 
-    total_alloc = tangible_assets_fv + total_intangibles + goodwill_value
+    tangible_assets_fv + total_intangibles + goodwill_value
     pct_tangible = (tangible_assets_fv / purchase_price * 100) if purchase_price else 0
     pct_intangible = (total_intangibles / purchase_price * 100) if purchase_price else 0
     pct_goodwill = (goodwill_value / purchase_price * 100) if purchase_price else 0
@@ -372,7 +377,7 @@ def deferred_tax_liability_ppa(
     temp_diff = total_fv - inputs.tax_basis
     dtl = temp_diff * inputs.statutory_rate
 
-    steps.append(f"Identified intangibles:")
+    steps.append("Identified intangibles:")
     for item in inputs.identified_intangibles:
         steps.append(f"  {item['name']}: {item['fair_value']:,.0f}")
     steps.append(f"Total fair value: {total_fv:,.0f}")

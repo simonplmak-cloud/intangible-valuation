@@ -14,7 +14,8 @@ All functions return structured dicts with:
 from __future__ import annotations
 
 import math
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -94,7 +95,7 @@ def estimate_useful_life(
         Appendix A, Section A.2 — Useful Life Estimation
         Chapter 5, Multi-Period Excess Earnings Method — Projection Period
     """
-    inputs = UsefulLifeInput(
+    UsefulLifeInput(
         asset_type=asset_type,
         legal_life=legal_life,
         obsolescence_rate=obsolescence_rate,
@@ -619,10 +620,7 @@ def double_declining_balance_amortization(
     steps.append(f"DDB Rate = 2 / {useful_life} = {ddb_rate:.4f} ({ddb_rate:.2%})")
 
     for year in range(1, useful_life + 1):
-        if year < useful_life:
-            amortization = book_value * ddb_rate
-        else:
-            amortization = book_value
+        amortization = book_value * ddb_rate if year < useful_life else book_value
 
         accumulated += amortization
         book_value -= amortization
@@ -715,8 +713,8 @@ def valuation_multiple(
             f"{multiple_type} = ${value:,.2f} / ${metric:,.2f} = {multiple:.4f}x",
         ],
         "assumptions": [
-            f"Value and metric are measured on a consistent basis",
-            f"Multiple is comparable to industry benchmarks",
+            "Value and metric are measured on a consistent basis",
+            "Multiple is comparable to industry benchmarks",
             f"Metric ({multiple_type.split('/')[-1]}) is positive and meaningful",
             "Multiple reflects current market conditions",
         ],

@@ -2,7 +2,8 @@
 
 import pytest
 
-from src.advanced.monte_carlo import monte_carlo_valuation, monte_carlo_sensitivity
+from src.advanced.monte_carlo import monte_carlo_sensitivity
+from src.core.statistics import monte_carlo_valuation
 
 
 def simple_valuation(revenue, margin):
@@ -62,7 +63,8 @@ class TestMonteCarloValuation:
 
     def test_too_few_iterations_raises(self):
         with pytest.raises(ValueError):
-            monte_carlo_valuation(simple_valuation, [{"name": "x", "distribution": "normal", "params": {"mean": 0, "std": 1}}], iterations=0)
+            dists = [{"name": "x", "distribution": "normal", "params": {"mean": 0, "std": 1}}]
+            monte_carlo_valuation(simple_valuation, dists, iterations=0)
 
     def test_empty_distributions_raises(self):
         with pytest.raises(ValueError, match="at least one distribution"):

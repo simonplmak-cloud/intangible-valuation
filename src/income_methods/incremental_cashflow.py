@@ -74,7 +74,7 @@ def incremental_cashflow(
     ]
     steps.append("Period-by-period incremental cash flow calculation:")
 
-    for i, (cf_with, cf_without) in enumerate(zip(cash_flows_with, cash_flows_without), start=1):
+    for i, (cf_with, cf_without) in enumerate(zip(cash_flows_with, cash_flows_without, strict=False), start=1):
         incr = cf_with - cf_without
         incremental.append(incr)
         steps.append(

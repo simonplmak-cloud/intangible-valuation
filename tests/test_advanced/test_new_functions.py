@@ -12,30 +12,13 @@ straight_line_amortization, SYD, DDB, valuation_multiple.
 """
 
 import math
+
 import pytest
 
-from src.asset_types.ip_valuation import (
-    patent_portfolio_valuation,
-    option_pricing_patent,
-)
-from src.asset_types.brand_valuation import (
-    interbrand_brand_valuation,
-    brand_strength_index,
-)
-from src.asset_types.technology_valuation import (
-    technology_obsolescence_curve,
-    api_valuation,
-    algorithm_valuation,
-)
-from src.asset_types.customer_valuation import (
-    customer_lifetime_value,
-    backlog_valuation,
-    churn_impact_analysis,
-)
 from src.advanced.impairment_testing import (
-    value_in_use,
-    fair_value_less_costs_to_sell,
     cash_generating_unit_impairment,
+    fair_value_less_costs_to_sell,
+    value_in_use,
 )
 from src.advanced.purchase_price_alloc import (
     bargain_purchase_analysis,
@@ -43,26 +26,44 @@ from src.advanced.purchase_price_alloc import (
     deferred_tax_liability_ppa,
 )
 from src.advanced.royalty_benchmark import (
-    profit_split_method,
     analytical_method_valuation,
+    profit_split_method,
+)
+from src.asset_types.brand_valuation import (
+    brand_strength_index,
+    interbrand_brand_valuation,
+)
+from src.asset_types.customer_valuation import (
+    backlog_valuation,
+    churn_impact_analysis,
+    customer_lifetime_value,
+)
+from src.asset_types.ip_valuation import (
+    option_pricing_patent,
+    patent_portfolio_valuation,
+)
+from src.asset_types.technology_valuation import (
+    algorithm_valuation,
+    api_valuation,
+    technology_obsolescence_curve,
 )
 from src.core.discount_rates import (
-    wacc_with_preferred,
-    implied_erp,
-    beta_unlevered,
     beta_relevered,
-    cost_of_equity_fama_french,
+    beta_unlevered,
     build_up_with_country_risk,
+    cost_of_equity_fama_french,
+    implied_erp,
+    wacc_with_preferred,
 )
 from src.core.statistics import (
     monte_carlo_with_correlation,
-    sensitivity_tornado,
     scenario_analysis,
+    sensitivity_tornado,
 )
 from src.utils.formulas import (
+    double_declining_balance_amortization,
     straight_line_amortization,
     sum_of_years_digits_amortization,
-    double_declining_balance_amortization,
     valuation_multiple,
 )
 
@@ -422,8 +423,8 @@ class TestFairValueLessCostsToSell:
         assert math.isclose(result.value, 5_000_000, abs_tol=1)
 
     def test_costs_exceed_value(self):
-        """When costs exceed value, the function raises due to non-negative validation."""
-        with pytest.raises(Exception):
+        """When costs exceed value, result raises validation error."""
+        with pytest.raises(ValueError, match="non-negative"):
             fair_value_less_costs_to_sell(1_000_000, 2_000_000)
 
 
@@ -738,16 +739,32 @@ class TestScenarioAnalysis:
 
     def test_basic_scenario(self):
         result = scenario_analysis([
-            {"name": "Base", "probability": 0.6, "params": {"payment": 1_000_000, "discount_rate": 0.10}, "function_name": "perpetuity_pv"},
-            {"name": "Upside", "probability": 0.2, "params": {"payment": 1_500_000, "discount_rate": 0.09}, "function_name": "perpetuity_pv"},
-            {"name": "Downside", "probability": 0.2, "params": {"payment": 700_000, "discount_rate": 0.12}, "function_name": "perpetuity_pv"},
+            {
+                "name": "Base", "probability": 0.6,
+                "params": {"payment": 1_000_000, "discount_rate": 0.10},
+                "function_name": "perpetuity_pv",
+            },
+            {
+                "name": "Upside", "probability": 0.2,
+                "params": {"payment": 1_500_000, "discount_rate": 0.09},
+                "function_name": "perpetuity_pv",
+            },
+            {
+                "name": "Downside", "probability": 0.2,
+                "params": {"payment": 700_000, "discount_rate": 0.12},
+                "function_name": "perpetuity_pv",
+            },
         ])
         assert result["expected_value"] > 0
         assert len(result["scenarios"]) == 3
 
     def test_single_scenario(self):
         result = scenario_analysis([
-            {"name": "Only", "probability": 1.0, "params": {"payment": 100_000, "discount_rate": 0.10}, "function_name": "perpetuity_pv"},
+            {
+                "name": "Only", "probability": 1.0,
+                "params": {"payment": 100_000, "discount_rate": 0.10},
+                "function_name": "perpetuity_pv",
+            },
         ])
         assert math.isclose(result["expected_value"], 1_000_000, rel_tol=1e-4)
 

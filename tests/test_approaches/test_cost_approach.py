@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.approaches.cost_approach import reproduction_cost, replacement_cost
+from src.approaches.cost_approach import replacement_cost, reproduction_cost
 
 
 class TestReproductionCost:
@@ -55,7 +55,11 @@ class TestReproductionCost:
     def test_returns_required_keys(self):
         """Result dict should contain all required keys."""
         result = reproduction_cost({"labor": 100})
-        for key in ("value", "method", "formula_reference", "gross_cost", "total_obsolescence_pct", "steps", "assumptions"):
+        expected_keys = (
+            "value", "method", "formula_reference", "gross_cost",
+            "total_obsolescence_pct", "steps", "assumptions",
+        )
+        for key in expected_keys:
             assert key in result
 
     def test_steps_not_empty(self):
@@ -94,5 +98,9 @@ class TestReplacementCost:
     def test_returns_required_keys(self):
         """Result dict should contain all required keys."""
         result = replacement_cost(current_cost=100)
-        for key in ("value", "method", "formula_reference", "gross_cost", "total_obsolescence_pct", "steps", "assumptions"):
+        expected_keys = (
+            "value", "method", "formula_reference", "gross_cost",
+            "total_obsolescence_pct", "steps", "assumptions",
+        )
+        for key in expected_keys:
             assert key in result

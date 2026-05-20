@@ -35,7 +35,7 @@ class TestContributoryAssetCharges:
 
     def test_invalid_asset_raises(self):
         """Invalid asset data should raise ValueError."""
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             contributory_asset_charges([{"type": "x", "value": -100, "return_rate": 0.10}])
 
     def test_returns_required_keys(self):

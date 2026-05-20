@@ -76,11 +76,19 @@ def goodwill_impairment_test(
             impaired = False
 
         steps = [
-            {"step": 1, "description": f"Standard: ASC 350 (US GAAP) - One-step goodwill impairment test"},
+            {
+                "step": 1,
+                "description": "Standard: ASC 350 (US GAAP) - "
+                               "One-step goodwill impairment test",
+            },
             {"step": 2, "description": f"Reporting Unit: {reporting_unit or 'N/A'}"},
             {"step": 3, "description": "Carrying Value", "value": carrying_value},
             {"step": 4, "description": "Fair Value", "value": fair_value},
-            {"step": 5, "description": "Impairment = max(0, CV - FV)", "calculation": f"max(0, {carrying_value} - {fair_value})"},
+            {
+                "step": 5,
+                "description": "Impairment = max(0, CV - FV)",
+                "calculation": f"max(0, {carrying_value} - {fair_value})",
+            },
             {"step": 6, "description": "Impairment Loss", "value": round(impairment, 2)},
         ]
         formula_ref = "Ch 10.4, ASC 350-20-35"
@@ -95,11 +103,22 @@ def goodwill_impairment_test(
             impaired = False
 
         steps = [
-            {"step": 1, "description": f"Standard: IAS 36 (IFRS) - Impairment of Assets"},
+            {
+                "step": 1,
+                "description": "Standard: IAS 36 (IFRS) - Impairment of Assets",
+            },
             {"step": 2, "description": f"Reporting Unit (CGU): {reporting_unit or 'N/A'}"},
             {"step": 3, "description": "Carrying Value", "value": carrying_value},
-            {"step": 4, "description": "Recoverable Amount (using fair value)", "value": recoverable_amount},
-            {"step": 5, "description": "Impairment = max(0, CV - Recoverable Amount)", "calculation": f"max(0, {carrying_value} - {recoverable_amount})"},
+            {
+                "step": 4,
+                "description": "Recoverable Amount (using fair value)",
+                "value": recoverable_amount,
+            },
+            {
+                "step": 5,
+                "description": "Impairment = max(0, CV - Recoverable Amount)",
+                "calculation": f"max(0, {carrying_value} - {recoverable_amount})",
+            },
             {"step": 6, "description": "Impairment Loss", "value": round(impairment, 2)},
         ]
         formula_ref = "Ch 10.4, IAS 36"
@@ -174,10 +193,18 @@ def intangible_impairment_test(
             impaired = False
 
         steps = [
-            {"step": 1, "description": "Standard: ASC 350 - Indefinite-lived intangible impairment test"},
+            {
+                "step": 1,
+                "description": "Standard: ASC 350 - "
+                               "Indefinite-lived intangible impairment test",
+            },
             {"step": 2, "description": "Carrying Value", "value": carrying_value},
             {"step": 3, "description": "Fair Value", "value": fair_value},
-            {"step": 4, "description": "Impairment = max(0, CV - FV)", "calculation": f"max(0, {carrying_value} - {fair_value})"},
+            {
+                "step": 4,
+                "description": "Impairment = max(0, CV - FV)",
+                "calculation": f"max(0, {carrying_value} - {fair_value})",
+            },
             {"step": 5, "description": "Impairment Loss", "value": round(impairment, 2)},
         ]
         formula_ref = "Ch 10.4, ASC 350-30-35"
@@ -194,10 +221,17 @@ def intangible_impairment_test(
             impaired = False
 
         steps = [
-            {"step": 1, "description": "Standard: IAS 36 - Impairment of Assets"},
+            {
+                "step": 1,
+                "description": "Standard: IAS 36 - Impairment of Assets",
+            },
             {"step": 2, "description": "Carrying Value", "value": carrying_value},
             {"step": 3, "description": "Recoverable Amount", "value": recoverable_amount},
-            {"step": 4, "description": "Impairment = max(0, CV - Recoverable Amount)", "calculation": f"max(0, {carrying_value} - {recoverable_amount})"},
+            {
+                "step": 4,
+                "description": "Impairment = max(0, CV - Recoverable Amount)",
+                "calculation": f"max(0, {carrying_value} - {recoverable_amount})",
+            },
             {"step": 5, "description": "Impairment Loss", "value": round(impairment, 2)},
         ]
         formula_ref = "Ch 10.4, IAS 36"
@@ -318,10 +352,11 @@ def value_in_use(
     terminal_val = terminal_value(final_cf, inputs.terminal_growth_rate, inputs.discount_rate)
     pv_terminal = present_value(terminal_val, inputs.discount_rate, n)
 
+    calc = f"{final_cf} x (1+{inputs.terminal_growth_rate}) / ({inputs.discount_rate} - {inputs.terminal_growth_rate})"
     steps.append({
         "step": n + 5,
         "description": "Terminal Value (Gordon Growth)",
-        "calculation": f"{final_cf} x (1+{inputs.terminal_growth_rate}) / ({inputs.discount_rate} - {inputs.terminal_growth_rate})",
+        "calculation": calc,
         "value": round(terminal_val, 2),
         "pv": round(pv_terminal, 2),
     })
@@ -418,7 +453,9 @@ def fair_value_less_costs_to_sell(
 class CGUImpairmentInputs(BaseModel):
     """Inputs for CGU-level impairment allocation."""
 
-    cgu_carrying_value: float = Field(gt=0, description="CGU carrying value including goodwill")
+    cgu_carrying_value: float = Field(
+        gt=0, description="CGU carrying value including goodwill"
+    )
     cgu_recoverable_amount: float = Field(ge=0, description="CGU recoverable amount")
     goodwill_allocated: float = Field(ge=0, description="Goodwill allocated to CGU")
     other_assets: list[dict] = Field(
@@ -497,12 +534,25 @@ def cash_generating_unit_impairment(
     remaining_impairment = total_impairment
 
     steps.append({"step": 1, "description": "IAS 36 CGU Impairment Allocation"})
-    steps.append({"step": 2, "description": "CGU Carrying Value", "value": inputs.cgu_carrying_value})
-    steps.append({"step": 3, "description": "CGU Recoverable Amount", "value": inputs.cgu_recoverable_amount})
-    steps.append({"step": 4, "description": "Total Impairment Loss", "value": round(total_impairment, 2)})
+    steps.append({
+        "step": 2, "description": "CGU Carrying Value",
+        "value": inputs.cgu_carrying_value,
+    })
+    steps.append({
+        "step": 3, "description": "CGU Recoverable Amount",
+        "value": inputs.cgu_recoverable_amount,
+    })
+    steps.append({
+        "step": 4, "description": "Total Impairment Loss",
+        "value": round(total_impairment, 2),
+    })
 
     if total_impairment == 0:
-        steps.append({"step": 5, "description": "No impairment - recoverable amount exceeds carrying value"})
+        steps.append({
+            "step": 5,
+            "description": "No impairment - recoverable amount "
+                           "exceeds carrying value",
+        })
         allocation_details = []
     else:
         allocation_details = []

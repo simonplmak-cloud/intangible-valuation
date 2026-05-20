@@ -6,7 +6,7 @@ and statistical methods from Chapter 2 and Appendix A.
 
 from __future__ import annotations
 
-from typing import Sequence
+from collections.abc import Sequence
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -124,4 +124,4 @@ def weighted_average(
     total_weight = sum(weights)
     if total_weight == 0:
         raise ValueError("Total weight must be positive")
-    return sum(v * w for v, w in zip(values, weights)) / total_weight
+    return sum(v * w for v, w in zip(values, weights, strict=False)) / total_weight

@@ -10,7 +10,6 @@ from __future__ import annotations
 import numpy as np
 from pydantic import BaseModel, Field
 
-from src.core.discount_rates import currency_adjusted_discount_rate
 from src.core import ValuationResult
 
 

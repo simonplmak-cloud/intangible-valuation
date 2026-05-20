@@ -7,55 +7,54 @@ import json
 import pytest
 
 from mcp_server.tools import (
-    present_value,
-    future_value,
+    adjust_royalty_rate,
     annuity_pv,
-    perpetuity_pv,
-    growing_annuity_pv,
-    terminal_value,
+    assembled_workforce_valuation,
     build_up_discount_rate,
     capm_discount_rate,
-    wacc,
-    tax_amortization_benefit,
-    control_premium,
-    dlom_finnerty,
-    currency_adjusted_discount_rate,
-    reproduction_cost,
-    replacement_cost,
-    market_approach_comparables,
-    royalty_capitalization,
-    relief_from_royalty,
-    mpeem,
-    single_period_excess_earnings,
-    incremental_cashflow,
     contributory_asset_charges,
-    patent_valuation,
-    trademark_valuation,
+    control_premium,
     copyright_valuation,
-    trade_secret_valuation,
-    developed_technology_valuation,
-    software_valuation,
-    data_asset_valuation,
-    platform_valuation,
-    customer_relationship_valuation,
-    distribution_network_valuation,
-    non_compete_valuation,
-    assembled_workforce_valuation,
-    key_person_value,
-    goodwill,
-    purchase_price_allocation,
-    goodwill_impairment_test,
-    intangible_impairment_test,
-    royalty_rate_benchmark,
-    adjust_royalty_rate,
-    twenty_five_percent_rule,
     cup_transfer_price,
-    patent_infringement_damages,
-    monte_carlo_valuation,
-    monte_carlo_sensitivity,
+    currency_adjusted_discount_rate,
+    customer_relationship_valuation,
+    data_asset_valuation,
     decision_tree_valuation,
-    sensitivity_analysis,
+    developed_technology_valuation,
+    distribution_network_valuation,
+    dlom_finnerty,
     estimate_useful_life,
+    future_value,
+    goodwill,
+    goodwill_impairment_test,
+    growing_annuity_pv,
+    incremental_cashflow,
+    intangible_impairment_test,
+    key_person_value,
+    market_approach_comparables,
+    monte_carlo_valuation,
+    mpeem,
+    non_compete_valuation,
+    patent_infringement_damages,
+    patent_valuation,
+    perpetuity_pv,
+    platform_valuation,
+    present_value,
+    purchase_price_allocation,
+    relief_from_royalty,
+    replacement_cost,
+    reproduction_cost,
+    royalty_capitalization,
+    royalty_rate_benchmark,
+    sensitivity_analysis,
+    single_period_excess_earnings,
+    software_valuation,
+    tax_amortization_benefit,
+    terminal_value,
+    trade_secret_valuation,
+    trademark_valuation,
+    twenty_five_percent_rule,
+    wacc,
 )
 
 
@@ -126,7 +125,9 @@ class TestCoreMathTools:
         assert 0 < r["value"] < 1
 
     def test_currency_adjusted_discount_rate(self):
-        r = _parse(currency_adjusted_discount_rate(base_rate=0.12, currency_risk_premium=0.02, country_risk_premium=0.03))
+        r = _parse(currency_adjusted_discount_rate(
+            base_rate=0.12, currency_risk_premium=0.02, country_risk_premium=0.03,
+        ))
         assert "error" not in r
         assert r["value"] == pytest.approx(0.17, rel=0.001)
 
@@ -146,7 +147,10 @@ class TestApproachTools:
         assert r["value"] == pytest.approx(419900, rel=0.01)
 
     def test_replacement_cost(self):
-        r = _parse(replacement_cost(current_cost=500000, obsolescence_factors={"functional": 0.10, "technological": 0.30}))
+        r = _parse(replacement_cost(
+            current_cost=500000,
+            obsolescence_factors={"functional": 0.10, "technological": 0.30},
+        ))
         assert "error" not in r
         assert r["value"] == pytest.approx(315000, rel=0.01)
 
@@ -180,7 +184,10 @@ class TestIncomeMethodTools:
 
     def test_mpeem(self):
         cfs = [200000, 220000, 240000, 260000, 280000]
-        cacs = [{"total_cac": 50000}, {"total_cac": 52000}, {"total_cac": 54000}, {"total_cac": 56000}, {"total_cac": 58000}]
+        cacs = [
+            {"total_cac": 50000}, {"total_cac": 52000}, {"total_cac": 54000},
+            {"total_cac": 56000}, {"total_cac": 58000},
+        ]
         r = _parse(mpeem(cash_flow_projections=cfs, contributory_asset_charges=cacs, discount_rate=0.12, tax_rate=0.25))
         assert "error" not in r
         assert r["value"] > 0

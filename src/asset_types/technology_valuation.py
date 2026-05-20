@@ -9,12 +9,9 @@ from __future__ import annotations
 from pydantic import BaseModel, Field, field_validator
 
 from src.core import (
-    ValuationResult,
     present_value,
     present_value_of_annuity,
-    present_value_of_growing_annuity,
 )
-
 
 LIFE_CYCLE_RISK = {
     "emerging": 0.30,

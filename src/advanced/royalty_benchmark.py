@@ -8,10 +8,9 @@ Implements Section 6.1-6.3 and Appendix A.10:
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 from src.core import ValuationResult, present_value_of_annuity
-
 
 VALID_IP_TYPES = {"patent", "trademark", "copyright", "trade_secret", "technology"}
 
@@ -243,7 +242,9 @@ def twenty_five_percent_rule(
     steps = [
         {"step": 1, "description": "Licensee Expected Profit", "value": licensee_expected_profit},
         {"step": 2, "description": "Profit Attribution to IP", "value": profit_attribution_to_ip},
-        {"step": 3, "description": "IP-Attributable Profit", "calculation": f"{licensee_expected_profit} * {profit_attribution_to_ip}", "value": round(ip_profit, 2)},
+        {"step": 3, "description": "IP-Attributable Profit",
+         "calculation": f"{licensee_expected_profit} * {profit_attribution_to_ip}",
+         "value": round(ip_profit, 2)},
         {"step": 4, "description": "Apply 25% Rule", "calculation": f"{ip_profit} * 0.25"},
         {"step": 5, "description": "Estimated Royalty", "value": round(royalty, 2)},
     ]

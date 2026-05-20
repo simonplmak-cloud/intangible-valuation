@@ -15,9 +15,8 @@ All functions return a ValuationResult dict with:
 from __future__ import annotations
 
 import math
-from typing import Any
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, field_validator
 
 from src.core.time_value import ValuationResult
 from src.utils.constants import (
@@ -356,7 +355,7 @@ def tax_amortization_benefit(
         steps = [
             f"Asset Value = ${av:,.2f}",
             f"Tax Rate = {tc:.2%}",
-            f"Discount rate ~ 0, TAB = Asset Value * Tax Rate",
+            "Discount rate ~ 0, TAB = Asset Value * Tax Rate",
             f"TAB = ${av:,.2f} * {tc:.2%} = ${tab:,.2f}",
         ]
     else:
@@ -722,7 +721,10 @@ def wacc_with_preferred(
             f"Pre-tax Cost of Debt (Rd) = {rd:.2%}",
             f"After-tax Cost of Debt = {rd:.2%} * (1 - {tc:.2%}) = {after_tax_debt:.2%}",
             f"Cost of Preferred (Rp) = {cost_of_preferred:.2%}",
-            f"WACC = {we:.4f}*{re:.2%} + {wd:.4f}*{after_tax_debt:.2%} + {wp:.4f}*{cost_of_preferred:.2%} = {result:.2%}",
+            (
+                f"WACC = {we:.4f}*{re:.2%} + {wd:.4f}*{after_tax_debt:.2%}"
+                f" + {wp:.4f}*{cost_of_preferred:.2%} = {result:.2%}"
+            ),
         ],
         assumptions=[
             "Capital structure weights are based on market values",
@@ -813,7 +815,10 @@ def build_up_with_country_risk(
             f"Industry Risk Premium = {irp:.2%}",
             f"Specific Risk Premium = {srp:.2%}",
             f"Country Risk Premium = {crp:.2%}",
-            f"Discount Rate = {rf:.2%} + {equity_rp:.2%} + {sp:.2%} + {irp:.2%} + {srp:.2%} + {crp:.2%} = {rate:.2%}",
+            (
+                f"Discount Rate = {rf:.2%} + {equity_rp:.2%} + {sp:.2%}"
+                f" + {irp:.2%} + {srp:.2%} + {crp:.2%} = {rate:.2%}"
+            ),
         ],
         assumptions=[
             "Risk-free rate reflects long-term government bond yield",
@@ -1083,7 +1088,11 @@ def cost_of_equity_fama_french(
             f"HML Beta (Value) = {hml_beta:.4f}",
             f"HML Premium = {hml_premium:.2%}",
             f"HML Contribution = {hml_beta:.4f} * {hml_premium:.2%} = {hml_contribution:.4f}",
-            f"Cost of Equity = {rf:.2%} + {market_contribution:.2%} + {smb_contribution:.2%} + {hml_contribution:.2%} = {cost_of_equity:.2%}",
+            (
+                f"Cost of Equity = {rf:.2%} + {market_contribution:.2%}"
+                f" + {smb_contribution:.2%} + {hml_contribution:.2%}"
+                f" = {cost_of_equity:.2%}"
+            ),
         ],
         assumptions=[
             "Fama-French factors capture all relevant systematic risk",

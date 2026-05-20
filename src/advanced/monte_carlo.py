@@ -8,9 +8,6 @@ from __future__ import annotations
 
 import numpy as np
 
-from src.core.statistics import monte_carlo_valuation
-from src.core import ValuationResult
-
 
 def monte_carlo_sensitivity(
     valuation_fn,
@@ -57,7 +54,10 @@ def monte_carlo_sensitivity(
         elif dist == "uniform":
             samples[name] = rng.uniform(low=params["low"], high=params["high"], size=iterations)
         elif dist == "triangular":
-            samples[name] = rng.triangular(left=params["low"], mode=params["mode"], right=params["high"], size=iterations)
+            samples[name] = rng.triangular(
+                left=params["low"], mode=params["mode"],
+                right=params["high"], size=iterations,
+            )
         elif dist == "lognormal":
             samples[name] = rng.lognormal(mean=params["mean"], sigma=params["sigma"], size=iterations)
         else:

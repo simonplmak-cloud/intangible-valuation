@@ -15,7 +15,8 @@ from __future__ import annotations
 
 import math
 import random
-from typing import Any, Callable, Literal
+from collections.abc import Callable
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -234,7 +235,7 @@ def monte_carlo_valuation(
         "assumptions": [
             "Input distributions accurately represent parameter uncertainty",
             "Input parameters are independent (no correlation modeled)",
-            f"valuation_fn correctly computes the valuation for given inputs",
+            "valuation_fn correctly computes the valuation for given inputs",
             f"{iterations} iterations provide sufficient convergence",
         ],
     }
@@ -388,14 +389,7 @@ def _find_optimal_path(
     while current in edges_from and edges_from[current]:
         node = nodes[current]
 
-        if node.type == "decision":
-            best_edge = max(
-                edges_from[current],
-                key=lambda e: node_values.get(e.to, 0) - e.cost,
-            )
-            current = best_edge.to
-            path.append(current)
-        elif node.type == "chance":
+        if node.type == "decision" or node.type == "chance":
             best_edge = max(
                 edges_from[current],
                 key=lambda e: node_values.get(e.to, 0) - e.cost,
@@ -556,7 +550,7 @@ def monte_carlo_with_correlation(
             "Input distributions accurately represent parameter uncertainty",
             "Correlation matrix is positive-definite and correctly specified",
             "Correlations are modeled using Cholesky decomposition of normal variables",
-            f"valuation_fn correctly computes the valuation for given inputs",
+            "valuation_fn correctly computes the valuation for given inputs",
             f"{iterations} iterations provide sufficient convergence",
         ],
     }
@@ -654,7 +648,7 @@ def sensitivity_tornado(
             f"Function: {function_name}",
             f"Base case value: ${base_value:,.2f}",
             f"Parameters analyzed: {list(parameter_ranges.keys())}",
-            f"Results sorted by impact (largest to smallest)",
+            "Results sorted by impact (largest to smallest)",
         ],
         "assumptions": [
             "All other parameters held constant at base values",
@@ -695,9 +689,21 @@ def scenario_analysis(
 
     Example:
         >>> result = scenario_analysis([
-        ...     {"name": "Base", "probability": 0.6, "params": {"revenue": 1_000_000, "discount_rate": 0.10}, "function_name": "perpetuity_pv"},
-        ...     {"name": "Upside", "probability": 0.2, "params": {"revenue": 1_500_000, "discount_rate": 0.09}, "function_name": "perpetuity_pv"},
-        ...     {"name": "Downside", "probability": 0.2, "params": {"revenue": 700_000, "discount_rate": 0.12}, "function_name": "perpetuity_pv"},
+        ...     {
+        ...         "name": "Base", "probability": 0.6,
+        ...         "params": {"revenue": 1_000_000, "discount_rate": 0.10},
+        ...         "function_name": "perpetuity_pv",
+        ...     },
+        ...     {
+        ...         "name": "Upside", "probability": 0.2,
+        ...         "params": {"revenue": 1_500_000, "discount_rate": 0.09},
+        ...         "function_name": "perpetuity_pv",
+        ...     },
+        ...     {
+        ...         "name": "Downside", "probability": 0.2,
+        ...         "params": {"revenue": 700_000, "discount_rate": 0.12},
+        ...         "function_name": "perpetuity_pv",
+        ...     },
         ... ])
 
     Book Reference:
@@ -838,11 +844,11 @@ def _cholesky_decomposition(matrix: list[list[float]]) -> list[list[float]]:
     Returns lower triangular matrix L such that A = L * L^T.
     """
     n = len(matrix)
-    l = [[0.0] * n for _ in range(n)]
+    lower = [[0.0] * n for _ in range(n)]
 
     for i in range(n):
         for j in range(i + 1):
-            s = sum(l[i][k] * l[j][k] for k in range(j))
+            s = sum(lower[i][k] * lower[j][k] for k in range(j))
             if i == j:
                 val = matrix[i][i] - s
                 if val <= 0:
@@ -850,13 +856,13 @@ def _cholesky_decomposition(matrix: list[list[float]]) -> list[list[float]]:
                         "Correlation matrix is not positive-definite. "
                         "Ensure the matrix is symmetric and positive-definite."
                     )
-                l[i][j] = math.sqrt(val)
+                lower[i][j] = math.sqrt(val)
             else:
-                if math.isclose(l[j][j], 0.0, abs_tol=1e-12):
+                if math.isclose(lower[j][j], 0.0, abs_tol=1e-12):
                     raise ValueError("Correlation matrix has zero diagonal element")
-                l[i][j] = (matrix[i][j] - s) / l[j][j]
+                lower[i][j] = (matrix[i][j] - s) / lower[j][j]
 
-    return l
+    return lower
 
 
 def _matrix_vector_multiply(matrix: list[list[float]], vector: list[float]) -> list[float]:

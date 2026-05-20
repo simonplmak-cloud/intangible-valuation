@@ -65,13 +65,38 @@ def patent_infringement_damages(
     total_damages = pv_damages + prejudgment_interest
 
     steps = [
-        {"step": 1, "description": "Annual Lost Profits / Reasonable Royalty", "value": lost_profits_or_royalty},
+        {
+            "step": 1,
+            "description": "Annual Lost Profits / Reasonable Royalty",
+            "value": lost_profits_or_royalty,
+        },
         {"step": 2, "description": "Infringement Period (years)", "value": infringement_period},
         {"step": 3, "description": "Discount Rate", "value": discount_rate},
-        {"step": 4, "description": "PV of Lost Profits (annuity)", "value": round(pv_damages, 2)},
-        {"step": 5, "description": "Pre-judgment Interest Rate", "value": prejudgment_interest_rate},
-        {"step": 6, "description": "Pre-judgment Interest", "calculation": f"{pv_damages} * ((1 + {prejudgment_interest_rate})^{infringement_period} - 1)", "value": round(prejudgment_interest, 2)},
-        {"step": 7, "description": "Total Damages", "calculation": f"{pv_damages} + {prejudgment_interest}", "value": round(total_damages, 2)},
+        {
+            "step": 4,
+            "description": "PV of Lost Profits (annuity)",
+            "value": round(pv_damages, 2),
+        },
+        {
+            "step": 5,
+            "description": "Pre-judgment Interest Rate",
+            "value": prejudgment_interest_rate,
+        },
+        {
+            "step": 6,
+            "description": "Pre-judgment Interest",
+            "calculation": (
+                f"{pv_damages} * ((1 + {prejudgment_interest_rate})"
+                f"^{infringement_period} - 1)"
+            ),
+            "value": round(prejudgment_interest, 2),
+        },
+        {
+            "step": 7,
+            "description": "Total Damages",
+            "calculation": f"{pv_damages} + {prejudgment_interest}",
+            "value": round(total_damages, 2),
+        },
     ]
 
     return ValuationResult(

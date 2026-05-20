@@ -6,14 +6,13 @@ methods with brand strength adjustments.
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field, field_validator
+from collections.abc import Sequence
+
+from pydantic import BaseModel, Field
 
 from src.core import (
-    ValuationResult,
     present_value_of_annuity,
-    present_value_of_growing_annuity,
 )
-from src.income_methods import relief_from_royalty
 
 
 class TrademarkInputs(BaseModel):

@@ -6,9 +6,9 @@ and non-compete agreements.
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
-from src.core import present_value, present_value_of_annuity
+from src.core import present_value
 
 
 class CustomerRelationshipInputs(BaseModel):

@@ -1,6 +1,7 @@
 """Tests for statistical functions: Monte Carlo simulation and decision tree analysis."""
 
 import math
+
 import pytest
 
 from src.core.statistics import (
@@ -76,8 +77,14 @@ class TestMonteCarloValuation:
         result = monte_carlo_valuation(
             valuation_fn=self._simple_valuation,
             input_distributions=[
-                {"name": "revenue", "distribution": "triangular", "params": {"low": 800_000, "high": 1_200_000, "mode": 1_000_000}},
-                {"name": "discount_rate", "distribution": "triangular", "params": {"low": 0.08, "high": 0.12, "mode": 0.10}},
+                {
+                    "name": "revenue", "distribution": "triangular",
+                    "params": {"low": 800_000, "high": 1_200_000, "mode": 1_000_000},
+                },
+                {
+                    "name": "discount_rate", "distribution": "triangular",
+                    "params": {"low": 0.08, "high": 0.12, "mode": 0.10},
+                },
             ],
             iterations=1000,
             seed=42,
@@ -361,19 +368,38 @@ class TestScenarioAnalysis:
         expected = 0.6 * base_pv + 0.2 * upside_pv + 0.2 * downside_pv
 
         result = scenario_analysis([
-            {"name": "Base", "probability": 0.6, "params": {"future_value": 1_000_000, "discount_rate": 0.10, "periods": 5}, "function_name": "present_value"},
-            {"name": "Upside", "probability": 0.2, "params": {"future_value": 1_500_000, "discount_rate": 0.09, "periods": 5}, "function_name": "present_value"},
-            {"name": "Downside", "probability": 0.2, "params": {"future_value": 700_000, "discount_rate": 0.12, "periods": 5}, "function_name": "present_value"},
+            {
+                "name": "Base", "probability": 0.6,
+                "params": {"future_value": 1_000_000, "discount_rate": 0.10, "periods": 5},
+                "function_name": "present_value",
+            },
+            {
+                "name": "Upside", "probability": 0.2,
+                "params": {"future_value": 1_500_000, "discount_rate": 0.09, "periods": 5},
+                "function_name": "present_value",
+            },
+            {
+                "name": "Downside", "probability": 0.2,
+                "params": {"future_value": 700_000, "discount_rate": 0.12, "periods": 5},
+                "function_name": "present_value",
+            },
         ])
 
         assert math.isclose(result["expected_value"], expected, abs_tol=1)
 
     def test_scenario_contributions(self):
         """Each scenario should have correct contribution."""
-        result = scenario_analysis([
-            {"name": "A", "probability": 0.5, "params": {"future_value": 100, "discount_rate": 0.0, "periods": 1}, "function_name": "present_value"},
-            {"name": "B", "probability": 0.5, "params": {"future_value": 200, "discount_rate": 0.0, "periods": 1}, "function_name": "present_value"},
-        ])
+        s1 = {
+            "name": "A", "probability": 0.5,
+            "params": {"future_value": 100, "discount_rate": 0.0, "periods": 1},
+            "function_name": "present_value",
+        }
+        s2 = {
+            "name": "B", "probability": 0.5,
+            "params": {"future_value": 200, "discount_rate": 0.0, "periods": 1},
+            "function_name": "present_value",
+        }
+        result = scenario_analysis([s1, s2])
 
         assert math.isclose(result["scenarios"][0]["contribution"], 50, abs_tol=1)
         assert math.isclose(result["scenarios"][1]["contribution"], 100, abs_tol=1)
@@ -381,10 +407,17 @@ class TestScenarioAnalysis:
 
     def test_scenario_probability_not_one_raises(self):
         with pytest.raises(ValueError, match="sum to"):
-            scenario_analysis([
-                {"name": "A", "probability": 0.3, "params": {"future_value": 100, "discount_rate": 0.10, "periods": 1}, "function_name": "present_value"},
-                {"name": "B", "probability": 0.3, "params": {"future_value": 200, "discount_rate": 0.10, "periods": 1}, "function_name": "present_value"},
-            ])
+            s1 = {
+                "name": "A", "probability": 0.3,
+                "params": {"future_value": 100, "discount_rate": 0.10, "periods": 1},
+                "function_name": "present_value",
+            }
+            s2 = {
+                "name": "B", "probability": 0.3,
+                "params": {"future_value": 200, "discount_rate": 0.10, "periods": 1},
+                "function_name": "present_value",
+            }
+            scenario_analysis([s1, s2])
 
     def test_scenario_empty_raises(self):
         with pytest.raises(ValueError, match="at least one"):
@@ -392,15 +425,20 @@ class TestScenarioAnalysis:
 
     def test_scenario_missing_name_raises(self):
         with pytest.raises(ValueError, match="name"):
-            scenario_analysis([
-                {"probability": 1.0, "params": {"future_value": 100, "discount_rate": 0.10, "periods": 1}, "function_name": "present_value"},
-            ])
+            scenario = {
+                "probability": 1.0,
+                "params": {"future_value": 100, "discount_rate": 0.10, "periods": 1},
+                "function_name": "present_value",
+            }
+            scenario_analysis([scenario])
 
     def test_scenario_missing_function_raises(self):
         with pytest.raises(ValueError, match="function_name"):
-            scenario_analysis([
-                {"name": "Test", "probability": 1.0, "params": {"future_value": 100, "discount_rate": 0.10, "periods": 1}},
-            ])
+            scenario = {
+                "name": "Test", "probability": 1.0,
+                "params": {"future_value": 100, "discount_rate": 0.10, "periods": 1},
+            }
+            scenario_analysis([scenario])
 
     def test_scenario_invalid_function_raises(self):
         with pytest.raises(ValueError, match="Unsupported function"):

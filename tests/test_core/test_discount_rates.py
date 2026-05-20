@@ -4,6 +4,7 @@ Verifies all discount rate functions against textbook examples and edge cases.
 """
 
 import math
+
 import pytest
 
 from src.core.discount_rates import (

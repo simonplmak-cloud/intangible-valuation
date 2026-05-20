@@ -5,43 +5,42 @@ and edge cases across time_value, discount_rates, and statistics modules.
 """
 
 import math
+
 import pytest
 
-from src.core.time_value import (
-    present_value,
-    future_value,
-    annuity_pv,
-    perpetuity_pv,
-    growing_annuity_pv,
-    terminal_value,
-    present_value_of_series,
-    present_value_graduated,
-    annuity_due_pv,
-    growing_perpetuity_pv,
-    effective_annual_rate,
-    continuous_compounding,
-)
 from src.core.discount_rates import (
+    beta_relevered,
+    beta_unlevered,
     build_up_discount_rate,
     capm_discount_rate,
-    wacc,
-    tax_amortization_benefit,
     control_premium,
-    dlom_finnerty,
-    currency_adjusted_discount_rate,
-    wacc_with_preferred,
-    implied_erp,
-    beta_unlevered,
-    beta_relevered,
     cost_of_equity_fama_french,
-    build_up_with_country_risk,
+    currency_adjusted_discount_rate,
+    dlom_finnerty,
+    implied_erp,
+    tax_amortization_benefit,
+    wacc,
+    wacc_with_preferred,
 )
 from src.core.statistics import (
-    monte_carlo_valuation,
     decision_tree_valuation,
-    monte_carlo_with_correlation,
-    sensitivity_tornado,
+    monte_carlo_valuation,
     scenario_analysis,
+    sensitivity_tornado,
+)
+from src.core.time_value import (
+    annuity_due_pv,
+    annuity_pv,
+    continuous_compounding,
+    effective_annual_rate,
+    future_value,
+    growing_annuity_pv,
+    growing_perpetuity_pv,
+    perpetuity_pv,
+    present_value,
+    present_value_graduated,
+    present_value_of_series,
+    terminal_value,
 )
 
 
@@ -721,9 +720,12 @@ class TestScenarioAnalysisEdgeCases:
     """Edge cases for scenario_analysis."""
 
     def test_single_scenario(self):
-        result = scenario_analysis([
-            {"name": "Only", "probability": 1.0, "params": {"future_value": 100, "discount_rate": 0.0, "periods": 0}, "function_name": "present_value"},
-        ])
+        scenario = {
+            "name": "Only", "probability": 1.0,
+            "params": {"future_value": 100, "discount_rate": 0.0, "periods": 0},
+            "function_name": "present_value",
+        }
+        result = scenario_analysis([scenario])
         assert math.isclose(result["expected_value"], 100, abs_tol=0.01)
 
     def test_probabilities_not_summing_raises(self):

@@ -1,6 +1,7 @@
 """Tests for utility functions: useful life estimation, sensitivity analysis, and contributory asset charges."""
 
 import math
+
 import pytest
 
 from src.utils.formulas import (

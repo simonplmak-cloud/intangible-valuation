@@ -7,12 +7,11 @@ using risk-adjusted income approaches.
 from __future__ import annotations
 
 import math
-from typing import Sequence
+from collections.abc import Sequence
 
 from pydantic import BaseModel, Field, field_validator
 
 from src.core import (
-    ValuationResult,
     present_value,
     present_value_of_annuity,
     risk_adjusted_value,
@@ -381,10 +380,7 @@ def patent_portfolio_valuation(
         cat = p.get("category", "uncategorized")
         categories[cat] = categories.get(cat, 0) + p["value"]
 
-    if total_raw > 0:
-        hhi = sum((v / total_raw) ** 2 for v in categories.values())
-    else:
-        hhi = 0.0
+    hhi = sum((v / total_raw) ** 2 for v in categories.values()) if total_raw > 0 else 0.0
 
     steps.append(f"Categories: {len(categories)}")
     for cat, val in categories.items():
@@ -487,10 +483,10 @@ def option_pricing_patent(
         risk_free_rate=risk_free_rate,
     )
 
-    S = inputs.expected_value
-    K = inputs.exercise_cost
+    S = inputs.expected_value  # noqa: N806 (standard Black-Scholes notation)
+    K = inputs.exercise_cost  # noqa: N806 (standard Black-Scholes notation)
     sigma = inputs.volatility
-    T = inputs.time_to_expiry
+    T = inputs.time_to_expiry  # noqa: N806 (standard Black-Scholes notation)
     r = inputs.risk_free_rate
 
     steps: list[str] = []

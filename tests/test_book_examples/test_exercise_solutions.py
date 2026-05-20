@@ -5,52 +5,36 @@ Covers Chapters 1-4 and Chapter 10 exercises.
 """
 
 import math
-import pytest
 
-from src.core.time_value import (
-    present_value,
-    future_value,
-    annuity_pv,
-    perpetuity_pv,
-    growing_annuity_pv,
-    terminal_value,
-    present_value_of_series,
-    annuity_due_pv,
-    growing_perpetuity_pv,
-    effective_annual_rate,
-    continuous_compounding,
-)
-from src.core.discount_rates import (
-    build_up_discount_rate,
-    capm_discount_rate,
-    wacc,
-    tax_amortization_benefit,
-    control_premium,
-    dlom_finnerty,
-)
-from src.core.statistics import monte_carlo_valuation, decision_tree_valuation
-from src.approaches.cost_approach import reproduction_cost, replacement_cost
-from src.approaches.market_approach import market_approach_comparables, royalty_capitalization
-from src.income_methods.relief_from_royalty import relief_from_royalty
-from src.income_methods.excess_earnings import mpeem, single_period_excess_earnings, contributory_asset_charges
-from src.income_methods.incremental_cashflow import incremental_cashflow
-from src.advanced.purchase_price_alloc import purchase_price_allocation, bargain_purchase_analysis
 from src.advanced.goodwill import goodwill
 from src.advanced.impairment_testing import goodwill_impairment_test, intangible_impairment_test
-from src.advanced.royalty_benchmark import twenty_five_percent_rule, royalty_rate_benchmark
+from src.advanced.purchase_price_alloc import bargain_purchase_analysis, purchase_price_allocation
+from src.advanced.royalty_benchmark import royalty_rate_benchmark, twenty_five_percent_rule
+from src.approaches.cost_approach import replacement_cost, reproduction_cost
+from src.approaches.market_approach import market_approach_comparables, royalty_capitalization
+from src.asset_types.brand_valuation import brand_strength_index, trademark_valuation
+from src.asset_types.customer_valuation import customer_relationship_valuation
+from src.asset_types.human_capital import assembled_workforce_valuation
+from src.asset_types.technology_valuation import developed_technology_valuation
+from src.core.discount_rates import (
+    build_up_discount_rate,
+)
+from src.core.statistics import decision_tree_valuation
+from src.core.time_value import (
+    annuity_pv,
+    effective_annual_rate,
+    future_value,
+    growing_annuity_pv,
+    perpetuity_pv,
+    present_value,
+    terminal_value,
+)
+from src.income_methods.excess_earnings import contributory_asset_charges, mpeem, single_period_excess_earnings
+from src.income_methods.incremental_cashflow import incremental_cashflow
+from src.income_methods.relief_from_royalty import relief_from_royalty
 from src.utils.formulas import (
     estimate_useful_life,
-    sensitivity_analysis,
-    contributory_asset_charges as formula_cac,
-    straight_line_amortization,
-    valuation_multiple,
 )
-from src.asset_types.brand_valuation import trademark_valuation, brand_strength_index
-from src.asset_types.customer_valuation import customer_relationship_valuation
-from src.asset_types.ip_valuation import patent_valuation
-from src.asset_types.technology_valuation import developed_technology_valuation
-from src.asset_types.human_capital import assembled_workforce_valuation
-
 
 TOLERANCE = 0.01
 
@@ -70,20 +54,20 @@ class TestChapter1Basic:
 
     def test_q1_identify_intangible_types(self):
         """Ch 1 Basic Q1: Identify that patents, trademarks, and goodwill are intangibles.
-        
+
         Verify useful life estimation for each type.
         """
         patent_life = estimate_useful_life(asset_type="patent")
         trademark_life = estimate_useful_life(asset_type="trademark")
         goodwill_life = estimate_useful_life(asset_type="goodwill")
-        
+
         assert patent_life.value <= 20
         assert trademark_life.value >= 10
         assert goodwill_life.value > 0
 
     def test_q2_cost_approach_concept(self):
         """Ch 1 Basic Q2: Cost approach — reproduction cost with obsolescence.
-        
+
         $500K reproduction cost, 30% obsolescence = $350K.
         """
         result = replacement_cost(current_cost=500_000, obsolescence_factors={"functional": 0.30})
@@ -91,7 +75,7 @@ class TestChapter1Basic:
 
     def test_q3_income_approach_concept(self):
         """Ch 1 Basic Q3: Income approach — perpetuity of royalty income.
-        
+
         $2M revenue, 5% royalty, 12% discount = $833,333.
         """
         royalty = 2_000_000 * 0.05
@@ -106,13 +90,13 @@ class TestChapter1Intermediate:
         """Ch 1 Intermediate Q1: Compare cost and income approaches."""
         cost_result = replacement_cost(current_cost=1_000_000, obsolescence_factors={"functional": 0.20})
         income_result = perpetuity_pv(payment=80_000, discount_rate=0.10)
-        
+
         assert cost_result["value"] > 0
         assert income_result.value > 0
 
     def test_q2_brand_strength_calculation(self):
         """Ch 1 Intermediate Q2: Brand strength index calculation.
-        
+
         RS=0.8, MS=0.6, GR=0.7, CL=0.9, IL=0.5
         BSI = (0.8*0.25 + 0.6*0.25 + 0.7*0.20 + 0.9*0.20 + 0.5*0.10) * 100 = 72
         """
@@ -121,7 +105,7 @@ class TestChapter1Intermediate:
 
     def test_q3_customer_relationship_value(self):
         """Ch 1 Intermediate Q3: Customer relationship with attrition.
-        
+
         1000 customers, $500/customer, 80% retention, 20% margin, 10% discount, 5 years.
         """
         result = customer_relationship_valuation(
@@ -141,7 +125,7 @@ class TestChapter1Advanced:
 
     def test_q1_comprehensive_brand_valuation(self):
         """Ch 1 Advanced Q1: Full brand valuation with RFR method.
-        
+
         Revenue: $10M, profit margin: 15%, brand strength: 0.7, discount: 12%, life: 10 years.
         """
         result = trademark_valuation(
@@ -157,7 +141,7 @@ class TestChapter1Advanced:
 
     def test_q2_workforce_valuation(self):
         """Ch 1 Advanced Q2: Assembled workforce valuation.
-        
+
         100 employees, $50K replacement cost, $10K training, 0.7 productivity, 10% attrition.
         """
         result = assembled_workforce_valuation(
@@ -171,7 +155,7 @@ class TestChapter1Advanced:
 
     def test_q3_technology_with_lifecycle(self):
         """Ch 1 Advanced Q3: Technology valuation with life cycle risk.
-        
+
         R&D: $2M, growth stage, 5-year advantage, 10% base rate, CFs: [$800K, $900K, $1M, $1.1M, $1.2M].
         """
         result = developed_technology_valuation(
@@ -225,7 +209,7 @@ class TestChapter2Intermediate:
 
     def test_q3_growing_annuity(self):
         """Ch 2 Intermediate Q3: Growing annuity $100K, r=10%, g=3%, n=10.
-        
+
         PV = 100000 * [1 - (1.03/1.10)^10] / (0.10 - 0.03) = ~690,770
         """
         result = growing_annuity_pv(payment=100_000, discount_rate=0.10, growth_rate=0.03, periods=10)
@@ -237,7 +221,7 @@ class TestChapter2Advanced:
 
     def test_q1_decision_tree(self):
         """Ch 2 Advanced Q1: BioGen decision tree.
-        
+
         Sell now: $50M
         Phase III: 60% success ($120M - $20M cost) + 40% failure ($0 - $20M cost)
         EV = 0.6 * 100M + 0.4 * (-20M) = 52M
@@ -262,7 +246,7 @@ class TestChapter2Advanced:
 
     def test_q2_terminal_value_gordon(self):
         """Ch 2 Advanced Q2: Terminal value, FCF=$2M, g=3%, r=10%.
-        
+
         TV = 2M * 1.03 / (0.10 - 0.03) = $29,428,571
         """
         result = terminal_value(
@@ -274,7 +258,7 @@ class TestChapter2Advanced:
 
     def test_q3_effective_annual_rate(self):
         """Ch 2 Advanced Q3: EAR for 12% nominal, monthly compounding.
-        
+
         EAR = (1 + 0.12/12)^12 - 1 = 12.68%
         """
         result = effective_annual_rate(nominal_rate=0.12, compounding_periods=12)
@@ -295,7 +279,7 @@ class TestChapter3Basic:
 
     def test_q2_reproduction_cost(self):
         """Ch 3 Basic Q2: Reproduction cost with multiple obsolescence factors.
-        
+
         Costs: $200K labor + $100K materials + $50K overhead = $350K
         Obsolescence: 10% functional + 5% economic = 15% total
         Value = $350K * (1 - 0.15) = $297,500
@@ -308,7 +292,7 @@ class TestChapter3Basic:
 
     def test_q3_royalty_capitalization(self):
         """Ch 3 Basic Q3: Royalty capitalization: $5M revenue, 4% royalty, 10% discount.
-        
+
         Value = (5M * 0.04) / 0.10 = $2,000,000
         """
         result = royalty_capitalization(revenue=5_000_000, royalty_rate=0.04, discount_rate=0.10)
@@ -320,7 +304,7 @@ class TestChapter3Intermediate:
 
     def test_q1_market_comparables(self):
         """Ch 3 Intermediate Q1: Market approach with comparables.
-        
+
         3 comparables with sale prices and revenues.
         Subject revenue: $10M.
         """
@@ -336,7 +320,7 @@ class TestChapter3Intermediate:
 
     def test_q2_trademark_perpetuity(self):
         """Ch 3 Intermediate Q2: Trademark perpetuity.
-        
+
         $10M revenue, 4% royalty, 15% discount = $2,666,667.
         """
         royalty = 10_000_000 * 0.04
@@ -354,7 +338,7 @@ class TestChapter3Advanced:
 
     def test_q1_combined_cost_income(self):
         """Ch 3 Advanced Q1: Combined cost and income approach.
-        
+
         Cost floor: $500K (replacement after 20% obsolescence)
         Income: $80K perpetuity at 10% = $800K
         Value = max($500K, $800K) = $800K
@@ -379,7 +363,7 @@ class TestChapter3Advanced:
 
     def test_q2_useful_life_estimation(self):
         """Ch 3 Advanced Q2b: Useful life with economic factors.
-        
+
         Patent with 15% obsolescence rate.
         Economic life = -ln(0.10) / 0.15 = 15.3 years, capped at 20 legal max = 15.3
         """
@@ -410,7 +394,7 @@ class TestChapter4Basic:
 
     def test_q2_contributory_asset_charges(self):
         """Ch 4 Basic Q2: CAC calculation.
-        
+
         Working capital: $500K @ 8% = $40K
         Fixed assets: $1M @ 10% = $100K
         Total CAC = $140K
@@ -423,7 +407,7 @@ class TestChapter4Basic:
 
     def test_q3_incremental_cashflow(self):
         """Ch 4 Basic Q3: Incremental cashflow method.
-        
+
         With: [$500K, $550K, $600K], Without: [$400K, $420K, $440K], r=10%
         Incremental: [$100K, $130K, $160K]
         """
@@ -440,7 +424,7 @@ class TestChapter4Intermediate:
 
     def test_q1_mpeem(self):
         """Ch 4 Intermediate Q1: MPEEM with CACs and TAB.
-        
+
         CFs: [$200K, $220K, $240K, $260K, $280K], CAC: $50K growing 4%/yr, r=12%, tax=25%.
         """
         cacs = [{"total_cac": 50_000 * (1.04 ** i)} for i in range(5)]
@@ -456,7 +440,7 @@ class TestChapter4Intermediate:
 
     def test_q2_single_period_excess_earnings(self):
         """Ch 4 Intermediate Q2: Single-period excess earnings.
-        
+
         Normalized earnings: $500K, CAC: $140K, cap rate: 12%
         Value = ($500K - $140K) / 0.12 = $3,000,000
         """
@@ -469,7 +453,7 @@ class TestChapter4Intermediate:
 
     def test_q3_rfr_without_tab(self):
         """Ch 4 Intermediate Q3: RFR without TAB.
-        
+
         Revenue: $500K/yr for 3 years, royalty 4%, discount 10%, tax 25%.
         """
         result = relief_from_royalty(
@@ -489,11 +473,11 @@ class TestChapter4Advanced:
 
     def test_q1_mpeem_vs_rfr_comparison(self):
         """Ch 4 Advanced Q1: Compare MPEEM and RFR for same asset.
-        
+
         Both should produce reasonable values for the same revenue stream.
         """
         revenue = [2_000_000, 2_200_000, 2_400_000, 2_600_000, 2_800_000]
-        
+
         rfr = relief_from_royalty(
             revenue_projections=revenue,
             royalty_rate=0.05,
@@ -501,7 +485,7 @@ class TestChapter4Advanced:
             tax_rate=0.25,
             useful_life=5,
         )
-        
+
         cacs = [{"total_cac": 200_000} for _ in range(5)]
         mpeem_result = mpeem(
             cash_flow_projections=[r * 0.20 for r in revenue],
@@ -509,13 +493,13 @@ class TestChapter4Advanced:
             discount_rate=0.12,
             tax_rate=0.25,
         )
-        
+
         assert rfr["value"] > 0
         assert mpeem_result["value"] > 0
 
     def test_q2_twenty_five_percent_rule(self):
         """Ch 4 Advanced Q2: 25% rule for royalty estimation.
-        
+
         Licensee profit: $10M, IP attribution: 80%
         Royalty = $10M * 0.80 * 0.25 = $2M
         """
@@ -527,11 +511,11 @@ class TestChapter4Advanced:
 
     def test_q3_royalty_benchmark(self):
         """Ch 4 Advanced Q3: Royalty rate benchmark for pharma patent.
-        
+
         Patent in pharmaceutical industry: median 8%, range 5-15%.
         """
         result = royalty_rate_benchmark("patent", "pharmaceutical")
-        assert 0.05 <= result.assumptions["recommended_range"][0]
+        assert result.assumptions["recommended_range"][0] >= 0.05
         assert result.assumptions["recommended_range"][1] <= 0.15
         assert math.isclose(result.value, 0.08, abs_tol=0.01)
 
@@ -545,7 +529,7 @@ class TestChapter10PPA:
 
     def test_q1_basic_ppa(self):
         """Ch 10 Q1: PPA waterfall.
-        
+
         $100M purchase, $15M tangible, $60M intangibles, $0 liabilities.
         Net identifiable = $75M, Goodwill = $25M.
         """
@@ -563,7 +547,7 @@ class TestChapter10PPA:
 
     def test_q2_goodwill_standalone(self):
         """Ch 10 Q2: Standalone goodwill.
-        
+
         Purchase: $100M, Net identifiable: $75M, Goodwill = $25M.
         """
         result = goodwill(
@@ -574,7 +558,7 @@ class TestChapter10PPA:
 
     def test_q3_ppa_with_liabilities(self):
         """Ch 10 Q3: PPA with assumed liabilities.
-        
+
         $50M purchase, $10M tangible, $20M intangibles, $5M liabilities.
         Net identifiable = $10M + $20M - $5M = $25M
         Goodwill = $50M - $25M = $25M
@@ -591,7 +575,7 @@ class TestChapter10PPA:
 
     def test_q4_bargain_purchase(self):
         """Ch 10 Q4: Bargain purchase analysis.
-        
+
         Purchase: $40M, Net assets FV: $50M.
         Bargain gain = $50M - $40M = $10M.
         """
@@ -603,7 +587,7 @@ class TestChapter10PPA:
 
     def test_q5_goodwill_impairment(self):
         """Ch 10 Q5: Goodwill impairment test.
-        
+
         Carrying value: $50M, Fair value: $40M.
         Impairment = $50M - $40M = $10M.
         """
@@ -616,7 +600,7 @@ class TestChapter10PPA:
 
     def test_q6_intangible_impairment(self):
         """Ch 10 Q6: Intangible asset impairment.
-        
+
         Carrying: $20M, Fair value: $15M.
         Impairment = $20M - $15M = $5M.
         """

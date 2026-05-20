@@ -5,7 +5,7 @@ Implements valuation for assembled workforce and key person dependencies.
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 from src.core import present_value
 

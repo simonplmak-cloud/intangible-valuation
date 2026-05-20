@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.advanced.transfer_pricing import cup_transfer_price, currency_adjusted_discount_rate
+from src.advanced.transfer_pricing import cup_transfer_price
 
 
 class TestCUPTransferPrice:

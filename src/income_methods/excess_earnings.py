@@ -174,7 +174,7 @@ def mpeem(
     excess_earnings = []
     steps.append("Period-by-period excess earnings calculation:")
 
-    for i, (cf, cac_data) in enumerate(zip(cash_flow_projections, contributory_asset_charges), start=1):
+    for i, (cf, cac_data) in enumerate(zip(cash_flow_projections, contributory_asset_charges, strict=False), start=1):
         total_cac = cac_data.get("total_cac", 0)
         pre_tax_excess = cf - total_cac
         after_tax_excess = pre_tax_excess * (1 - tax_rate)
