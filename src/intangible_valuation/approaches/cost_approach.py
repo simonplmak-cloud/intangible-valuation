@@ -3,10 +3,11 @@
 Implements reproduction cost and replacement cost methods
 from Chapter 3, including obsolescence adjustments.
 """
-
 from __future__ import annotations
 
 from pydantic import BaseModel, Field, field_validator
+
+from intangible_valuation.core import ValuationResult
 
 
 class CostApproachResult(BaseModel):
@@ -47,7 +48,7 @@ class ObsolescenceInput(BaseModel):
 def reproduction_cost(
     development_costs: dict,
     obsolescence_factors: dict | None = None,
-) -> dict:
+) -> ValuationResult:
     """Calculate depreciated reproduction cost of an intangible asset.
 
     Reproduction cost estimates the cost to create an exact replica of the
@@ -64,7 +65,7 @@ def reproduction_cost(
             keys. Values must be between 0 and 1. Defaults to no obsolescence.
 
     Returns:
-        Dict with:
+        ValuationResult with:
             - value: Depreciated reproduction cost
             - method: 'Reproduction Cost'
             - formula_reference: 'Chapter 3: Cost Approach - Reproduction Cost Method'
@@ -82,7 +83,7 @@ def reproduction_cost(
         ...     {"labor": 400000, "materials": 150000, "overhead": 100000},
         ...     {"functional": 0.15, "technological": 0.20, "economic": 0.05}
         ... )
-        >>> result["value"]
+        >>> result.value
         476000.0
     """
     if not development_costs:
@@ -131,21 +132,13 @@ def reproduction_cost(
             "All cost components are in current dollars",
         ]
 
-    return {
-        "value": value,
-        "method": "Reproduction Cost",
-        "formula_reference": "Chapter 3: Cost Approach - Reproduction Cost Method",
-        "gross_cost": gross_cost,
-        "total_obsolescence_pct": total_obsolescence,
-        "steps": steps,
-        "assumptions": assumptions,
-    }
+    return ValuationResult(value=value, method="Reproduction Cost", formula_reference="Chapter 3: Cost Approach - Reproduction Cost Method", gross_cost=gross_cost, total_obsolescence_pct=total_obsolescence, steps=steps, assumptions=assumptions)
 
 
 def replacement_cost(
     current_cost: float,
     obsolescence_factors: dict | None = None,
-) -> dict:
+) -> ValuationResult:
     """Calculate depreciated replacement cost of an intangible asset.
 
     Replacement cost estimates the cost to create an asset with equivalent
@@ -162,7 +155,7 @@ def replacement_cost(
             keys. Values must be between 0 and 1. Defaults to no obsolescence.
 
     Returns:
-        Dict with:
+        ValuationResult with:
             - value: Depreciated replacement cost
             - method: 'Replacement Cost'
             - formula_reference: 'Chapter 3: Cost Approach - Replacement Cost Method'
@@ -179,7 +172,7 @@ def replacement_cost(
         ...     500000,
         ...     {"functional": 0.10, "technological": 0.30}
         ... )
-        >>> result["value"]
+        >>> result.value
         315000.0
     """
     if not isinstance(current_cost, (int, float)):
@@ -221,12 +214,4 @@ def replacement_cost(
             "Current cost reflects modern equivalent utility",
         ]
 
-    return {
-        "value": value,
-        "method": "Replacement Cost",
-        "formula_reference": "Chapter 3: Cost Approach - Replacement Cost Method",
-        "gross_cost": current_cost,
-        "total_obsolescence_pct": total_obsolescence,
-        "steps": steps,
-        "assumptions": assumptions,
-    }
+    return ValuationResult(value=value, method="Replacement Cost", formula_reference="Chapter 3: Cost Approach - Replacement Cost Method", gross_cost=current_cost, total_obsolescence_pct=total_obsolescence, steps=steps, assumptions=assumptions)

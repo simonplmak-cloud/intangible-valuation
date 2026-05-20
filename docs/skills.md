@@ -45,26 +45,6 @@ Step-by-step PPA workflow:
 6. Compute goodwill as residual
 7. Validate allocation percentages
 
-### Monte Carlo Analysis Skill
-
-Guide for uncertainty analysis:
-
-1. Identify uncertain input parameters
-2. Select appropriate probability distributions
-3. Configure iteration count and random seed
-4. Run simulation and interpret results
-5. Perform sensitivity analysis on key drivers
-
-### Decision Tree Skill
-
-For valuing assets with contingent outcomes:
-
-1. Map decision points and chance events
-2. Assign probabilities and values to each branch
-3. Apply backward induction
-4. Identify optimal decision path
-5. Calculate expected value
-
 ## Using Skills
 
 Skills are located in the `skills/` directory. Each skill is a markdown file with:

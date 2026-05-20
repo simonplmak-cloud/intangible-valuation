@@ -278,7 +278,7 @@ def profit_split_method(
     licensor_contribution_pct: float,
     licensee_contribution_pct: float,
     total_profit: float,
-) -> dict:
+) -> ValuationResult:
     """Calculate royalty using the profit split approach.
 
     The profit split method allocates total profit between licensor and licensee
@@ -306,7 +306,7 @@ def profit_split_method(
 
     Example:
         >>> result = profit_split_method(0.40, 0.60, 10_000_000)
-        >>> result["value"]  # 10M x (0.4 / 1.0) = 4M
+        >>> result.value  # 10M x (0.4 / 1.0) = 4M
         4000000.0
 
     Reference:
@@ -336,12 +336,7 @@ def profit_split_method(
     steps.append(f"Licensor profit (royalty): {licensor_profit:,.0f}")
     steps.append(f"Licensee profit: {licensee_profit:,.0f}")
 
-    return {
-        "value": licensor_profit,
-        "method": "Profit Split Method",
-        "formula_reference": "OECD TPSM, Royalty = Profit x (Licensor% / Total%)",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=licensor_profit, method="Profit Split Method", formula_reference="OECD TPSM, Royalty = Profit x (Licensor% / Total%)", steps=steps, assumptions={
             "total_profit": inputs.total_profit,
             "licensor_contribution_pct": inputs.licensor_contribution_pct,
             "licensee_contribution_pct": inputs.licensee_contribution_pct,
@@ -349,8 +344,7 @@ def profit_split_method(
             "licensee_share_pct": round(licensee_share, 4),
             "licensor_profit": round(licensor_profit, 2),
             "licensee_profit": round(licensee_profit, 2),
-        },
-    }
+        })
 
 
 class AnalyticalMethodInputs(BaseModel):
@@ -369,7 +363,7 @@ def analytical_method_valuation(
     volume: float,
     discount_rate: float,
     economic_life: int,
-) -> dict:
+) -> ValuationResult:
     """Calculate royalty rate using the analytical method.
 
     The analytical method determines the value of an IP asset by quantifying
@@ -403,7 +397,7 @@ def analytical_method_valuation(
         ...     discount_rate=0.12,
         ...     economic_life=7,
         ... )
-        >>> result["value"] > 0
+        >>> result.value > 0
         True
 
     Reference:
@@ -439,12 +433,7 @@ def analytical_method_valuation(
     steps.append(f"PV of volume: {pv_volume:,.0f}")
     steps.append(f"Implied royalty rate: {implied_royalty_rate:.4f} ({implied_royalty_rate:.2%})")
 
-    return {
-        "value": ip_value,
-        "method": "Analytical Method",
-        "formula_reference": "V = PV(Volume x Advantage Margin, r, n)",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=ip_value, method="Analytical Method", formula_reference="V = PV(Volume x Advantage Margin, r, n)", steps=steps, assumptions={
             "volume": inputs.volume,
             "advantage_margin": inputs.advantage_margin,
             "annual_advantage": annual_advantage,
@@ -452,5 +441,4 @@ def analytical_method_valuation(
             "economic_life": inputs.economic_life,
             "ip_value": round(ip_value, 2),
             "implied_royalty_rate": round(implied_royalty_rate, 4),
-        },
-    }
+        })

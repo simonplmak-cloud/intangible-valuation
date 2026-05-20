@@ -29,8 +29,8 @@ class ValuationResult(BaseModel):
     value: float
     method: str
     formula_reference: str
-    steps: list[str] = Field(default_factory=list)
-    assumptions: list[str] = Field(default_factory=list)
+    steps: list[Any] = Field(default_factory=list)
+    assumptions: dict[str, Any] | list[str] = Field(default_factory=list)
 
     def __init__(self, **data: Any) -> None:
         super().__init__(**data)
@@ -42,6 +42,18 @@ class ValuationResult(BaseModel):
     def __getitem__(self, key: str) -> Any:
         """Allow dict-style access to result fields."""
         return getattr(self, key)
+
+    def __contains__(self, key: str) -> bool:
+        """Allow 'key in result' checks."""
+        return hasattr(self, key)
+
+    def get(self, key: str, default: Any = None) -> Any:
+        """Dict-like .get() method."""
+        return getattr(self, key, default)
+
+    def keys(self) -> list[str]:
+        """Dict-like .keys() method."""
+        return list(self.model_dump().keys())
 
 
 class TVMInputs(BaseModel):

@@ -117,7 +117,7 @@ class BargainPurchaseInputs(BaseModel):
 def bargain_purchase_analysis(
     purchase_price: float,
     fair_value_net_assets: float,
-) -> dict:
+) -> ValuationResult:
     """Analyze and document a bargain purchase (negative goodwill) situation.
 
     A bargain purchase occurs when the purchase price is less than the fair
@@ -144,7 +144,7 @@ def bargain_purchase_analysis(
         ...     purchase_price=40_000_000,
         ...     fair_value_net_assets=50_000_000,
         ... )
-        >>> result["value"]
+        >>> result.value
         10000000.0
 
     Reference:
@@ -178,18 +178,12 @@ def bargain_purchase_analysis(
         "4. Recognize remaining gain in current period income statement",
     ]
 
-    return {
-        "value": gain,
-        "method": "Bargain Purchase Analysis",
-        "formula_reference": "ASC 805-30-25, Gain = FV(Net Assets) - Purchase Price",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=gain, method="Bargain Purchase Analysis", formula_reference="ASC 805-30-25, Gain = FV(Net Assets) - Purchase Price", steps=steps, assumptions={
             "purchase_price": inputs.purchase_price,
             "fair_value_net_assets": inputs.fair_value_net_assets,
             "bargain_purchase_gain": gain,
             "gain_percentage": round(gain_pct, 4),
-        },
-    }
+        })
 
 
 class ContingentConsiderationInputs(BaseModel):
@@ -219,7 +213,7 @@ class ContingentConsiderationInputs(BaseModel):
 def contingent_consideration_valuation(
     scenarios: list[dict],
     discount_rate: float,
-) -> dict:
+) -> ValuationResult:
     """Value earn-out / contingent consideration using probability-weighted scenarios.
 
     Contingent consideration (earn-out) is valued as the probability-weighted
@@ -251,7 +245,7 @@ def contingent_consideration_valuation(
         ...     {"probability": 0.2, "payment": 15_000_000, "period": 3},
         ... ]
         >>> result = contingent_consideration_valuation(scenarios, 0.10)
-        >>> result["value"] > 0
+        >>> result.value > 0
         True
 
     Reference:
@@ -287,18 +281,12 @@ def contingent_consideration_valuation(
     steps.append("")
     steps.append(f"Total PV of contingent consideration: {total_expected_pv:,.0f}")
 
-    return {
-        "value": total_expected_pv,
-        "method": "Contingent Consideration (Probability-Weighted)",
-        "formula_reference": "ASC 805-30-25, PV = sum(p_i x payment_i / (1+r)^t)",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=total_expected_pv, method="Contingent Consideration (Probability-Weighted)", formula_reference="ASC 805-30-25, PV = sum(p_i x payment_i / (1+r)^t)", steps=steps, assumptions={
             "num_scenarios": len(inputs.scenarios),
             "discount_rate": inputs.discount_rate,
             "scenarios": inputs.scenarios,
             "total_expected_pv": round(total_expected_pv, 2),
-        },
-    }
+        })
 
 
 class DTLPPAInputs(BaseModel):
@@ -315,7 +303,7 @@ def deferred_tax_liability_ppa(
     identified_intangibles: list[dict],
     tax_basis: float,
     statutory_rate: float,
-) -> dict:
+) -> ValuationResult:
     """Calculate deferred tax liability arising from PPA step-up in basis.
 
     When intangible assets are recorded at fair value in a business combination
@@ -347,7 +335,7 @@ def deferred_tax_liability_ppa(
         ...     {"name": "Technology", "fair_value": 25_000_000},
         ... ]
         >>> result = deferred_tax_liability_ppa(intangibles, 0, 0.25)
-        >>> result["value"]  # (45M - 0) x 0.25 = 11.25M
+        >>> result.value  # (45M - 0) x 0.25 = 11.25M
         11250000.0
 
     Reference:
@@ -389,17 +377,11 @@ def deferred_tax_liability_ppa(
     steps.append("Note: DTL increases goodwill in PPA (gross-up effect)")
     steps.append(f"Grossed-up goodwill increase: {dtl:,.0f}")
 
-    return {
-        "value": dtl,
-        "method": "Deferred Tax Liability from PPA Step-Up",
-        "formula_reference": "ASC 805-740, DTL = (FV - Tax Basis) x Tax Rate",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=dtl, method="Deferred Tax Liability from PPA Step-Up", formula_reference="ASC 805-740, DTL = (FV - Tax Basis) x Tax Rate", steps=steps, assumptions={
             "total_fair_value": total_fv,
             "tax_basis": inputs.tax_basis,
             "temporary_difference": temp_diff,
             "statutory_rate": inputs.statutory_rate,
             "dtl": dtl,
             "num_intangibles": len(inputs.identified_intangibles),
-        },
-    }
+        })

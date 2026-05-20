@@ -5,9 +5,9 @@ between cash flows with and without the asset.
 
 Implements the method from Chapter 4.
 """
-
 from __future__ import annotations
 
+from intangible_valuation.core import ValuationResult
 from intangible_valuation.core.time_value import present_value_of_series
 
 
@@ -15,7 +15,7 @@ def incremental_cashflow(
     cash_flows_with: list[float],
     cash_flows_without: list[float],
     discount_rate: float,
-) -> dict:
+) -> ValuationResult:
     """Calculate asset value using the Incremental Cash Flow method.
 
     The Incremental Cash Flow method values an intangible asset as the
@@ -36,7 +36,7 @@ def incremental_cashflow(
         discount_rate: Discount rate as decimal. Must be positive.
 
     Returns:
-        Dict with:
+        ValuationResult with:
             - value: Present value of incremental cash flows
             - method: 'Incremental Cash Flow'
             - formula_reference: 'Chapter 4: Income Methods - Incremental Cash Flow'
@@ -53,7 +53,7 @@ def incremental_cashflow(
         ...     cash_flows_without=[400000, 420000, 440000, 460000, 480000],
         ...     discount_rate=0.10,
         ... )
-        >>> result["value"] > 0
+        >>> result.value > 0
         True
     """
     if not cash_flows_with:
@@ -83,7 +83,7 @@ def incremental_cashflow(
         )
 
     pv_result = present_value_of_series(incremental, discount_rate)
-    value = pv_result["present_value"]
+    value = pv_result.value
 
     steps.append(f"PV of incremental cash flows: ${value:,.2f}")
 
@@ -95,11 +95,4 @@ def incremental_cashflow(
         "Both scenarios use consistent assumptions and projections",
     ]
 
-    return {
-        "value": value,
-        "method": "Incremental Cash Flow",
-        "formula_reference": "Chapter 4: Income Methods - Incremental Cash Flow",
-        "incremental_cash_flows": incremental,
-        "steps": steps,
-        "assumptions": assumptions,
-    }
+    return ValuationResult(value=value, method="Incremental Cash Flow", formula_reference="Chapter 4: Income Methods - Incremental Cash Flow", incremental_cash_flows=incremental, steps=steps, assumptions=assumptions)

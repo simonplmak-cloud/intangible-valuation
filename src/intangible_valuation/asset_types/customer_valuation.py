@@ -3,12 +3,11 @@
 Implements valuation for customer relationships, distribution networks,
 and non-compete agreements.
 """
-
 from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-from intangible_valuation.core import present_value
+from intangible_valuation.core import ValuationResult, present_value
 
 
 class CustomerRelationshipInputs(BaseModel):
@@ -33,7 +32,7 @@ def customer_relationship_valuation(
     profit_margin: float,
     discount_rate: float,
     projection_period: int,
-) -> dict:
+) -> ValuationResult:
     """Value customer relationships with multi-period cash flow and attrition.
 
     Projects declining customer base over time using retention rate,
@@ -84,20 +83,14 @@ def customer_relationship_valuation(
             f"profit={profit:,.0f}, PV={pv:,.0f}"
         )
 
-    return {
-        "value": total_pv,
-        "method": "Multi-Period Customer Cash Flow with Attrition",
-        "formula_reference": "V = sum(C0 x r^t x RPU x PM / (1+d)^t)",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=total_pv, method="Multi-Period Customer Cash Flow with Attrition", formula_reference="V = sum(C0 x r^t x RPU x PM / (1+d)^t)", steps=steps, assumptions={
             "customer_count": inputs.customer_count,
             "avg_revenue_per_customer": inputs.avg_revenue_per_customer,
             "retention_rate": inputs.retention_rate,
             "profit_margin": inputs.profit_margin,
             "discount_rate": inputs.discount_rate,
             "projection_period": inputs.projection_period,
-        },
-    }
+        })
 
 
 class DistributionNetworkInputs(BaseModel):
@@ -116,7 +109,7 @@ def distribution_network_valuation(
     channel_margin: float,
     useful_life: int,
     discount_rate: float,
-) -> dict:
+) -> ValuationResult:
     """Value a distribution network based on channel profitability.
 
     Calculates PV of expected profits from distribution channels over
@@ -164,19 +157,13 @@ def distribution_network_valuation(
         f"PV of channel profits: {pv:,.0f}",
     ]
 
-    return {
-        "value": pv,
-        "method": "Distribution Network Income Approach",
-        "formula_reference": "V = sum(Channels x Rev/Ch x Margin / (1+r)^t)",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=pv, method="Distribution Network Income Approach", formula_reference="V = sum(Channels x Rev/Ch x Margin / (1+r)^t)", steps=steps, assumptions={
             "channel_count": inputs.channel_count,
             "revenue_per_channel": inputs.revenue_per_channel,
             "channel_margin": inputs.channel_margin,
             "useful_life": inputs.useful_life,
             "discount_rate": inputs.discount_rate,
-        },
-    }
+        })
 
 
 class NonCompeteInputs(BaseModel):
@@ -197,7 +184,7 @@ def non_compete_valuation(
     term: int,
     enforcement_probability: float,
     discount_rate: float,
-) -> dict:
+) -> ValuationResult:
     """Value a non-compete agreement based on protected profits.
 
     Values the expected profit stream protected by the non-compete,
@@ -243,19 +230,13 @@ def non_compete_valuation(
 
     steps.append(f"PV of protected profits: {total_pv:,.0f}")
 
-    return {
-        "value": total_pv,
-        "method": "Non-Compete Income Approach with Enforcement Risk",
-        "formula_reference": "V = sum(Rev x PM x P(enforce) / (1+r)^t)",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=total_pv, method="Non-Compete Income Approach with Enforcement Risk", formula_reference="V = sum(Rev x PM x P(enforce) / (1+r)^t)", steps=steps, assumptions={
             "protected_revenue": inputs.protected_revenue,
             "profit_margin": inputs.profit_margin,
             "term": inputs.term,
             "enforcement_probability": inputs.enforcement_probability,
             "discount_rate": inputs.discount_rate,
-        },
-    }
+        })
 
 
 class CLVInputs(BaseModel):
@@ -272,7 +253,7 @@ def customer_lifetime_value(
     retention_rate: float,
     discount_rate: float,
     margin: float,
-) -> dict:
+) -> ValuationResult:
     """Calculate customer lifetime value using the infinite horizon CLV formula.
 
     Formula:
@@ -295,7 +276,7 @@ def customer_lifetime_value(
 
     Example:
         >>> result = customer_lifetime_value(100, 0.80, 0.10, 0.30)
-        >>> result["value"]  # 0.30 * 100 * 0.80 / (1 + 0.10 - 0.80) = 80.0
+        >>> result.value  # 0.30 * 100 * 0.80 / (1 + 0.10 - 0.80) = 80.0
         80.0
 
     Reference:
@@ -330,19 +311,13 @@ def customer_lifetime_value(
     steps.append(f"Denominator (1+r-retention): {denominator:.4f}")
     steps.append(f"CLV: {clv:,.2f}")
 
-    return {
-        "value": clv,
-        "method": "Customer Lifetime Value (Infinite Horizon)",
-        "formula_reference": "CLV = margin x RPP x r / (1 + d - r)",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=clv, method="Customer Lifetime Value (Infinite Horizon)", formula_reference="CLV = margin x RPP x r / (1 + d - r)", steps=steps, assumptions={
             "revenue_per_period": inputs.revenue_per_period,
             "retention_rate": inputs.retention_rate,
             "discount_rate": inputs.discount_rate,
             "margin": inputs.margin,
             "profit_per_period": profit_per_period,
-        },
-    }
+        })
 
 
 class BacklogValuationInputs(BaseModel):
@@ -361,7 +336,7 @@ def backlog_valuation(
     contract_backlog: list[dict],
     probability_of_completion: float,
     discount_rate: float,
-) -> dict:
+) -> ValuationResult:
     """Value order backlog as risk-adjusted present value of contracted revenue.
 
     Each contract in the backlog is discounted to present value and adjusted
@@ -389,7 +364,7 @@ def backlog_valuation(
         ...     {"value": 300_000, "period": 2},
         ... ]
         >>> result = backlog_valuation(backlog, 0.90, 0.10)
-        >>> result["value"] > 0
+        >>> result.value > 0
         True
     """
     if not contract_backlog:
@@ -422,18 +397,12 @@ def backlog_valuation(
     steps.append(f"Total nominal backlog: {total_nominal:,.0f}")
     steps.append(f"Risk-adjusted PV: {total_pv:,.0f}")
 
-    return {
-        "value": total_pv,
-        "method": "Order Backlog Risk-Adjusted PV",
-        "formula_reference": "V = sum(Value x P(complete) / (1+r)^t)",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=total_pv, method="Order Backlog Risk-Adjusted PV", formula_reference="V = sum(Value x P(complete) / (1+r)^t)", steps=steps, assumptions={
             "num_contracts": len(inputs.contract_backlog),
             "total_nominal_value": total_nominal,
             "probability_of_completion": inputs.probability_of_completion,
             "discount_rate": inputs.discount_rate,
-        },
-    }
+        })
 
 
 class ChurnImpactInputs(BaseModel):
@@ -452,7 +421,7 @@ def churn_impact_analysis(
     churn_rate_after: float,
     revenue_per_customer: float,
     discount_rate: float,
-) -> dict:
+) -> ValuationResult:
     """Analyze the value impact of a change in customer churn rate.
 
     Compares the present value of the customer base under two churn scenarios
@@ -486,7 +455,7 @@ def churn_impact_analysis(
         ...     revenue_per_customer=5000,
         ...     discount_rate=0.10,
         ... )
-        >>> result["value"] > 0  # reducing churn creates value
+        >>> result.value > 0  # reducing churn creates value
         True
     """
     inputs = ChurnImpactInputs(
@@ -534,12 +503,7 @@ def churn_impact_analysis(
     steps.append("")
     steps.append(f"Value impact (PV_after - PV_before): {impact:,.0f}")
 
-    return {
-        "value": impact,
-        "method": "Churn Impact Analysis",
-        "formula_reference": "Impact = PV(churn_after) - PV(churn_before)",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=impact, method="Churn Impact Analysis", formula_reference="Impact = PV(churn_after) - PV(churn_before)", steps=steps, assumptions={
             "current_customers": inputs.current_customers,
             "churn_rate_before": inputs.churn_rate_before,
             "churn_rate_after": inputs.churn_rate_after,
@@ -548,5 +512,4 @@ def churn_impact_analysis(
             "projection_years": projection_years,
             "pv_before": round(pv_before, 2),
             "pv_after": round(pv_after, 2),
-        },
-    }
+        })

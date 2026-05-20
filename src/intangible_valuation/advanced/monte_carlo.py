@@ -3,12 +3,13 @@
 Re-exports monte_carlo_valuation from intangible_valuation.core.statistics and adds
 monte_carlo_sensitivity for sensitivity analysis on valuation functions.
 """
-
 from __future__ import annotations
 
 from collections.abc import Callable
 
 import numpy as np
+
+from intangible_valuation.core import ValuationResult
 
 
 def monte_carlo_sensitivity(
@@ -17,7 +18,7 @@ def monte_carlo_sensitivity(
     distributions: dict,
     iterations: int = 10000,
     seed: int | None = None,
-) -> dict:
+) -> ValuationResult:
     """Run Monte Carlo sensitivity analysis on a valuation function.
 
     Unlike monte_carlo_valuation which simulates all inputs, this function
@@ -94,22 +95,13 @@ def monte_carlo_sensitivity(
 
     sensitivity_ranking.sort(key=lambda x: x["abs_correlation"], reverse=True)  # type: ignore[arg-type,return-value]
 
-    return {
-        "value": round(mean_val, 2),
-        "method": "Monte Carlo Sensitivity Analysis",
-        "formula_reference": "Ch 2.4, Appendix A.11, A.15",
-        "steps": [
-            {"step": 1, "description": f"Monte Carlo sensitivity analysis with {iterations} iterations"},
-            {"step": 2, "description": f"Varying {len(distributions)} parameters"},
-            {"step": 3, "description": "Mean valuation result", "value": round(mean_val, 2)},
-        ],
-        "assumptions": {
+    return ValuationResult(value=round(mean_val, 2), method="Monte Carlo Sensitivity Analysis", formula_reference="Ch 2.4, Appendix A.11, A.15", steps=[
+            {"step": 1, "description": f"Monte Carlo sensitivity analysis with {iterations} iterations"}, {"step": 2, "description": f"Varying {len(distributions)} parameters"}, {"step": 3, "description": "Mean valuation result", "value": round(mean_val, 2)}, ], assumptions={
             "iterations": iterations,
             "seed": seed,
             "base_params": base_params,
             "distributions": distributions,
-        },
-        "statistics": {
+        }, statistics={
             "mean": round(mean_val, 2),
             "std": round(std_val, 2),
             "median": round(p50, 2),
@@ -119,6 +111,4 @@ def monte_carlo_sensitivity(
             "confidence_interval_90": [round(p5, 2), round(p95, 2)],
             "min": round(float(np.min(results)), 2),
             "max": round(float(np.max(results)), 2),
-        },
-        "sensitivity_ranking": sensitivity_ranking,
-    }
+        }, sensitivity_ranking=sensitivity_ranking)

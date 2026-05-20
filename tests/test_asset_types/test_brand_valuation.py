@@ -97,7 +97,7 @@ class TestTrademarkValuation:
             trademark_valuation(
                 revenue=100000,
                 profit_margin=0.20,
-                brand_strength_index=1.5,
+                brand_strength_index=150,
                 discount_rate=0.10,
                 useful_life=5,
             )

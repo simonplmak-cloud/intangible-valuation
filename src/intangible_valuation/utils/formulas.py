@@ -10,7 +10,6 @@ All functions return structured dicts with:
     - steps: Step-by-step calculation breakdown
     - assumptions: List of assumptions made during calculation
 """
-
 from __future__ import annotations
 
 import math
@@ -165,7 +164,7 @@ def sensitivity_analysis(
     parameter_name: str,
     parameter_range: list[float],
     fixed_parameters: dict[str, Any],
-) -> dict[str, Any]:
+) -> ValuationResult:
     """Perform sensitivity analysis on a valuation function.
 
     Evaluates the function across a range of values for one parameter
@@ -256,29 +255,9 @@ def sensitivity_analysis(
         max_result = None
         sensitivity_range = None
 
-    return {
-        "function_name": function_name,
-        "parameter_name": parameter_name,
-        "results": results,
-        "min_result": min_result,
-        "max_result": max_result,
-        "sensitivity_range": sensitivity_range,
-        "method": "Sensitivity Analysis",
-        "formula_reference": f"One-at-a-time sensitivity analysis on {parameter_name} for {function_name}",
-        "steps": [
-            f"Function: {function_name}",
-            f"Parameter varied: {parameter_name}",
-            f"Range: {parameter_range}",
-            f"Fixed parameters: {list(fixed_parameters.keys())}",
-            f"Results: {len(results)} evaluations",
-            f"Output range: {min_result} to {max_result}" if valid_results else "No valid results",
-        ],
-        "assumptions": [
-            "All other parameters held constant",
-            "Parameter values are within valid ranges for the function",
-            "Linear interpolation between tested points is reasonable",
-        ],
-    }
+    return ValuationResult(value=0, function_name=function_name, parameter_name=parameter_name, results=results, min_result=min_result, max_result=max_result, sensitivity_range=sensitivity_range, method="Sensitivity Analysis", formula_reference=f"One-at-a-time sensitivity analysis on {parameter_name} for {function_name}", steps=[
+            f"Function: {function_name}", f"Parameter varied: {parameter_name}", f"Range: {parameter_range}", f"Fixed parameters: {list(fixed_parameters.keys())}", f"Results: {len(results)} evaluations", f"Output range: {min_result} to {max_result}" if valid_results else "No valid results", ], assumptions=[
+            "All other parameters held constant", "Parameter values are within valid ranges for the function", "Linear interpolation between tested points is reasonable", ])
 
 
 def _call_present_value(**kwargs: Any) -> float:
@@ -328,7 +307,7 @@ def _call_wacc(**kwargs: Any) -> float:
 
 def contributory_asset_charges(
     assets: list[dict[str, Any]],
-) -> dict[str, Any]:
+) -> ValuationResult:
     """Calculate contributory asset charges (CAC) for a set of supporting assets.
 
     Contributory asset charges represent the return required on supporting assets
@@ -386,25 +365,14 @@ def contributory_asset_charges(
 
     steps.append(f"Total CAC = ${total_cac:,.2f}")
 
-    return {
-        "total_cac": round(total_cac, 2),
-        "asset_charges": asset_charges,
-        "method": "Contributory Asset Charge",
-        "formula_reference": "CAC_i = Asset_Value_i * Return_Rate_i; Total CAC = sum(CAC_i)",
-        "steps": steps,
-        "assumptions": [
-            "Asset values represent fair market values",
-            "Return rates reflect the risk of each asset class",
-            "All contributory assets are necessary for the subject asset's earnings",
-            "Charges represent opportunity cost of capital tied up in supporting assets",
-        ],
-    }
+    return ValuationResult(value=round(total_cac, 2), total_cac=round(total_cac, 2), asset_charges=asset_charges, method="Contributory Asset Charge", formula_reference="CAC_i = Asset_Value_i * Return_Rate_i; Total CAC = sum(CAC_i)", steps=steps, assumptions=[
+            "Asset values represent fair market values", "Return rates reflect the risk of each asset class", "All contributory assets are necessary for the subject asset's earnings", "Charges represent opportunity cost of capital tied up in supporting assets", ])
 
 
 def straight_line_amortization(
     asset_value: float,
     useful_life: int,
-) -> dict[str, Any]:
+) -> ValuationResult:
     """Generate a straight-line amortization schedule.
 
     Under straight-line amortization, the asset value is allocated evenly over
@@ -432,7 +400,7 @@ def straight_line_amortization(
 
     Example:
         >>> result = straight_line_amortization(asset_value=1_000_000, useful_life=5)
-        >>> result["schedule"][0]["amortization"]  # 200,000
+        >>> result.schedule[0]["amortization"]  # 200,000
 
     Book Reference:
         Chapter 3, Section 3.4 — Amortization Methods
@@ -466,25 +434,14 @@ def straight_line_amortization(
             f"Accum=${accumulated:,.2f}, BV=${book_value:,.2f}"
         )
 
-    return {
-        "schedule": schedule,
-        "total_amortization": round(accumulated, 2),
-        "method": "Straight-Line Amortization",
-        "formula_reference": "Annual Amortization = Asset Value / Useful Life",
-        "steps": steps,
-        "assumptions": [
-            "Amortization expense is constant each year",
-            "No residual value assumed",
-            "Useful life is known and fixed",
-            "Straight-line method reflects pattern of economic benefit consumption",
-        ],
-    }
+    return ValuationResult(value=0, schedule=schedule, total_amortization=round(accumulated, 2), method="Straight-Line Amortization", formula_reference="Annual Amortization = Asset Value / Useful Life", steps=steps, assumptions=[
+            "Amortization expense is constant each year", "No residual value assumed", "Useful life is known and fixed", "Straight-line method reflects pattern of economic benefit consumption", ])
 
 
 def sum_of_years_digits_amortization(
     asset_value: float,
     useful_life: int,
-) -> dict[str, Any]:
+) -> ValuationResult:
     """Generate a sum-of-years'-digits (SYD) amortization schedule.
 
     SYD is an accelerated amortization method that allocates more expense to
@@ -512,7 +469,7 @@ def sum_of_years_digits_amortization(
 
     Example:
         >>> result = sum_of_years_digits_amortization(asset_value=1_000_000, useful_life=5)
-        >>> result["schedule"][0]["amortization"]  # 333,333.33 (largest in year 1)
+        >>> result.schedule[0]["amortization"]  # 333,333.33 (largest in year 1)
 
     Book Reference:
         Chapter 3, Section 3.4 — Accelerated Amortization Methods
@@ -550,25 +507,14 @@ def sum_of_years_digits_amortization(
             f"Amort=${amortization:,.2f}, BV=${book_value:,.2f}"
         )
 
-    return {
-        "schedule": schedule,
-        "total_amortization": round(accumulated, 2),
-        "method": "Sum-of-Years'-Digits Amortization",
-        "formula_reference": "Year t Amort = Asset Value * (n - t + 1) / [n*(n+1)/2]",
-        "steps": steps,
-        "assumptions": [
-            "Economic benefits decline over the asset's useful life",
-            "Accelerated method reflects front-loaded benefit pattern",
-            "No residual value assumed",
-            "Useful life is known and fixed",
-        ],
-    }
+    return ValuationResult(value=0, schedule=schedule, total_amortization=round(accumulated, 2), method="Sum-of-Years'-Digits Amortization", formula_reference="Year t Amort = Asset Value * (n - t + 1) / [n*(n+1)/2]", steps=steps, assumptions=[
+            "Economic benefits decline over the asset's useful life", "Accelerated method reflects front-loaded benefit pattern", "No residual value assumed", "Useful life is known and fixed", ])
 
 
 def double_declining_balance_amortization(
     asset_value: float,
     useful_life: int,
-) -> dict[str, Any]:
+) -> ValuationResult:
     """Generate a double-declining balance (DDB) amortization schedule.
 
     DDB is the most common accelerated amortization method. It applies twice the
@@ -598,7 +544,7 @@ def double_declining_balance_amortization(
 
     Example:
         >>> result = double_declining_balance_amortization(asset_value=1_000_000, useful_life=5)
-        >>> result["schedule"][0]["amortization"]  # 400,000 (40% of $1M)
+        >>> result.schedule[0]["amortization"]  # 400,000 (40% of $1M)
 
     Book Reference:
         Chapter 3, Section 3.4 — Accelerated Amortization Methods
@@ -635,26 +581,15 @@ def double_declining_balance_amortization(
             f"Amort=${amortization:,.2f}, BV_end=${book_value:,.2f}"
         )
 
-    return {
-        "schedule": schedule,
-        "total_amortization": round(accumulated, 2),
-        "method": "Double-Declining Balance Amortization",
-        "formula_reference": "DDB Rate = 2/n; Year t Amort = BV_(t-1) * DDB Rate; Final year = remaining BV",
-        "steps": steps,
-        "assumptions": [
-            "DDB rate is 200% of straight-line rate",
-            "Economic benefits are heavily front-loaded",
-            "Final year fully amortizes remaining book value",
-            "No residual value assumed",
-        ],
-    }
+    return ValuationResult(value=0, schedule=schedule, total_amortization=round(accumulated, 2), method="Double-Declining Balance Amortization", formula_reference="DDB Rate = 2/n; Year t Amort = BV_(t-1) * DDB Rate; Final year = remaining BV", steps=steps, assumptions=[
+            "DDB rate is 200% of straight-line rate", "Economic benefits are heavily front-loaded", "Final year fully amortizes remaining book value", "No residual value assumed", ])
 
 
 def valuation_multiple(
     value: float,
     metric: float,
     multiple_type: str = "EV/Revenue",
-) -> dict[str, Any]:
+) -> ValuationResult:
     """Calculate a valuation multiple from enterprise value (or equity value) and a financial metric.
 
     Valuation multiples express the relationship between a company's value and a
@@ -684,7 +619,7 @@ def valuation_multiple(
 
     Example:
         >>> result = valuation_multiple(value=50_000_000, metric=10_000_000, multiple_type="EV/Revenue")
-        >>> result["multiple"]  # 5.0
+        >>> result.multiple  # 5.0
 
     Book Reference:
         Chapter 4, Section 4.1 — Market Approach and Valuation Multiples
@@ -699,23 +634,6 @@ def valuation_multiple(
 
     multiple = value / metric
 
-    return {
-        "multiple": round(multiple, 4),
-        "value": round(value, 2),
-        "metric": round(metric, 2),
-        "multiple_type": multiple_type,
-        "method": "Valuation Multiple",
-        "formula_reference": "Multiple = Value / Metric",
-        "steps": [
-            f"Value = ${value:,.2f}",
-            f"Metric = ${metric:,.2f}",
-            f"Multiple Type = {multiple_type}",
-            f"{multiple_type} = ${value:,.2f} / ${metric:,.2f} = {multiple:.4f}x",
-        ],
-        "assumptions": [
-            "Value and metric are measured on a consistent basis",
-            "Multiple is comparable to industry benchmarks",
-            f"Metric ({multiple_type.rsplit('/', maxsplit=1)[-1]}) is positive and meaningful",
-            "Multiple reflects current market conditions",
-        ],
-    }
+    return ValuationResult(multiple=round(multiple, 4), value=round(value, 2), metric=round(metric, 2), multiple_type=multiple_type, method="Valuation Multiple", formula_reference="Multiple = Value / Metric", steps=[
+            f"Value = ${value:,.2f}", f"Metric = ${metric:,.2f}", f"Multiple Type = {multiple_type}", f"{multiple_type} = ${value:,.2f} / ${metric:,.2f} = {multiple:.4f}x", ], assumptions=[
+            "Value and metric are measured on a consistent basis", "Multiple is comparable to industry benchmarks", f"Metric ({multiple_type.rsplit('/', maxsplit=1)[-1]}) is positive and meaningful", "Multiple reflects current market conditions", ])

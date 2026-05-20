@@ -3,12 +3,12 @@
 Implements valuation for developed technology, software, data assets,
 and platforms with network effects.
 """
-
 from __future__ import annotations
 
 from pydantic import BaseModel, Field, field_validator
 
 from intangible_valuation.core import (
+    ValuationResult,
     present_value,
     present_value_of_annuity,
 )
@@ -60,7 +60,7 @@ def developed_technology_valuation(
     competitive_advantage: int,
     discount_rate: float,
     cash_flow_projections: list[float],
-) -> dict:
+) -> ValuationResult:
     """Value developed technology with life-cycle risk adjustment.
 
     Combines cost approach (R&D costs as floor) with income approach,
@@ -114,20 +114,14 @@ def developed_technology_valuation(
         f"and income {pv_cash_flows:,.0f}): {value:,.0f}"
     )
 
-    return {
-        "value": value,
-        "method": "Cost-Income Hybrid with Life Cycle Risk",
-        "formula_reference": "V = max(Cost, sum(CF_t / (1+r+risk)^t))",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=value, method="Cost-Income Hybrid with Life Cycle Risk", formula_reference="V = max(Cost, sum(CF_t / (1+r+risk)^t))", steps=steps, assumptions={
             "rd_costs": inputs.rd_costs,
             "life_cycle_stage": inputs.life_cycle_stage,
             "risk_premium": risk_premium,
             "competitive_advantage": inputs.competitive_advantage,
             "base_discount_rate": inputs.discount_rate,
             "adjusted_discount_rate": adjusted_discount_rate,
-        },
-    }
+        })
 
 
 class SoftwareInputs(BaseModel):
@@ -161,7 +155,7 @@ def software_valuation(
     revenue_model: dict,
     useful_life: int,
     discount_rate: float,
-) -> dict:
+) -> ValuationResult:
     """Value software using cost and income approaches.
 
     Combines replacement cost with PV of net cash flows from the user base.
@@ -218,12 +212,7 @@ def software_valuation(
         f"and income {income_value:,.0f}): {value:,.0f}"
     )
 
-    return {
-        "value": value,
-        "method": "Cost-Income Hybrid (Software)",
-        "formula_reference": "V = max(Cost, sum((Rev - Maint) / (1+r)^t))",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=value, method="Cost-Income Hybrid (Software)", formula_reference="V = max(Cost, sum((Rev - Maint) / (1+r)^t))", steps=steps, assumptions={
             "development_cost": inputs.development_cost,
             "maintenance_cost": inputs.maintenance_cost,
             "user_base": inputs.user_base,
@@ -231,8 +220,7 @@ def software_valuation(
             "revenue_per_user": inputs.revenue_model["revenue_per_user"],
             "useful_life": inputs.useful_life,
             "discount_rate": inputs.discount_rate,
-        },
-    }
+        })
 
 
 class DataAssetInputs(BaseModel):
@@ -253,7 +241,7 @@ def data_asset_valuation(
     revenue_contribution: float,
     useful_life: int,
     discount_rate: float,
-) -> dict:
+) -> ValuationResult:
     """Value a data asset with quality-adjusted revenue contribution.
 
     Quality score (0-1) adjusts the revenue contribution to reflect
@@ -300,19 +288,13 @@ def data_asset_valuation(
         f"and income {income_value:,.0f}): {value:,.0f}"
     )
 
-    return {
-        "value": value,
-        "method": "Cost-Income Hybrid with Quality Adjustment",
-        "formula_reference": "V = max(Cost, sum(Rev x Quality / (1+r)^t))",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=value, method="Cost-Income Hybrid with Quality Adjustment", formula_reference="V = max(Cost, sum(Rev x Quality / (1+r)^t))", steps=steps, assumptions={
             "acquisition_cost": inputs.acquisition_cost,
             "quality_score": inputs.quality_score,
             "revenue_contribution": inputs.revenue_contribution,
             "useful_life": inputs.useful_life,
             "discount_rate": inputs.discount_rate,
-        },
-    }
+        })
 
 
 class PlatformInputs(BaseModel):
@@ -333,7 +315,7 @@ def platform_valuation(
     revenue_per_user: float,
     growth_rate: float,
     discount_rate: float,
-) -> dict:
+) -> ValuationResult:
     """Value a platform incorporating network effects in revenue projection.
 
     Network effects amplify revenue as the user base grows. The coefficient
@@ -388,20 +370,14 @@ def platform_valuation(
             f"revenue={annual_revenue:,.0f}, PV={pv:,.0f}"
         )
 
-    return {
-        "value": total_pv,
-        "method": "Network Effects Income Approach",
-        "formula_reference": "V = sum(N_t x RPU_t x (1 + NE x t/T) / (1+r)^t)",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=total_pv, method="Network Effects Income Approach", formula_reference="V = sum(N_t x RPU_t x (1 + NE x t/T) / (1+r)^t)", steps=steps, assumptions={
             "network_size": inputs.network_size,
             "network_effects_coefficient": inputs.network_effects_coefficient,
             "revenue_per_user": inputs.revenue_per_user,
             "growth_rate": inputs.growth_rate,
             "discount_rate": inputs.discount_rate,
             "projection_years": projection_years,
-        },
-    }
+        })
 
 
 class TechObsolescenceInputs(BaseModel):
@@ -418,7 +394,7 @@ def technology_obsolescence_curve(
     initial_value: float,
     obsolescence_rate: float,
     periods: int,
-) -> dict:
+) -> ValuationResult:
     """Calculate technology value decay over time due to obsolescence.
 
     Models the decline in technology value as newer alternatives emerge.
@@ -438,7 +414,7 @@ def technology_obsolescence_curve(
 
     Example:
         >>> result = technology_obsolescence_curve(1_000_000, 0.20, 5)
-        >>> result["value"]  # ~327,680
+        >>> result.value  # ~327,680
         327680.0
     """
     inputs = TechObsolescenceInputs(
@@ -464,19 +440,13 @@ def technology_obsolescence_curve(
             f"({pct_remaining:.1%} of original)"
         )
 
-    return {
-        "value": current_value,
-        "method": "Technology Obsolescence Curve",
-        "formula_reference": "V(t) = V0 x (1 - r)^t",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=current_value, method="Technology Obsolescence Curve", formula_reference="V(t) = V0 x (1 - r)^t", steps=steps, assumptions={
             "initial_value": inputs.initial_value,
             "obsolescence_rate": inputs.obsolescence_rate,
             "periods": inputs.periods,
             "value_at_each_period": [round(v, 2) for v in values],
             "total_value_lost": round(inputs.initial_value - current_value, 2),
-        },
-    }
+        })
 
 
 class ApiValuationInputs(BaseModel):
@@ -495,7 +465,7 @@ def api_valuation(
     growth_rate: float,
     useful_life: int,
     discount_rate: float,
-) -> dict:
+) -> ValuationResult:
     """Value an API as an intangible asset based on call volume and revenue.
 
     Projects annual revenue from API usage with growth, then discounts
@@ -526,7 +496,7 @@ def api_valuation(
         ...     useful_life=5,
         ...     discount_rate=0.10,
         ... )
-        >>> result["value"] > 0
+        >>> result.value > 0
         True
     """
     inputs = ApiValuationInputs(
@@ -559,20 +529,14 @@ def api_valuation(
 
     steps.append(f"Total PV: {total_pv:,.0f}")
 
-    return {
-        "value": total_pv,
-        "method": "API Income Approach",
-        "formula_reference": "V = sum(Calls x 12 x RPC x (1+g)^(t-1) / (1+r)^t)",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=total_pv, method="API Income Approach", formula_reference="V = sum(Calls x 12 x RPC x (1+g)^(t-1) / (1+r)^t)", steps=steps, assumptions={
             "api_calls_per_month": inputs.api_calls_per_month,
             "revenue_per_call": inputs.revenue_per_call,
             "growth_rate": inputs.growth_rate,
             "useful_life": inputs.useful_life,
             "discount_rate": inputs.discount_rate,
             "year1_revenue": annual_revenue_year1,
-        },
-    }
+        })
 
 
 class AlgorithmValuationInputs(BaseModel):
@@ -593,7 +557,7 @@ def algorithm_valuation(
     deployment_scale: float,
     competitive_advantage_years: int,
     discount_rate: float,
-) -> dict:
+) -> ValuationResult:
     """Value an ML algorithm based on computational savings and competitive advantage.
 
     Values the algorithm by the cost savings it generates at scale,
@@ -622,7 +586,7 @@ def algorithm_valuation(
         ...     competitive_advantage_years=5,
         ...     discount_rate=0.12,
         ... )
-        >>> result["value"] > 0
+        >>> result.value > 0
         True
     """
     inputs = AlgorithmValuationInputs(
@@ -650,16 +614,10 @@ def algorithm_valuation(
 
     steps.append(f"Total algorithm value: {total_pv:,.0f}")
 
-    return {
-        "value": total_pv,
-        "method": "ML Algorithm Income Approach",
-        "formula_reference": "V = sum(Savings x Scale / (1+r)^t)",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=total_pv, method="ML Algorithm Income Approach", formula_reference="V = sum(Savings x Scale / (1+r)^t)", steps=steps, assumptions={
             "computational_savings": inputs.computational_savings,
             "deployment_scale": inputs.deployment_scale,
             "competitive_advantage_years": inputs.competitive_advantage_years,
             "discount_rate": inputs.discount_rate,
             "annual_benefit": annual_benefit,
-        },
-    }
+        })

@@ -2,12 +2,11 @@
 
 Implements valuation for assembled workforce and key person dependencies.
 """
-
 from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-from intangible_valuation.core import present_value
+from intangible_valuation.core import ValuationResult, present_value
 
 
 class AssembledWorkforceInputs(BaseModel):
@@ -30,7 +29,7 @@ def assembled_workforce_valuation(
     training_cost: float,
     productivity_factor: float,
     attrition_rate: float,
-) -> dict:
+) -> ValuationResult:
     """Value an assembled workforce using replacement cost approach.
 
     The value reflects the cost savings from having a trained, productive
@@ -99,20 +98,14 @@ def assembled_workforce_valuation(
     steps.append(f"Productivity loss factor: {productivity_loss:,.0f}")
     steps.append(f"Final assembled workforce value: {value:,.0f}")
 
-    return {
-        "value": value,
-        "method": "Replacement Cost with Attrition Adjustment",
-        "formula_reference": "V = sum(N_t x (RC + TC) / (1+r)^t)",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=value, method="Replacement Cost with Attrition Adjustment", formula_reference="V = sum(N_t x (RC + TC) / (1+r)^t)", steps=steps, assumptions={
             "employee_count": inputs.employee_count,
             "avg_replacement_cost": inputs.avg_replacement_cost,
             "training_cost": inputs.training_cost,
             "productivity_factor": inputs.productivity_factor,
             "attrition_rate": inputs.attrition_rate,
             "horizon_years": horizon,
-        },
-    }
+        })
 
 
 class KeyPersonInputs(BaseModel):
@@ -131,7 +124,7 @@ def key_person_value(
     replacement_cost: float,
     departure_probability: float,
     discount_rate: float,
-) -> dict:
+) -> ValuationResult:
     """Value a key person based on revenue contribution and replacement risk.
 
     Combines the cost to replace the person with the PV of their revenue
@@ -185,16 +178,10 @@ def key_person_value(
     )
     steps.append(f"Final value (PV + replacement cost): {value:,.0f}")
 
-    return {
-        "value": value,
-        "method": "Key Person Income and Replacement Cost",
-        "formula_reference": "V = RC + sum(Rev x P(survival)^t / (1+r)^t)",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=value, method="Key Person Income and Replacement Cost", formula_reference="V = RC + sum(Rev x P(survival)^t / (1+r)^t)", steps=steps, assumptions={
             "revenue_contribution": inputs.revenue_contribution,
             "replacement_cost": inputs.replacement_cost,
             "departure_probability": inputs.departure_probability,
             "discount_rate": inputs.discount_rate,
             "horizon_years": horizon,
-        },
-    }
+        })

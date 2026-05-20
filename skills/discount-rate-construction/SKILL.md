@@ -1,4 +1,4 @@
-# Impairment Testing Skill
+# Discount Rate Construction Skill
 
 ## When to Use
 

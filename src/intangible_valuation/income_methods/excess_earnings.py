@@ -4,11 +4,11 @@ Implements Multi-Period Excess Earnings Method (MPEEM) and
 Single-Period Excess Earnings Method from Chapter 4.
 Includes Contributory Asset Charge (CAC) calculations.
 """
-
 from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
+from intangible_valuation.core import ValuationResult
 from intangible_valuation.core.time_value import present_value_of_series
 
 
@@ -20,7 +20,7 @@ class ContributoryAssetInput(BaseModel):
     return_rate: float = Field(..., gt=0, description="Required return rate as decimal")
 
 
-def contributory_asset_charges(assets: list[dict]) -> dict:
+def contributory_asset_charges(assets: list[dict]) -> ValuationResult:
     """Calculate total contributory asset charges (CACs).
 
     Contributory asset charges represent the return required by providers
@@ -36,7 +36,7 @@ def contributory_asset_charges(assets: list[dict]) -> dict:
             value must be positive, return_rate must be between 0 and 1.
 
     Returns:
-        Dict with:
+        ValuationResult with:
             - total_cac: Sum of all contributory asset charges
             - breakdown: List of individual CAC calculations
             - method: 'Contributory Asset Charges'
@@ -53,7 +53,7 @@ def contributory_asset_charges(assets: list[dict]) -> dict:
         ...     {"type": "fixed_assets", "value": 1000000, "return_rate": 0.10},
         ... ]
         >>> result = contributory_asset_charges(assets)
-        >>> result["total_cac"]
+        >>> result.total_cac
         140000.0
     """
     if not assets:
@@ -88,14 +88,7 @@ def contributory_asset_charges(assets: list[dict]) -> dict:
         "CACs are charged against cash flows attributable to the subject asset",
     ]
 
-    return {
-        "total_cac": total_cac,
-        "breakdown": breakdown,
-        "method": "Contributory Asset Charges",
-        "formula_reference": "Chapter 4: Income Methods - Excess Earnings",
-        "steps": steps,
-        "assumptions": assumptions,
-    }
+    return ValuationResult(value=total_cac, method="Contributory Asset Charges", formula_reference="Chapter 4: Income Methods - Excess Earnings", steps=steps, assumptions=assumptions, breakdown=breakdown, total_cac=total_cac)
 
 
 def mpeem(
@@ -104,7 +97,7 @@ def mpeem(
     discount_rate: float,
     tax_rate: float,
     tab_enabled: bool = True,
-) -> dict:
+) -> ValuationResult:
     """Calculate asset value using the Multi-Period Excess Earnings Method (MPEEM).
 
     MPEEM values an intangible asset as the present value of projected cash flows
@@ -129,7 +122,7 @@ def mpeem(
         tab_enabled: Whether to include Tax Amortization Benefit. Defaults to True.
 
     Returns:
-        Dict with:
+        ValuationResult with:
             - value: Present value of excess earnings (with TAB if enabled)
             - method: 'Multi-Period Excess Earnings Method (MPEEM)'
             - formula_reference: 'Chapter 4: Income Methods - MPEEM'
@@ -148,7 +141,7 @@ def mpeem(
         ...     {"total_cac": 56000}, {"total_cac": 58000},
         ... ]
         >>> result = mpeem(cfs, cacs, discount_rate=0.12, tax_rate=0.25)
-        >>> result["value"] > 0
+        >>> result.value > 0
         True
     """
     if not cash_flow_projections:
@@ -175,7 +168,7 @@ def mpeem(
     steps.append("Period-by-period excess earnings calculation:")
 
     for i, (cf, cac_data) in enumerate(zip(cash_flow_projections, contributory_asset_charges, strict=False), start=1):
-        total_cac = cac_data.get("total_cac", 0)
+        total_cac = cac_data.get("total_cac", 0) if isinstance(cac_data, dict) else cac_data
         pre_tax_excess = cf - total_cac
         after_tax_excess = pre_tax_excess * (1 - tax_rate)
         excess_earnings.append(after_tax_excess)
@@ -187,7 +180,7 @@ def mpeem(
         )
 
     pv_result = present_value_of_series(excess_earnings, discount_rate)
-    pv_before_tab = pv_result["present_value"]
+    pv_before_tab = pv_result.value
 
     steps.append(f"PV of after-tax excess earnings (before TAB): ${pv_before_tab:,.2f}")
 
@@ -218,22 +211,14 @@ def mpeem(
     if tab_enabled:
         assumptions.append("Tax amortization benefit is available and realizable")
 
-    return {
-        "value": value,
-        "method": "Multi-Period Excess Earnings Method (MPEEM)",
-        "formula_reference": "Chapter 4: Income Methods - MPEEM",
-        "pv_before_tab": pv_before_tab,
-        "tab_factor": tab_factor,
-        "steps": steps,
-        "assumptions": assumptions,
-    }
+    return ValuationResult(value=value, method="Multi-Period Excess Earnings Method (MPEEM)", formula_reference="Chapter 4: Income Methods - MPEEM", pv_before_tab=pv_before_tab, tab_factor=tab_factor, steps=steps, assumptions=assumptions)
 
 
 def single_period_excess_earnings(
     normalized_earnings: float,
     contributory_asset_charges: list[dict],
     capitalization_rate: float,
-) -> dict:
+) -> ValuationResult:
     """Calculate asset value using the Single-Period Excess Earnings Method.
 
     Values an intangible asset by capitalizing a single period of normalized
@@ -250,7 +235,7 @@ def single_period_excess_earnings(
         capitalization_rate: Capitalization rate as decimal. Must be positive.
 
     Returns:
-        Dict with:
+        ValuationResult with:
             - value: Capitalized excess earnings value
             - method: 'Single-Period Excess Earnings Method'
             - formula_reference: 'Chapter 4: Income Methods - Single Period Excess Earnings'
@@ -268,7 +253,7 @@ def single_period_excess_earnings(
         ...     contributory_asset_charges=[{"total_cac": 140000}],
         ...     capitalization_rate=0.12,
         ... )
-        >>> result["value"]
+        >>> result.value
         3000000.0
     """
     if not contributory_asset_charges:
@@ -302,12 +287,4 @@ def single_period_excess_earnings(
         "Single-period method assumes stable excess earnings in perpetuity",
     ]
 
-    return {
-        "value": value,
-        "method": "Single-Period Excess Earnings Method",
-        "formula_reference": "Chapter 4: Income Methods - Single Period Excess Earnings",
-        "total_cac": total_cac,
-        "excess_earnings": excess_earnings,
-        "steps": steps,
-        "assumptions": assumptions,
-    }
+    return ValuationResult(value=value, method="Single-Period Excess Earnings Method", formula_reference="Chapter 4: Income Methods - Single Period Excess Earnings", total_cac=total_cac, excess_earnings=excess_earnings, steps=steps, assumptions=assumptions)

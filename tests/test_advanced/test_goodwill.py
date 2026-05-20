@@ -39,7 +39,7 @@ class TestGoodwill:
     def test_returns_steps(self):
         result = goodwill(100, 75)
         assert len(result.steps) >= 4
-        assert any(s.get("description") == "Goodwill" for s in result.steps)
+        assert any("Goodwill" in s for s in result.steps)
 
     def test_returns_assumptions(self):
         result = goodwill(100, 75)

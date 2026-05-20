@@ -3,10 +3,11 @@
 Implements comparable transactions and royalty capitalization methods
 from Chapter 3.
 """
-
 from __future__ import annotations
 
 from pydantic import BaseModel, Field
+
+from intangible_valuation.core import ValuationResult
 
 
 class MarketApproachResult(BaseModel):
@@ -31,7 +32,7 @@ def market_approach_comparables(
     comparables: list[dict],
     subject_revenue: float,
     adjustments: dict | None = None,
-) -> dict:
+) -> ValuationResult:
     """Valuation based on comparable market transactions.
 
     Applies revenue multiples from comparable transactions to the subject
@@ -51,7 +52,7 @@ def market_approach_comparables(
             adjustment factor (e.g., {0: 0.10, 1: -0.05}). Defaults to no adjustments.
 
     Returns:
-        Dict with:
+        ValuationResult with:
             - value: Median implied value from comparables
             - method: 'Market Approach - Comparables'
             - formula_reference: 'Chapter 3: Market Approach - Comparable Transactions'
@@ -72,7 +73,7 @@ def market_approach_comparables(
         ...     {"sale_price": 12000000, "revenue": 4000000, "asset_type": "trademark"},
         ... ]
         >>> result = market_approach_comparables(comps, subject_revenue=2500000)
-        >>> result["value"]
+        >>> result.value
         6250000.0
     """
     if not comparables:
@@ -132,23 +133,14 @@ def market_approach_comparables(
         "Adjustments reflect identifiable differences",
     ]
 
-    return {
-        "value": median_value,
-        "method": "Market Approach - Comparables",
-        "formula_reference": "Chapter 3: Market Approach - Comparable Transactions",
-        "multiples": multiples,
-        "implied_values": implied_values,
-        "range": (min(implied_values), max(implied_values)),
-        "steps": steps,
-        "assumptions": assumptions,
-    }
+    return ValuationResult(value=median_value, method="Market Approach - Comparables", formula_reference="Chapter 3: Market Approach - Comparable Transactions", multiples=multiples, implied_values=implied_values, range=(min(implied_values), max(implied_values)), steps=steps, assumptions=assumptions)
 
 
 def royalty_capitalization(
     revenue: float,
     royalty_rate: float,
     discount_rate: float,
-) -> dict:
+) -> ValuationResult:
     """Valuation using the royalty capitalization method.
 
     Capitalizes a perpetual royalty stream into a present value.
@@ -164,7 +156,7 @@ def royalty_capitalization(
         discount_rate: Discount rate as decimal. Must be positive.
 
     Returns:
-        Dict with:
+        ValuationResult with:
             - value: Capitalized royalty value
             - method: 'Royalty Capitalization'
             - formula_reference: 'Chapter 3: Market Approach - Royalty Capitalization'
@@ -181,7 +173,7 @@ def royalty_capitalization(
         ...     royalty_rate=0.04,
         ...     discount_rate=0.15
         ... )
-        >>> result["value"]
+        >>> result.value
         2666666.6666666665
     """
     if revenue <= 0:
@@ -209,11 +201,4 @@ def royalty_capitalization(
         "No growth in revenue is assumed (perpetuity)",
     ]
 
-    return {
-        "value": value,
-        "method": "Royalty Capitalization",
-        "formula_reference": "Chapter 3: Market Approach - Royalty Capitalization",
-        "annual_royalty": annual_royalty,
-        "steps": steps,
-        "assumptions": assumptions,
-    }
+    return ValuationResult(value=value, method="Royalty Capitalization", formula_reference="Chapter 3: Market Approach - Royalty Capitalization", annual_royalty=annual_royalty, steps=steps, assumptions=assumptions)

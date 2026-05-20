@@ -3,14 +3,14 @@
 Implements brand value using Relief-from-Royalty and Excess Earnings
 methods with brand strength adjustments.
 """
-
 from __future__ import annotations
 
 from collections.abc import Sequence
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from intangible_valuation.core import (
+    ValuationResult,
     present_value_of_annuity,
 )
 
@@ -21,7 +21,7 @@ class TrademarkInputs(BaseModel):
     revenue: float = Field(ge=0, description="Annual revenue attributable to brand")
     profit_margin: float = Field(ge=0, le=1, description="Profit margin (decimal)")
     brand_strength_index: float = Field(
-        ge=0, le=1, description="Brand strength index (0-1)"
+        ge=0, le=100, description="Brand strength index (0-100 scale, e.g., 75 for strong brand)"
     )
     discount_rate: float = Field(ge=0, description="Discount rate (decimal)")
     useful_life: int = Field(ge=1, description="Useful life in years")
@@ -29,6 +29,13 @@ class TrademarkInputs(BaseModel):
         default="relief_from_royalty",
         description="Valuation method: relief_from_royalty or excess_earnings",
     )
+
+    @model_validator(mode="after")
+    def normalize_brand_strength(self) -> TrademarkInputs:
+        """Normalize brand_strength_index from 0-100 to 0-1 scale."""
+        if self.brand_strength_index > 1:
+            object.__setattr__(self, "brand_strength_index", self.brand_strength_index / 100)
+        return self
 
 
 def trademark_valuation(
@@ -38,7 +45,7 @@ def trademark_valuation(
     discount_rate: float,
     useful_life: int,
     method: str = "relief_from_royalty",
-) -> dict:
+) -> ValuationResult:
     """Calculate brand value using RFR or excess earnings method.
 
     Brand strength index adjusts the royalty rate in the relief-from-royalty
@@ -47,7 +54,7 @@ def trademark_valuation(
     Args:
         revenue: Annual revenue attributable to the brand.
         profit_margin: Profit margin (decimal).
-        brand_strength_index: Brand strength index (0-1, higher = stronger).
+        brand_strength_index: Brand strength index (0-100 scale, e.g., 75 for strong brand).
         discount_rate: Discount rate (decimal).
         useful_life: Useful life in years.
         method: Valuation method ("relief_from_royalty" or "excess_earnings").
@@ -118,20 +125,15 @@ def trademark_valuation(
             f"{inputs.discount_rate:.2%}: {value:,.0f}",
         ]
 
-    return {
-        "value": value,
-        "method": (
+    return ValuationResult(value=value, method=(
             "Relief-from-Royalty (Brand)"
             if inputs.method == "relief_from_royalty"
             else "Excess Earnings (Brand)"
-        ),
-        "formula_reference": (
+        ), formula_reference=(
             "RFR = sum(Revenue x Royalty x (1-T) / (1+r)^t)"
             if inputs.method == "relief_from_royalty"
             else "EE = sum(Profit x BSI / (1+r)^t)"
-        ),
-        "steps": steps,
-        "assumptions": {
+        ), steps=steps, assumptions={
             "revenue": inputs.revenue,
             "profit_margin": inputs.profit_margin,
             "brand_strength_index": inputs.brand_strength_index,
@@ -139,8 +141,7 @@ def trademark_valuation(
             "useful_life": inputs.useful_life,
             "method": inputs.method,
             "tax_rate": 0.25,
-        },
-    }
+        })
 
 
 class BrandStrengthInputs(BaseModel):
@@ -159,7 +160,7 @@ def brand_strength_index(
     geographic_reach: float,
     customer_loyalty: float,
     investment_level: float,
-) -> dict:
+) -> ValuationResult:
     """Calculate composite brand strength score on a 0-100 scale.
 
     Combines five dimensions of brand strength using weighted scoring:
@@ -187,7 +188,7 @@ def brand_strength_index(
 
     Example:
         >>> result = brand_strength_index(0.8, 0.6, 0.7, 0.9, 0.5)
-        >>> result["value"]
+        >>> result.value
         72.0
     """
     inputs = BrandStrengthInputs(
@@ -238,17 +239,11 @@ def brand_strength_index(
     steps.append(f"Weighted sum: {weighted_sum:.4f}")
     steps.append(f"Brand Strength Index: {bsi_score:.1f}/100 ({rating})")
 
-    return {
-        "value": bsi_score,
-        "method": "Composite Brand Strength Index",
-        "formula_reference": "BSI = sum(Factor_i x Weight_i) x 100",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=bsi_score, method="Composite Brand Strength Index", formula_reference="BSI = sum(Factor_i x Weight_i) x 100", steps=steps, assumptions={
             "weights": weights,
             "scores": scores,
             "rating": rating,
-        },
-    }
+        })
 
 
 class InterbrandInputs(BaseModel):
@@ -265,7 +260,7 @@ def interbrand_brand_valuation(
     role_of_brand_index: float,
     brand_strength_score: float,
     discount_rate: float,
-) -> dict:
+) -> ValuationResult:
     """Value a brand using the Interbrand methodology.
 
     The Interbrand method calculates brand value as:
@@ -303,7 +298,7 @@ def interbrand_brand_valuation(
         ...     brand_strength_score=75,
         ...     discount_rate=0.08,
         ... )
-        >>> result["value"] > 0
+        >>> result.value > 0
         True
 
     Reference:
@@ -335,19 +330,13 @@ def interbrand_brand_valuation(
     brand_value = branded_earnings * brand_multiple
     steps.append(f"Brand value: {brand_value:,.0f}")
 
-    return {
-        "value": brand_value,
-        "method": "Interbrand Brand Valuation",
-        "formula_reference": "BV = (Earnings x ROBI) x (BS / (r x 100))",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=brand_value, method="Interbrand Brand Valuation", formula_reference="BV = (Earnings x ROBI) x (BS / (r x 100))", steps=steps, assumptions={
             "brand_earnings": inputs.brand_earnings,
             "role_of_brand_index": inputs.role_of_brand_index,
             "brand_strength_score": inputs.brand_strength_score,
             "discount_rate": inputs.discount_rate,
             "brand_multiple": round(brand_multiple, 2),
-        },
-    }
+        })
 
 
 class BrandRoyaltyInputs(BaseModel):
@@ -364,7 +353,7 @@ class BrandRoyaltyInputs(BaseModel):
 def brand_royalty_rate_from_comparables(
     comparable_rates: Sequence[float],
     brand_strength_adjustment: float = 0.0,
-) -> dict:
+) -> ValuationResult:
     """Derive brand royalty rate from comparable brand licensing agreements.
 
     Calculates a base rate from comparable transactions (median), then
@@ -389,7 +378,7 @@ def brand_royalty_rate_from_comparables(
     Example:
         >>> rates = [0.03, 0.04, 0.05, 0.06, 0.04]
         >>> result = brand_royalty_rate_from_comparables(rates, 0.10)
-        >>> result["value"]  # 0.04 * 1.10 = 0.044
+        >>> result.value  # 0.04 * 1.10 = 0.044
         0.044
     """
     rates = list(comparable_rates)
@@ -423,17 +412,11 @@ def brand_royalty_rate_from_comparables(
     steps.append(f"Brand strength adjustment: {inputs.brand_strength_adjustment:+.0%}")
     steps.append(f"Adjusted royalty rate: {adjusted_rate:.4f} ({adjusted_rate:.2%})")
 
-    return {
-        "value": adjusted_rate,
-        "method": "Comparable Brand Royalty Rate",
-        "formula_reference": "Rate = Median(comparables) x (1 + adjustment)",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=adjusted_rate, method="Comparable Brand Royalty Rate", formula_reference="Rate = Median(comparables) x (1 + adjustment)", steps=steps, assumptions={
             "num_comparables": n,
             "min_rate": min_rate,
             "max_rate": max_rate,
             "mean_rate": round(mean_rate, 4),
             "median_rate": median_rate,
             "brand_strength_adjustment": inputs.brand_strength_adjustment,
-        },
-    }
+        })

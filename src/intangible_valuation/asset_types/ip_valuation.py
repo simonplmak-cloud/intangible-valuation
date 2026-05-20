@@ -3,7 +3,6 @@
 Implements valuation for patents, copyrights, and trade secrets
 using risk-adjusted income approaches.
 """
-
 from __future__ import annotations
 
 import math
@@ -12,6 +11,7 @@ from collections.abc import Sequence
 from pydantic import BaseModel, Field, field_validator
 
 from intangible_valuation.core import (
+    ValuationResult,
     present_value,
     present_value_of_annuity,
     risk_adjusted_value,
@@ -47,7 +47,7 @@ def patent_valuation(
     probability_of_success: float,
     discount_rate: float,
     comparable_license_rates: Sequence[float] | None = None,
-) -> dict:
+) -> ValuationResult:
     """Calculate risk-adjusted patent value with probability weighting.
 
     Values a patent by discounting projected cash flows and applying
@@ -124,13 +124,7 @@ def patent_valuation(
             comparable_license_rates
         )
 
-    return {
-        "value": final_value,
-        "method": "Risk-Adjusted Income Approach",
-        "formula_reference": "PV = sum(CF_t / (1+r)^t) x POS",
-        "steps": steps,
-        "assumptions": assumptions,
-    }
+    return ValuationResult(value=final_value, method="Risk-Adjusted Income Approach", formula_reference="PV = sum(CF_t / (1+r)^t) x POS", steps=steps, assumptions=assumptions)
 
 
 class CopyrightInputs(BaseModel):
@@ -149,7 +143,7 @@ def copyright_valuation(
     useful_life: int,
     discount_rate: float,
     royalty_rate: float,
-) -> dict:
+) -> ValuationResult:
     """Calculate PV of expected copyright royalty/licensing income.
 
     Uses the relief-from-royalty approach to value copyrights based on
@@ -190,18 +184,12 @@ def copyright_valuation(
         f"PV of royalty stream: {value:,.0f}",
     ]
 
-    return {
-        "value": value,
-        "method": "Relief-from-Royalty (Copyright)",
-        "formula_reference": "PV = sum(R_t * r / (1+d)^t)",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=value, method="Relief-from-Royalty (Copyright)", formula_reference="PV = sum(R_t * r / (1+d)^t)", steps=steps, assumptions={
             "projected_revenue": inputs.projected_revenue,
             "useful_life": inputs.useful_life,
             "discount_rate": inputs.discount_rate,
             "royalty_rate": inputs.royalty_rate,
-        },
-    }
+        })
 
 
 class TradeSecretInputs(BaseModel):
@@ -224,7 +212,7 @@ def trade_secret_valuation(
     competitive_advantage_period: int,
     discount_rate: float,
     secrecy_probability: float,
-) -> dict:
+) -> ValuationResult:
     """Value a trade secret incorporating secrecy risk over time.
 
     Combines cost approach (development cost) with income approach
@@ -288,19 +276,13 @@ def trade_secret_valuation(
         f"{value:,.0f}"
     )
 
-    return {
-        "value": value,
-        "method": "Cost-Income Hybrid with Secrecy Risk",
-        "formula_reference": "V = max(Cost, PV(Benefit) x P(secrecy)^t)",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=value, method="Cost-Income Hybrid with Secrecy Risk", formula_reference="V = max(Cost, PV(Benefit) x P(secrecy)^t)", steps=steps, assumptions={
             "development_cost": inputs.development_cost,
             "economic_life": inputs.economic_life,
             "competitive_advantage_period": inputs.competitive_advantage_period,
             "discount_rate": inputs.discount_rate,
             "secrecy_probability": inputs.secrecy_probability,
-        },
-    }
+        })
 
 
 class PatentPortfolioInputs(BaseModel):
@@ -327,7 +309,7 @@ class PatentPortfolioInputs(BaseModel):
 def patent_portfolio_valuation(
     patents: Sequence[dict],
     diversification_factor: float = 0.1,
-) -> dict:
+) -> ValuationResult:
     """Calculate total patent portfolio value with diversification adjustment.
 
     Sums individual patent values and applies a diversification discount/premium
@@ -356,7 +338,7 @@ def patent_portfolio_valuation(
         ...     {"value": 750000, "category": "pharma"},
         ... ]
         >>> result = patent_portfolio_valuation(patents)
-        >>> result["value"] < 2250000  # diversification adjustment
+        >>> result.value < 2250000  # diversification adjustment
         True
     """
     patent_list = list(patents)
@@ -396,19 +378,13 @@ def patent_portfolio_valuation(
     )
     steps.append(f"Portfolio value: {portfolio_value:,.0f}")
 
-    return {
-        "value": portfolio_value,
-        "method": "Patent Portfolio with Diversification Adjustment",
-        "formula_reference": "V = sum(Vi) x (1 - DF x HHI)",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=portfolio_value, method="Patent Portfolio with Diversification Adjustment", formula_reference="V = sum(Vi) x (1 - DF x HHI)", steps=steps, assumptions={
             "num_patents": len(inputs.patents),
             "total_raw_value": total_raw,
             "hhi": hhi,
             "diversification_factor": inputs.diversification_factor,
             "num_categories": len(categories),
-        },
-    }
+        })
 
 
 class OptionPricingInputs(BaseModel):
@@ -427,7 +403,7 @@ def option_pricing_patent(
     volatility: float,
     time_to_expiry: float,
     risk_free_rate: float,
-) -> dict:
+) -> ValuationResult:
     """Value a patent using Black-Scholes real options approximation.
 
     Treats a patent as a call option: the right (but not obligation) to
@@ -468,7 +444,7 @@ def option_pricing_patent(
         ...     time_to_expiry=10,
         ...     risk_free_rate=0.03,
         ... )
-        >>> result["value"] > 5_000_000  # option value > intrinsic
+        >>> result.value > 5_000_000  # option value > intrinsic
         True
 
     Reference:
@@ -530,12 +506,7 @@ def option_pricing_patent(
     steps.append(f"Time value: {time_value:,.0f}")
     steps.append(f"Option value: {option_value:,.0f}")
 
-    return {
-        "value": max(option_value, 0),
-        "method": "Real Options (Black-Scholes)",
-        "formula_reference": "C = S·N(d1) - K·e^(-rT)·N(d2)",
-        "steps": steps,
-        "assumptions": {
+    return ValuationResult(value=max(option_value, 0), method="Real Options (Black-Scholes)", formula_reference="C = S·N(d1) - K·e^(-rT)·N(d2)", steps=steps, assumptions={
             "expected_value": S,
             "exercise_cost": K,
             "volatility": sigma,
@@ -545,5 +516,4 @@ def option_pricing_patent(
             "d2": round(d2, 4),
             "intrinsic_value": intrinsic_value,
             "time_value": round(time_value, 2),
-        },
-    }
+        })

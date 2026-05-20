@@ -20,6 +20,8 @@ from typing import Any, Literal, cast
 
 from pydantic import BaseModel, Field, field_validator
 
+from intangible_valuation.core import ValuationResult
+
 
 class DistributionInput(BaseModel):
     """Validated input distribution for Monte Carlo simulation."""
@@ -110,7 +112,7 @@ def monte_carlo_valuation(
     input_distributions: list[dict[str, Any]],
     iterations: int = 10000,
     seed: int | None = None,
-) -> dict[str, Any]:
+) -> ValuationResult:
     """Perform Monte Carlo simulation for valuation uncertainty analysis.
 
     Runs the valuation function multiple times with randomly sampled inputs
@@ -210,35 +212,9 @@ def monte_carlo_valuation(
                 f"{dist.name} ~ Triangular({dist.params['low']}, {dist.params['mode']}, {dist.params['high']})"
             )
 
-    return {
-        "mean": round(mean, 2),
-        "median": round(percentile(50), 2),
-        "std": round(std, 2),
-        "percentile_5": round(percentile(5), 2),
-        "percentile_25": round(percentile(25), 2),
-        "percentile_75": round(percentile(75), 2),
-        "percentile_95": round(percentile(95), 2),
-        "min": round(results[0], 2),
-        "max": round(results[-1], 2),
-        "method": "Monte Carlo Simulation",
-        "formula_reference": "Monte Carlo: Sample from input distributions, compute valuation, aggregate statistics",
-        "iterations": iterations,
-        "seed": seed,
-        "steps": [
-            f"Number of iterations: {iterations}",
-            f"Input distributions: {', '.join(distribution_descriptions)}",
-            f"Random seed: {seed if seed is not None else 'None (non-deterministic)'}",
-            f"Mean result: ${mean:,.2f}",
-            f"Standard deviation: ${std:,.2f}",
-            f"5th-95th percentile range: ${percentile(5):,.2f} - ${percentile(95):,.2f}",
-        ],
-        "assumptions": [
-            "Input distributions accurately represent parameter uncertainty",
-            "Input parameters are independent (no correlation modeled)",
-            "valuation_fn correctly computes the valuation for given inputs",
-            f"{iterations} iterations provide sufficient convergence",
-        ],
-    }
+    return ValuationResult(value=round(mean, 2), mean=round(mean, 2), median=round(percentile(50), 2), std=round(std, 2), percentile_5=round(percentile(5), 2), percentile_25=round(percentile(25), 2), percentile_75=round(percentile(75), 2), percentile_95=round(percentile(95), 2), min=round(results[0], 2), max=round(results[-1], 2), method="Monte Carlo Simulation", formula_reference="Monte Carlo: Sample from input distributions, compute valuation, aggregate statistics", iterations=iterations, seed=seed, steps=[
+            f"Number of iterations: {iterations}", f"Input distributions: {', '.join(distribution_descriptions)}", f"Random seed: {seed if seed is not None else 'None (non-deterministic)'}", f"Mean result: ${mean:,.2f}", f"Standard deviation: ${std:,.2f}", f"5th-95th percentile range: ${percentile(5):,.2f} - ${percentile(95):,.2f}", ], assumptions=[
+            "Input distributions accurately represent parameter uncertainty", "Input parameters are independent (no correlation modeled)", "valuation_fn correctly computes the valuation for given inputs", f"{iterations} iterations provide sufficient convergence", ])
 
 
 def _random_triangular(low: float, high: float, mode: float) -> float:
@@ -256,7 +232,7 @@ def _random_triangular(low: float, high: float, mode: float) -> float:
 
 def decision_tree_valuation(
     tree: dict[str, Any],
-) -> dict[str, Any]:
+) -> ValuationResult:
     """Evaluate a decision tree to compute expected values at each node.
 
     The tree consists of three node types:
@@ -358,20 +334,8 @@ def decision_tree_valuation(
 
     optimal_path = _find_optimal_path(root_id, nodes, edges_from, node_values)
 
-    return {
-        "expected_value": round(root_value, 2),
-        "node_values": {k: round(v, 2) for k, v in node_values.items()},
-        "optimal_path": optimal_path,
-        "method": "Decision Tree Analysis",
-        "formula_reference": "Backward induction: EV(chance) = sum(P_i * V_i), EV(decision) = max(branches)",
-        "steps": evaluation_steps,
-        "assumptions": [
-            "All probabilities at chance nodes sum to 1.0",
-            "Decision nodes select the branch with maximum expected value",
-            "Values are risk-neutral (no risk adjustment beyond discounting)",
-            "Tree is acyclic (no loops)",
-        ],
-    }
+    return ValuationResult(value=round(root_value, 2), expected_value=round(root_value, 2), node_values={k: round(v, 2) for k, v in node_values.items()}, optimal_path=optimal_path, method="Decision Tree Analysis", formula_reference="Backward induction: EV(chance) = sum(P_i * V_i), EV(decision) = max(branches)", steps=evaluation_steps, assumptions=[
+            "All probabilities at chance nodes sum to 1.0", "Decision nodes select the branch with maximum expected value", "Values are risk-neutral (no risk adjustment beyond discounting)", "Tree is acyclic (no loops)", ])
 
 
 def _find_optimal_path(
@@ -406,7 +370,7 @@ def monte_carlo_with_correlation(
     correlation_matrix: list[list[float]],
     iterations: int = 10000,
     seed: int | None = None,
-) -> dict[str, Any]:
+) -> ValuationResult:
     """Perform Monte Carlo simulation with correlated input variables.
 
     Uses Cholesky decomposition of the correlation matrix to generate correlated
@@ -520,45 +484,16 @@ def monte_carlo_with_correlation(
         idx = int(p / 100 * (n - 1))
         return results[idx]
 
-    return {
-        "mean": round(mean, 2),
-        "median": round(percentile(50), 2),
-        "std": round(std, 2),
-        "percentile_5": round(percentile(5), 2),
-        "percentile_25": round(percentile(25), 2),
-        "percentile_75": round(percentile(75), 2),
-        "percentile_95": round(percentile(95), 2),
-        "min": round(results[0], 2),
-        "max": round(results[-1], 2),
-        "method": "Monte Carlo with Correlation",
-        "formula_reference": "Monte Carlo with Cholesky decomposition for correlated inputs",
-        "iterations": iterations,
-        "seed": seed,
-        "correlation_used": True,
-        "steps": [
-            f"Number of iterations: {iterations}",
-            f"Number of input variables: {n_vars}",
-            f"Correlation matrix: {n_vars}x{n_vars} (Cholesky decomposition applied)",
-            f"Random seed: {seed if seed is not None else 'None (non-deterministic)'}",
-            f"Mean result: ${mean:,.2f}",
-            f"Standard deviation: ${std:,.2f}",
-            f"5th-95th percentile range: ${percentile(5):,.2f} - ${percentile(95):,.2f}",
-        ],
-        "assumptions": [
-            "Input distributions accurately represent parameter uncertainty",
-            "Correlation matrix is positive-definite and correctly specified",
-            "Correlations are modeled using Cholesky decomposition of normal variables",
-            "valuation_fn correctly computes the valuation for given inputs",
-            f"{iterations} iterations provide sufficient convergence",
-        ],
-    }
+    return ValuationResult(value=round(mean, 2), mean=round(mean, 2), median=round(percentile(50), 2), std=round(std, 2), percentile_5=round(percentile(5), 2), percentile_25=round(percentile(25), 2), percentile_75=round(percentile(75), 2), percentile_95=round(percentile(95), 2), min=round(results[0], 2), max=round(results[-1], 2), method="Monte Carlo with Correlation", formula_reference="Monte Carlo with Cholesky decomposition for correlated inputs", iterations=iterations, seed=seed, correlation_used=True, steps=[
+            f"Number of iterations: {iterations}", f"Number of input variables: {n_vars}", f"Correlation matrix: {n_vars}x{n_vars} (Cholesky decomposition applied)", f"Random seed: {seed if seed is not None else 'None (non-deterministic)'}", f"Mean result: ${mean:,.2f}", f"Standard deviation: ${std:,.2f}", f"5th-95th percentile range: ${percentile(5):,.2f} - ${percentile(95):,.2f}", ], assumptions=[
+            "Input distributions accurately represent parameter uncertainty", "Correlation matrix is positive-definite and correctly specified", "Correlations are modeled using Cholesky decomposition of normal variables", "valuation_fn correctly computes the valuation for given inputs", f"{iterations} iterations provide sufficient convergence", ])
 
 
 def sensitivity_tornado(
     function_name: str,
     base_params: dict[str, Any],
     parameter_ranges: dict[str, list[float]],
-) -> dict[str, Any]:
+) -> ValuationResult:
     """Generate tornado diagram data for multi-parameter sensitivity analysis.
 
     Evaluates the impact of varying each parameter across its range while holding
@@ -618,7 +553,7 @@ def sensitivity_tornado(
             fixed_parameters={k: v for k, v in base_params.items() if k != param_name},
         )
 
-        valid_results = [r for r in sa_result["results"] if r["result"] is not None]
+        valid_results = [r for r in getattr(sa_result, "results", []) if r["result"] is not None]
         if not valid_results:
             continue
 
@@ -637,29 +572,14 @@ def sensitivity_tornado(
 
     tornado_data.sort(key=lambda x: x["impact"], reverse=True)
 
-    return {
-        "base_value": round(base_value, 2),
-        "tornado": tornado_data,
-        "method": "Tornado Sensitivity Analysis",
-        "formula_reference": "One-at-a-time sensitivity analysis, sorted by impact magnitude",
-        "steps": [
-            f"Function: {function_name}",
-            f"Base case value: ${base_value:,.2f}",
-            f"Parameters analyzed: {list(parameter_ranges.keys())}",
-            "Results sorted by impact (largest to smallest)",
-        ],
-        "assumptions": [
-            "All other parameters held constant at base values",
-            "Parameter ranges represent realistic bounds of uncertainty",
-            "Linear interpolation between tested points is reasonable",
-            "Impact is measured as absolute difference between high and low results",
-        ],
-    }
+    return ValuationResult(value=round(base_value, 2), base_value=round(base_value, 2), tornado=tornado_data, method="Tornado Sensitivity Analysis", formula_reference="One-at-a-time sensitivity analysis, sorted by impact magnitude", steps=[
+            f"Function: {function_name}", f"Base case value: ${base_value:,.2f}", f"Parameters analyzed: {list(parameter_ranges.keys())}", "Results sorted by impact (largest to smallest)", ], assumptions=[
+            "All other parameters held constant at base values", "Parameter ranges represent realistic bounds of uncertainty", "Linear interpolation between tested points is reasonable", "Impact is measured as absolute difference between high and low results", ])
 
 
 def scenario_analysis(
     scenarios: list[dict[str, Any]],
-) -> dict[str, Any]:
+) -> ValuationResult:
     """Calculate probability-weighted expected value across multiple scenarios.
 
     Each scenario defines a set of parameter values and an associated probability.
@@ -753,19 +673,8 @@ def scenario_analysis(
 
     steps.append(f"Expected Value = ${expected_value:,.2f}")
 
-    return {
-        "expected_value": round(expected_value, 2),
-        "scenarios": scenario_results,
-        "method": "Scenario Analysis",
-        "formula_reference": "EV = sum(Probability_i * Value_i) for all scenarios",
-        "steps": steps,
-        "assumptions": [
-            "Scenario probabilities are mutually exclusive and exhaustive",
-            "Probabilities sum to 1.0 (100%)",
-            "Each scenario's parameter set produces a valid valuation",
-            "Expected value represents the risk-neutral valuation",
-        ],
-    }
+    return ValuationResult(value=round(expected_value, 2), expected_value=round(expected_value, 2), scenarios=scenario_results, method="Scenario Analysis", formula_reference="EV = sum(Probability_i * Value_i) for all scenarios", steps=steps, assumptions=[
+            "Scenario probabilities are mutually exclusive and exhaustive", "Probabilities sum to 1.0 (100%)", "Each scenario's parameter set produces a valid valuation", "Expected value represents the risk-neutral valuation", ])
 
 
 def _call_function(function_name: str, params: dict[str, Any]) -> float:

@@ -8,9 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-from pydantic import BaseModel, Field, field_validator
-
-from intangible_valuation.core.time_value import ValuationResult
+from intangible_valuation.core.time_value import ValuationResult as ValuationResult
 
 
 def present_value(

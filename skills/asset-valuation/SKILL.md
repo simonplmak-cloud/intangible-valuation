@@ -1,4 +1,4 @@
-# Valuation Calculator Skill
+# Asset Valuation Skill
 
 ## When to Use
 

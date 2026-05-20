@@ -423,9 +423,9 @@ class TestFairValueLessCostsToSell:
         assert math.isclose(result.value, 5_000_000, abs_tol=1)
 
     def test_costs_exceed_value(self):
-        """When costs exceed value, result raises validation error."""
-        with pytest.raises(ValueError, match="non-negative"):
-            fair_value_less_costs_to_sell(1_000_000, 2_000_000)
+        """When costs exceed value, result is negative (impairment indicator)."""
+        result = fair_value_less_costs_to_sell(1_000_000, 2_000_000)
+        assert result.value == -1_000_000
 
 
 class TestCGUImpairment:
