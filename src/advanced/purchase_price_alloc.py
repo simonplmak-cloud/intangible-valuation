@@ -80,7 +80,7 @@ def purchase_price_allocation(
     pct_intangible = (total_intangibles / purchase_price * 100) if purchase_price else 0
     pct_goodwill = (goodwill_value / purchase_price * 100) if purchase_price else 0
 
-    steps = [
+    steps: list[dict] = [
         {"item": "Purchase Price", "value": purchase_price},
         {"item": "Tangible Assets", "value": tangible_assets_fv},
         {"item": "Identified Intangibles", "value": total_intangibles},

@@ -16,7 +16,7 @@ from __future__ import annotations
 import math
 import random
 from collections.abc import Callable
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -790,7 +790,7 @@ def _call_function(function_name: str, params: dict[str, Any]) -> float:
             f"Supported: {', '.join(function_map.keys())}"
         )
 
-    return function_map[function_name](**params)
+    return cast(float, function_map[function_name](**params))
 
 
 def _call_present_value(**kwargs: Any) -> float:

@@ -173,7 +173,7 @@ def adjust_royalty_rate(
         raise ValueError(f"Unknown adjustment factors: {invalid}. Valid: {valid_factors}")
 
     adjusted = base_rate
-    factor_steps = []
+    factor_steps: list[dict] = []
     for factor_name, multiplier in adjustment_factors.items():
         adjusted *= multiplier
         factor_steps.append({

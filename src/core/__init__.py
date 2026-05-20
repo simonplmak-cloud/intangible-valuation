@@ -17,8 +17,8 @@ class ValuationResult(BaseModel):
     value: float = Field(description="Calculated asset value")
     method: str = Field(description="Valuation method used")
     formula_reference: str = Field(description="Reference to valuation formula")
-    steps: list[dict] = Field(default_factory=list, description="Calculation steps")
-    assumptions: dict = Field(default_factory=dict, description="Key assumptions used")
+    steps: list[str | dict] = Field(default_factory=list, description="Calculation steps")
+    assumptions: dict[str, object] = Field(default_factory=dict, description="Key assumptions used")
 
     @field_validator("value")
     @classmethod

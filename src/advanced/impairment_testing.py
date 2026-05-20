@@ -553,9 +553,9 @@ def cash_generating_unit_impairment(
             "description": "No impairment - recoverable amount "
                            "exceeds carrying value",
         })
-        allocation_details = []
+        allocation_details: list[dict] = []
     else:
-        allocation_details = []
+        allocation_details: list[dict] = []
 
         # Step 1: Allocate to goodwill first
         gw_impairment = min(remaining_impairment, inputs.goodwill_allocated)

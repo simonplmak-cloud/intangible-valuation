@@ -23,7 +23,7 @@ INDUSTRY_DISCOUNT_RANGES: Final[dict[str, dict[str, float]]] = {
 }
 
 # Asset type default useful lives (years)
-DEFAULT_USEFUL_LIVES: Final[dict[str, dict[str, float]]] = {
+DEFAULT_USEFUL_LIVES: Final[dict[str, dict[str, float | None]]] = {
     "patent": {"legal_max": 20, "economic_typical": 10, "tech_obsolescence_rate": 0.10},
     "trademark": {"legal_max": float("inf"), "economic_typical": 20, "tech_obsolescence_rate": 0.02},
     "copyright": {"legal_max": 70, "economic_typical": 25, "tech_obsolescence_rate": 0.05},
@@ -80,7 +80,7 @@ COUNTRY_RISK_PREMIUMS: Final[dict[str, float]] = {
 
 # Royalty rate benchmarks by industry and IP type
 # Source: RoyaltyStat, ktMINE, and industry surveys
-ROYALTY_RATE_BENCHMARKS: Final[dict[str, dict[str, dict[str, float]]]] = {
+ROYALTY_RATE_BENCHMARKS: Final[dict[str, dict[str, dict[str, float | str]]]] = {
     "technology": {
         "patent": {"low": 0.01, "median": 0.03, "high": 0.07, "typical_range": "1-7%"},
         "software": {"low": 0.05, "median": 0.10, "high": 0.20, "typical_range": "5-20%"},

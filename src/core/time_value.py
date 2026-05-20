@@ -581,8 +581,8 @@ def present_value_of_series(
             f"Discount rate is constant at {discount_rate:.2%}",
             f"Projection period is {len(cash_flows)} years",
         ],
-        present_value=round(pv, 2),
-        pv_by_period=pv_by_period,
+        present_value=round(pv, 2),  # type: ignore[call-arg]
+        pv_by_period=pv_by_period,  # type: ignore[call-arg]
     )
 
 
@@ -667,8 +667,8 @@ def present_value_graduated(
             f"Projection period is {len(cash_flows)} years",
             "Cumulative discounting applied across periods",
         ],
-        present_value=round(pv, 2),
-        pv_by_period=pv_by_period,
+        present_value=round(pv, 2),  # type: ignore[call-arg]
+        pv_by_period=pv_by_period,  # type: ignore[call-arg]
     )
 
 

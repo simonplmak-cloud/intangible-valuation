@@ -370,7 +370,7 @@ def platform_valuation(
     # Project 5 years of cash flows with network effects
     projection_years = 5
     total_pv = 0.0
-    current_size = inputs.network_size
+    current_size = float(inputs.network_size)
 
     for t in range(1, projection_years + 1):
         # Network grows

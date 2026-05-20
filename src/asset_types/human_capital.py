@@ -78,7 +78,7 @@ def assembled_workforce_valuation(
     # Use 3-year horizon for assembled workforce value
     horizon = 3
     total_pv = 0.0
-    remaining_employees = inputs.employee_count
+    remaining_employees = float(inputs.employee_count)
 
     for t in range(1, horizon + 1):
         remaining_employees = remaining_employees * (1 - inputs.attrition_rate)

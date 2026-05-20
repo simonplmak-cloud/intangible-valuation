@@ -70,7 +70,7 @@ def customer_relationship_valuation(
     ]
 
     total_pv = 0.0
-    current_customers = inputs.customer_count
+    current_customers = float(inputs.customer_count)
 
     for t in range(1, inputs.projection_period + 1):
         # Attrition: customers decay by retention rate
@@ -503,7 +503,7 @@ def churn_impact_analysis(
     def calc_pv(churn_rate: float) -> tuple[float, list[tuple[int, int, float, float]]]:
         total = 0.0
         yearly_details: list[tuple[int, int, float, float]] = []
-        customers = inputs.current_customers
+        customers = float(inputs.current_customers)
         for t in range(1, projection_years + 1):
             customers = customers * (1 - churn_rate)
             revenue = customers * inputs.revenue_per_customer
