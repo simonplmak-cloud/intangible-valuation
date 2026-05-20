@@ -1,44 +1,46 @@
-# Intangible Asset Valuation — Documentation
+# Intangible Asset Valuation: A Comprehensive Guide
 
-> Complete Python library implementing all valuation methodologies from **"Intangible Asset Valuation"** (Ascent Partners Group Limited, 2025, ISBN: 9798272663375).
-> 124+ functions, 54 MCP tools, 3 AI-Agent Skills, 698 tests.
+<div class="book-hero">
+  <div class="book-cover">
+    <img src="assets/images/book-cover.jpg" alt="Intangible Asset Valuation book cover">
+  </div>
+  <div class="book-info">
+    <h2>Intangible Asset Valuation</h2>
+    <p class="book-subtitle">A Comprehensive Guide to Valuing Brands, IP, Technology, and Human Capital</p>
+    <p class="book-subtitle-2">Theory, Methods, Regulation, and Practice</p>
+    <p class="book-series">Valuation in Practice Series by Ascent Partners</p>
+    <p class="book-author">By Simon Mak</p>
+    <p class="book-description">
+      The definitive textbook for finance professionals, valuation analysts, accountants, and students navigating the complexities of intangible asset valuation. Covers all three valuation approaches, 19 chapters of frameworks for patents, trademarks, brands, technology, customer relationships, goodwill, purchase price allocation, and impairment testing — with step-by-step methodologies aligned to ASC 805, IFRS 3, ASC 350, and IAS 36.
+    </p>
+    <p class="book-features">
+      19 chapters · 3 appendices · 124+ functions · 698 tests · 54 MCP tools · 3 AI-Agent Skills
+    </p>
+    <a href="https://www.amazon.com/Intangible-Asset-Valuation-Comprehensive-Technology/dp/B0FZ8742R1" class="amazon-btn" target="_blank" rel="noopener">
+      Buy on Amazon
+    </a>
+  </div>
+</div>
 
-## Overview
+## Companion Library
 
-**intangible-valuation** is the most comprehensive open-source library for intangible asset valuation in Python. It provides programmatic access to every calculation methodology described in the definitive textbook — covering **19 chapters and 3 appendices** of valuation frameworks.
-
-Built for financial analysts, valuation professionals, accountants, and AI agents, this library replaces error-prone spreadsheet calculations with validated, tested, and auditable Python functions.
-
-**Keywords:** intangible asset valuation, patent valuation, brand valuation, goodwill calculation, purchase price allocation, relief from royalty, MPEEM, MCP server, AI valuation tool, ASC 805, IFRS 3, impairment testing, discount rate, WACC, CAPM, Monte Carlo simulation.
+This site is the companion documentation for the Python library implementing **124+ functions** from the Intangible Asset Valuation textbook.
 
 ## Quick Start
-
-### Installation
 
 ```bash
 pip install intangible-valuation
 ```
 
-With MCP server for AI agent integration:
-
-```bash
-pip install intangible-valuation[mcp]
-```
-
-### First Valuation — Present Value
-
 ```python
-from src.core.time_value import present_value
+from intangible_valuation.core.time_value import present_value
+from intangible_valuation.income_methods.relief_from_royalty import relief_from_royalty
 
+# Present Value
 result = present_value(future_value=500_000, discount_rate=0.10, periods=8)
 print(f"PV: ${result.value:,.2f}")  # $233,253.69
-```
 
-### Relief from Royalty — Patent Valuation
-
-```python
-from src.income_methods.relief_from_royalty import relief_from_royalty
-
+# Relief from Royalty — Patent Valuation
 value = relief_from_royalty(
     revenue_projections=[1_000_000, 1_100_000, 1_200_000, 1_300_000, 1_400_000],
     royalty_rate=0.05,
@@ -49,182 +51,77 @@ value = relief_from_royalty(
 print(f"Patent value: ${value.value:,.2f}")
 ```
 
-### Purchase Price Allocation
+## Book Chapters → Library Modules
 
-```python
-from src.advanced.purchase_price_alloc import purchase_price_allocation
+| Chapter | Topic | Library Module |
+|---------|-------|----------------|
+| 1 | Introduction to Intangible Assets | — |
+| 2 | Core Mathematics | `core.time_value`, `core.discount_rate`, `core.statistics` |
+| 3 | Valuation Approaches | `approaches.cost`, `approaches.market` |
+| 4 | Income Methods | `income_methods.relief_from_royalty`, `income_methods.mpeem`, `income_methods.incremental_cash_flow` |
+| 5 | Intellectual Property | `asset_types.patent`, `asset_types.trademark`, `asset_types.copyright`, `asset_types.trade_secret` |
+| 6 | Royalty Analysis | `advanced.royalty` |
+| 7 | Technology Assets | `asset_types.technology`, `asset_types.software`, `asset_types.data`, `asset_types.platform` |
+| 8 | Customer-Related Intangibles | `asset_types.customer_relationship`, `asset_types.distribution_network`, `asset_types.non_compete` |
+| 9 | Human Capital | `asset_types.assembled_workforce`, `asset_types.key_person` |
+| 10 | Goodwill & PPA | `advanced.goodwill`, `advanced.purchase_price_alloc` |
+| 11 | Impairment Testing | `advanced.impairment` |
+| 12–14 | Advanced Topics | `advanced.monte_carlo`, `advanced.decision_tree`, `advanced.litigation`, `advanced.transfer_pricing` |
+| 15–19 | Specialized & International | See textbook |
 
-ppa = purchase_price_allocation(
-    purchase_price=100_000_000,
-    tangible_assets_fv=15_000_000,
-    identified_intangibles=[
-        {"name": "Customer Relationships", "value": 25_000_000, "method": "MPEEM"},
-        {"name": "Technology", "value": 20_000_000, "method": "relief-from-royalty"},
-        {"name": "Trademark", "value": 15_000_000, "method": "relief-from-royalty"},
-    ],
-    liabilities_fv=0,
-)
-print(f"Goodwill: ${ppa.value:,.2f}")  # $25,000,000
+## Features
+
+- **124+ valuation functions** across all three approaches covering every methodology in the textbook
+- **Typed Python API** with structured `ValuationResult` returns (value + assumptions + step-by-step calculation)
+- **MCP Server** exposing 54 valuation tools for AI agents (Claude, OpenCode, etc.)
+- **AI-Agent Skills** with workflow guidance for asset valuation, discount rate construction, and PPA
+- **698 tests** — every function verified against textbook example values
+
+## Modules
+
+| Module | Methods | Chapter |
+|--------|---------|---------|
+| `core.time_value` | PV, FV, annuity, perpetuity, growing annuity, terminal value | 2 |
+| `core.discount_rate` | Build-up, CAPM, WACC, TAB, control premium, DLOM, currency adjustment | 2 |
+| `core.statistics` | Monte Carlo, decision trees, regression | 2 |
+| `approaches.cost` | Reproduction cost, replacement cost | 3 |
+| `approaches.market` | Comparable transactions, royalty capitalization | 3 |
+| `income_methods.relief_from_royalty` | RFR with TAB | 4 |
+| `income_methods.mpeem` | Multi-period excess earnings with CACs | 4 |
+| `income_methods.incremental_cash_flow` | With vs. without asset comparison | 4 |
+| `asset_types.*` | IP, brand, technology, customer, human capital | 5–9 |
+| `advanced.royalty` | Benchmarking, 25% rule, adjustment | 6 |
+| `advanced.goodwill` | Goodwill calculation, PPA waterfall | 10 |
+| `advanced.impairment` | Goodwill & intangible impairment (ASC 350 / IAS 36) | 11 |
+| `advanced.monte_carlo` | Simulation, sensitivity analysis | 15 |
+| `advanced.decision_tree` | Backward induction | 16 |
+| `advanced.litigation` | Lost profits, pre-judgment interest | 17 |
+| `advanced.transfer_pricing` | CUP method, OECD guidelines | 18 |
+
+## MCP Server
+
+```bash
+pip install intangible-valuation[mcp]
+intangible-valuation-mcp
 ```
 
-## Methodology Coverage
+Connect with any MCP-compatible AI agent. All 54 valuation tools are available.
 
-Every methodology from the textbook, organized by chapter:
+## AI-Agent Skills
 
-### Chapter 2 — Core Mathematics
+Copy the `skills/` directory to your agent's skills folder. Available skills:
+- `asset-valuation` — Patents, trademarks, technology, customer relationships, human capital
+- `discount-rate-construction` — Build-up, CAPM, WACC, risk premiums, adjustments
+- `purchase-price-allocation` — Full PPA workflow, goodwill calculation, impairment testing
 
-| Category | Methods | Functions | Tests |
-|----------|---------|-----------|-------|
-| Time Value of Money | PV, FV, annuity, perpetuity, growing annuity, terminal value | 6 | 72 |
-| Discount Rates | Build-up, CAPM, WACC, TAB, control premium, DLOM, currency adjustment | 7 | 84 |
-| Statistics | Monte Carlo, decision trees, regression | 2 | 36 |
+## Development
 
-### Chapter 3 — Valuation Approaches
-
-| Approach | Methods | Functions | Tests |
-|----------|---------|-----------|-------|
-| Cost Approach | Reproduction cost, replacement cost | 2 | 24 |
-| Market Approach | Comparable transactions, royalty capitalization | 2 | 28 |
-
-### Chapter 4 — Income Methods
-
-| Method | Description | Functions | Tests |
-|--------|-------------|-----------|-------|
-| Relief from Royalty | PV of after-tax royalty payments avoided | 1 | 36 |
-| MPEEM | Multi-period excess earnings with CACs | 3 | 48 |
-| Incremental Cash Flow | With vs. without asset comparison | 1 | 24 |
-
-### Chapter 5 — Intellectual Property
-
-| Asset | Valuation Approach | Functions | Tests |
-|-------|-------------------|-----------|-------|
-| Patents | Risk-adjusted cash flows, comparable licensing | 1 | 24 |
-| Trademarks | RFR, brand strength index | 1 | 20 |
-| Copyrights | PV of royalty/licensing income | 1 | 16 |
-| Trade Secrets | Cost + secrecy risk over time | 1 | 16 |
-
-### Chapter 7 — Technology
-
-| Asset | Methods | Functions | Tests |
-|-------|---------|-----------|-------|
-| Developed Technology | Life-cycle risk adjustment | 1 | 20 |
-| Software | Cost + income approaches | 1 | 24 |
-| Data Assets | Quality-adjusted revenue contribution | 1 | 16 |
-| Platforms | Network effects modeling | 1 | 16 |
-
-### Chapter 8 — Customer-Related Intangibles
-
-| Asset | Method | Functions | Tests |
-|-------|--------|-----------|-------|
-| Customer Relationships | Multi-period with attrition | 1 | 24 |
-| Distribution Network | Channel profitability | 1 | 16 |
-| Non-Compete | Protected profits | 1 | 16 |
-
-### Chapter 9 — Human Capital
-
-| Asset | Method | Functions | Tests |
-|-------|--------|-----------|-------|
-| Assembled Workforce | Replacement cost | 1 | 16 |
-| Key Person | Revenue contribution + risk | 1 | 16 |
-
-### Chapter 10 — Goodwill & PPA
-
-| Method | Standard | Functions | Tests |
-|--------|----------|-----------|-------|
-| Goodwill Calculation | ASC 805-30-30-1 | 1 | 16 |
-| PPA Waterfall | ASC 805 / IFRS 3 | 1 | 24 |
-| Goodwill Impairment | ASC 350 / IAS 36 | 1 | 20 |
-| Intangible Impairment | ASC 350 / IAS 36 | 1 | 20 |
-
-### Advanced Topics (Chapters 6, 15, 16)
-
-| Topic | Methods | Functions | Tests |
-|-------|---------|-----------|-------|
-| Royalty Analysis | Benchmarking, 25% rule, adjustment | 3 | 36 |
-| Transfer Pricing | CUP method, OECD guidelines | 1 | 16 |
-| Litigation Damages | Lost profits, pre-judgment interest | 1 | 16 |
-| Monte Carlo | Simulation, sensitivity analysis | 2 | 32 |
-| Decision Trees | Backward induction | 1 | 16 |
-| Useful Life | Economic + legal life estimation | 1 | 12 |
-
-## Documentation Sections
-
-| Section | Description |
-|---------|-------------|
-| [API Reference — Core](api/core.md) | Time value of money, discount rates, statistics |
-| [API Reference — Approaches](api/approaches.md) | Cost approach, market approach |
-| [API Reference — Income Methods](api/income_methods.md) | Relief from royalty, MPEEM, incremental cash flow |
-| [API Reference — Asset Types](api/asset_types.md) | IP, brand, technology, customer, human capital |
-| [API Reference — Advanced](api/advanced.md) | Goodwill, PPA, impairment, litigation, Monte Carlo |
-| [MCP Server](mcp.md) | AI agent integration via Model Context Protocol |
-| [AI Skills](skills.md) | Valuation workflow skills for AI agents |
-
-## Why This Library
-
-### vs. Excel Spreadsheets
-
-| Feature | Excel | intangible-valuation |
-|---------|-------|---------------------|
-| Validation | Manual checks | Pydantic schemas with clear errors |
-| Audit Trail | Cell formulas | Step-by-step calculation results |
-| Reproducibility | Version drift | Immutable functions, 698 tests |
-| Collaboration | File sharing | pip install, import, use |
-| AI Integration | None | 54 MCP tools + 3 AI skills |
-| Error Handling | Silent #DIV/0! | Descriptive exceptions |
-| Performance | Slow for Monte Carlo | NumPy-optimized |
-
-### vs. Manual Calculation
-
-| Feature | Manual | intangible-valuation |
-|---------|--------|---------------------|
-| Speed | Hours per valuation | Milliseconds |
-| Accuracy | Human error risk | Mathematically verified |
-| Consistency | Analyst-dependent | Deterministic results |
-| Documentation | Ad hoc | Chapter references built-in |
-| Updates | Recalculate everything | Update library, re-run |
-
-### vs. Other Libraries
-
-| Feature | Other Tools | intangible-valuation |
-|---------|-------------|---------------------|
-| Scope | Single method | All 3 approaches, 19 chapters |
-| Book Alignment | Generic | Exact textbook methodology match |
-| AI Ready | No | MCP server + skills included |
-| Testing | Unknown | 698 tests, book examples verified |
-| Transparency | Black box | Open source, step-by-step results |
-
-## Project Structure
-
-```
-src/
-  core/                    # TVM, discount rates, statistics (Ch 2)
-  approaches/              # Cost and market approaches (Ch 3)
-  income_methods/          # RFR, MPEEM, incremental cash flow (Ch 4)
-  asset_types/             # IP, brand, technology, customer, human capital (Ch 5-9)
-  advanced/                # Goodwill, PPA, impairment, litigation, Monte Carlo (Ch 10-17)
-  utils/                   # Constants, formulas, sensitivity analysis
-mcp_server/                # MCP server (54 tools)
-skills/                    # 3 AI-Agent Skills
-tests/                     # 698 tests
+```bash
+pip install -e ".[dev]"
+pytest --cov=src --cov-report=term-missing
+ruff check .
 ```
 
-## Book Reference
+## License
 
-> **Intangible Asset Valuation**
-> Ascent Partners Group Limited, 2025
-> ISBN: 9798272663375
-> 19 chapters, 3 appendices
-
-All functions include docstring references to specific book chapters and sections. Book exercise solutions are verified in `tests/test_book_examples/`.
-
-## Citation
-
-```bibtex
-@software{intangible_valuation,
-  title = {Intangible Asset Valuation — Python Library},
-  author = {{Intangible Valuation Contributors}},
-  year = {2025},
-  url = {https://github.com/simonplmak-cloud/intangible-valuation},
-  note = {Implementation of methodologies from "Intangible Asset Valuation" (Ascent Partners Group Limited, 2025, ISBN: 9798272663375)}
-}
-```
+MIT

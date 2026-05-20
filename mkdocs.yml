@@ -1,22 +1,54 @@
 site_name: Intangible Asset Valuation
-site_description: Complete implementation of all valuation methodologies from Ascent Partners textbook
-site_author: Intangible Valuation Contributors
-repo_url: https://github.com/USERNAME/intangible-valuation
+site_description: Complete intangible asset valuation library with 124+ functions, MCP server, and AI-agent skills
+site_author: Ascent Partners
+site_url: https://simonplmak-cloud.github.io/intangible-valuation
+repo_url: https://github.com/simonplmak-cloud/intangible-valuation
+repo_name: simonplmak-cloud/intangible-valuation
 edit_uri: edit/main/docs/
 
 theme:
   name: material
+  logo: assets/images/ascent-logo.png
+  favicon: assets/images/ascent-logo.png
   palette:
-    primary: blue
-    accent: indigo
+    - scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Open Sans
+    code: Roboto Mono
   features:
-    - navigation.tabs
+    - navigation.instant
+    - navigation.tracking
     - navigation.sections
-    - navigation.expand
+    - navigation.top
     - search.highlight
     - search.share
     - content.code.copy
     - content.code.annotate
+  icon:
+    repo: fontawesome/brands/github
+
+extra_css:
+  - assets/stylesheets/extra.css
+
+extra:
+  social:
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/ascent-partners-group-
+      name: Ascent Partners on LinkedIn
+  generator: false
+
+copyright: "© 2026 Ascent Partners Group Ltd, All rights reserved. | Part of the <a href='https://www.amazon.com/Intangible-Asset-Valuation-Comprehensive-Technology/dp/B0FZ8742R1' target='_blank' rel='noopener'>Valuation in Practice Series</a>"
 
 plugins:
   - search
@@ -26,19 +58,16 @@ plugins:
           options:
             show_source: true
             show_root_heading: true
-            show_root_full_path: false
-            show_signature_annotations: true
             show_category_heading: true
-            merge_init_into_class: true
+            members_order: source
             docstring_style: google
-            docstring_section_style: table
 
 markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.superfences
-  - pymdownx.tabbed:
-      alternate_style: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
   - admonition
   - tables
   - toc:
@@ -47,10 +76,10 @@ markdown_extensions:
 nav:
   - Home: index.md
   - API Reference:
-    - Core Math: api/core.md
-    - Approaches: api/approaches.md
-    - Income Methods: api/income_methods.md
-    - Asset Types: api/asset_types.md
-    - Advanced: api/advanced.md
+      - Core Math: api/core.md
+      - Approaches: api/approaches.md
+      - Income Methods: api/income_methods.md
+      - Asset Types: api/asset_types.md
+      - Advanced: api/advanced.md
   - MCP Server: mcp.md
   - AI Skills: skills.md
