@@ -49,6 +49,9 @@ dmypy.json
 # Linting
 .ruff_cache/
 
+# MkDocs privacy cache
+.cache/
+
 # Distribution / packaging
 *.manifest
 *.spec
