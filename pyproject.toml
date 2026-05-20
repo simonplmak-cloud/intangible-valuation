@@ -96,6 +96,12 @@ Changelog = "https://github.com/simonplmak-cloud/intangible-valuation/releases"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build.targets.wheel]
+packages = ["src", "mcp_server", "skills"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "mcp_server", "skills", "README.md", "LICENSE"]
+
 [tool.ruff]
 target-version = "py311"
 line-length = 120
