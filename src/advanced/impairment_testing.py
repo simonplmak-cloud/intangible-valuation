@@ -547,15 +547,14 @@ def cash_generating_unit_impairment(
         "value": round(total_impairment, 2),
     })
 
+    allocation_details: list[dict] = []
     if total_impairment == 0:
         steps.append({
             "step": 5,
             "description": "No impairment - recoverable amount "
                            "exceeds carrying value",
         })
-        allocation_details: list[dict] = []
     else:
-        allocation_details: list[dict] = []
 
         # Step 1: Allocate to goodwill first
         gw_impairment = min(remaining_impairment, inputs.goodwill_allocated)
