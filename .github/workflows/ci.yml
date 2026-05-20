@@ -41,3 +41,13 @@ jobs:
       - name: Enforce coverage threshold
         run: |
           coverage report --fail-under=85
+
+      - name: Security audit
+        run: |
+          pip install pip-audit
+          pip-audit --format=columns
+
+      - name: Verify build
+        run: |
+          pip install build
+          python -m build

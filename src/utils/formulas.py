@@ -715,7 +715,7 @@ def valuation_multiple(
         "assumptions": [
             "Value and metric are measured on a consistent basis",
             "Multiple is comparable to industry benchmarks",
-            f"Metric ({multiple_type.split('/')[-1]}) is positive and meaningful",
+            f"Metric ({multiple_type.rsplit('/', maxsplit=1)[-1]}) is positive and meaningful",
             "Multiple reflects current market conditions",
         ],
     }

@@ -1,7 +1,7 @@
 cff-version: "1.2.0"
 message: "If you use this software, please cite it as below."
 title: "Intangible Asset Valuation Engine"
-version: "0.1.0"
+version: "1.0.0"
 authors:
   - family-names: "Mak"
     given-names: "Simon"
@@ -38,4 +38,4 @@ keywords:
 repository-code: "https://github.com/simonplmak-cloud/intangible-valuation"
 license: MIT
 type: software
-date-released: "2026-05-20"
+date-released: "2026-05-21"

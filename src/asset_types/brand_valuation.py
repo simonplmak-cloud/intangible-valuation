@@ -326,8 +326,6 @@ def interbrand_brand_valuation(
     steps.append(f"Branded earnings: {branded_earnings:,.0f}")
 
     # Step 2: Map brand strength to brand multiple
-    # Interbrand uses an S-curve: stronger brands get higher multiples
-    # Approximate: multiple = strength_score / (discount_rate * 100)
     brand_multiple = inputs.brand_strength_score / (inputs.discount_rate * 100)
     steps.append(f"Brand strength score: {inputs.brand_strength_score:.0f}/100")
     steps.append(f"Discount rate: {inputs.discount_rate:.2%}")

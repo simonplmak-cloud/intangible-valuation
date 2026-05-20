@@ -1,0 +1,22 @@
+# Code Owners
+# These owners will be requested for review when someone opens a PR.
+
+* @simonplmak-cloud
+
+# Core math and valuation logic
+src/core/ @simonplmak-cloud
+src/approaches/ @simonplmak-cloud
+src/income_methods/ @simonplmak-cloud
+src/asset_types/ @simonplmak-cloud
+src/advanced/ @simonplmak-cloud
+src/utils/ @simonplmak-cloud
+
+# MCP server
+mcp_server/ @simonplmak-cloud
+
+# Documentation
+docs/ @simonplmak-cloud
+
+# CI/CD and configuration
+.github/workflows/ @simonplmak-cloud
+pyproject.toml @simonplmak-cloud

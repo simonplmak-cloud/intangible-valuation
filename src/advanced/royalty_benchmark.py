@@ -108,8 +108,8 @@ def royalty_rate_benchmark(
     if comparable_database:
         user_rates = [c["rate"] for c in comparable_database if "rate" in c]
         if user_rates:
-            min_rate = min(min_rate, min(user_rates))
-            max_rate = max(max_rate, max(user_rates))
+            min_rate = min(min_rate, *user_rates)
+            max_rate = max(max_rate, *user_rates)
             median_rate = sorted(user_rates)[len(user_rates) // 2]
             source = f"{source}; User comparables ({len(user_rates)} entries)"
 

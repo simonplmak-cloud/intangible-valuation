@@ -32,6 +32,9 @@ class ValuationResult(BaseModel):
     steps: list[str] = Field(default_factory=list)
     assumptions: list[str] = Field(default_factory=list)
 
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+
     def to_dict(self) -> dict[str, Any]:
         """Convert to plain dictionary."""
         return self.model_dump()
@@ -497,7 +500,7 @@ def terminal_value(
             ],
         )
 
-    elif method == METHOD_EXIT_MULTIPLE:
+    if method == METHOD_EXIT_MULTIPLE:
         if exit_multiple is None:
             raise ValueError("exit_multiple is required when method='exit_multiple'")
         if exit_multiple <= 0:
@@ -521,8 +524,7 @@ def terminal_value(
             ],
         )
 
-    else:
-        raise ValueError(f"Unknown method: {method}. Use 'gordon_growth' or 'exit_multiple'")
+    raise ValueError(f"Unknown method: {method}. Use 'gordon_growth' or 'exit_multiple'")
 
 
 def present_value_of_series(
@@ -581,8 +583,8 @@ def present_value_of_series(
             f"Discount rate is constant at {discount_rate:.2%}",
             f"Projection period is {len(cash_flows)} years",
         ],
-        present_value=round(pv, 2),  # type: ignore[call-arg]
-        pv_by_period=pv_by_period,  # type: ignore[call-arg]
+        present_value=round(pv, 2),
+        pv_by_period=pv_by_period,
     )
 
 
@@ -667,8 +669,8 @@ def present_value_graduated(
             f"Projection period is {len(cash_flows)} years",
             "Cumulative discounting applied across periods",
         ],
-        present_value=round(pv, 2),  # type: ignore[call-arg]
-        pv_by_period=pv_by_period,  # type: ignore[call-arg]
+        present_value=round(pv, 2),
+        pv_by_period=pv_by_period,
     )
 
 

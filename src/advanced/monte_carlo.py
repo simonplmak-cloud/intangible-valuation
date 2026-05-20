@@ -81,15 +81,15 @@ def monte_carlo_sensitivity(
     p95 = float(np.percentile(results, 95))
 
     sensitivity_ranking: list[dict[str, float | str | None]] = []
-    for name in samples:
-        corr = float(np.corrcoef(samples[name], results)[0, 1])
+    for name, values in samples.items():
+        corr = float(np.corrcoef(values, results)[0, 1])
         sensitivity_ranking.append({
             "parameter": name,
             "correlation": round(corr, 4),
             "abs_correlation": round(abs(corr), 4),
             "base_value": base_params.get(name),
-            "simulated_mean": round(float(np.mean(samples[name])), 4),
-            "simulated_std": round(float(np.std(samples[name])), 4),
+            "simulated_mean": round(float(np.mean(values)), 4),
+            "simulated_std": round(float(np.std(values)), 4),
         })
 
     sensitivity_ranking.sort(key=lambda x: x["abs_correlation"], reverse=True)  # type: ignore[arg-type,return-value]

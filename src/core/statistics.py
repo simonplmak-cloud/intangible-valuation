@@ -30,7 +30,7 @@ class DistributionInput(BaseModel):
 
     @field_validator("params")
     @classmethod
-    def validate_params(cls, v: dict[str, float], info) -> dict[str, float]:
+    def validate_params(cls, v: dict[str, float], info: Any) -> dict[str, float]:
         dist = info.data.get("distribution")
         if dist == "normal":
             if "mean" not in v or "std" not in v:
@@ -93,7 +93,7 @@ class DecisionTreeInput(BaseModel):
 
     @field_validator("edges")
     @classmethod
-    def validate_edges(cls, v: list[TreeEdge], info) -> list[TreeEdge]:
+    def validate_edges(cls, v: list[TreeEdge], info: Any) -> list[TreeEdge]:
         if not v:
             raise ValueError("Decision tree must have at least one edge")
         node_ids = {node.id for node in info.data.get("nodes", [])}
@@ -251,8 +251,7 @@ def _random_triangular(low: float, high: float, mode: float) -> float:
 
     if u < c:
         return low + math.sqrt(u * (high - low) * (mode - low))
-    else:
-        return high - math.sqrt((1 - u) * (high - low) * (high - mode))
+    return high - math.sqrt((1 - u) * (high - low) * (high - mode))
 
 
 def decision_tree_valuation(
@@ -327,7 +326,7 @@ def decision_tree_valuation(
             )
             return best[1]
 
-        elif node.type == "chance":
+        if node.type == "chance":
             total_prob = sum(edge.probability for edge in edges_from[node_id])
             if not math.isclose(total_prob, 1.0, abs_tol=1e-6):
                 raise ValueError(
@@ -352,8 +351,7 @@ def decision_tree_valuation(
             )
             return expected
 
-        else:
-            raise ValueError(f"Unknown node type: {node.type}")
+        raise ValueError(f"Unknown node type: {node.type}")
 
     root_id = validated.nodes[0].id
     root_value = evaluate(root_id)
@@ -389,7 +387,7 @@ def _find_optimal_path(
     while current in edges_from and edges_from[current]:
         node = nodes[current]
 
-        if node.type == "decision" or node.type == "chance":
+        if node.type in {"decision", "chance"}:
             best_edge = max(
                 edges_from[current],
                 key=lambda e: node_values.get(e.to, 0) - e.cost,
@@ -886,5 +884,4 @@ def _triangular_from_uniform(low: float, high: float, mode: float, u: float) -> 
     c = (mode - low) / (high - low)
     if u < c:
         return low + math.sqrt(u * (high - low) * (mode - low))
-    else:
-        return high - math.sqrt((1 - u) * (high - low) * (high - mode))
+    return high - math.sqrt((1 - u) * (high - low) * (high - mode))
