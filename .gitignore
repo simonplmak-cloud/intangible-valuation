@@ -76,3 +76,11 @@ output/
 *.pdf
 *.xlsx
 *.pptx
+
+# Internal / local config
+.playwright-mcp/
+*.png
+mcp.json
+specs/
+constitution.md
+AGENTS.md

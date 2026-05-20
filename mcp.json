@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "intangible-valuation": {
-      "command": "python",
-      "args": ["-m", "mcp_server.server"],
-      "cwd": "/mnt/c/git_repo/intangiable_valuation_model"
-    }
-  }
-}
