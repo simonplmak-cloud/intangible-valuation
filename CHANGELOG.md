@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] — 2026-05-21
+
+### Fixed
+- All public functions now return `ValuationResult` consistently (was mixed dict/ValuationResult)
+- Package import path: `src/` renamed to `src/intangible_valuation/` per Python packaging standards
+- `__version__` now sourced from `importlib.metadata` (single source of truth)
+- CI/CD workflows: E501 ruff errors, pyjwt security audit, API doc references
+- MCP docs example values corrected to actual computed output
+- README docs badge updated to custom domain
+- `ValuationResult` now supports dict-like protocol (`in`, `[]`, `.get()`, `.keys()`)
+- `trademark_valuation()` accepts `brand_strength_index` on 0-100 scale
+- `mpeem()` now handles simple list inputs for `contributory_asset_charges`
+- `goodwill()` steps converted to strings for consistency
+
+### Changed
+- Skill directories renamed to match README (`valuation-calculator` → `asset-valuation`, etc.)
+- docs/skills.md removed references to non-existent Monte Carlo/Decision Tree skills
+- Dependency upper bounds added (`pydantic<3.0`, `numpy<3.0`)
+
 ## [1.0.0] — 2026-05-20
 
 ### Added
