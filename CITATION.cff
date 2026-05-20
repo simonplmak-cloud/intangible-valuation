@@ -1,0 +1,41 @@
+cff-version: "1.2.0"
+message: "If you use this software, please cite it as below."
+title: "Intangible Asset Valuation Engine"
+version: "0.1.0"
+authors:
+  - family-names: "Mak"
+    given-names: "Simon"
+  - family-names: "Yuen"
+    given-names: "William"
+  - family-names: "Wu"
+    given-names: "Paul"
+  - family-names: "Hu"
+    given-names: "Wayne"
+abstract: >
+  A comprehensive Python library implementing 124+ intangible asset valuation
+  functions from the Intangible Asset Valuation textbook. Includes an MCP server
+  for AI agents and AI-Agent Skills for workflow guidance. Covers time value of
+  money, discount rate construction, relief from royalty, MPEEM, purchase price
+  allocation, goodwill calculation, impairment testing, Monte Carlo simulation,
+  decision trees, and all three valuation approaches (cost, market, income).
+keywords:
+  - intangible asset valuation
+  - patent valuation
+  - brand valuation
+  - purchase price allocation
+  - relief from royalty
+  - MPEEM
+  - goodwill calculation
+  - impairment testing
+  - Monte Carlo simulation
+  - MCP server
+  - AI agents
+  - ASC 805
+  - IFRS 3
+  - discount rate
+  - WACC
+  - CAPM
+repository-code: "https://github.com/simonplmak-cloud/intangible-valuation"
+license: MIT
+type: software
+date-released: "2026-05-20"
