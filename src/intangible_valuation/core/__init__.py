@@ -10,22 +10,7 @@ from collections.abc import Sequence
 
 from pydantic import BaseModel, Field, field_validator
 
-
-class ValuationResult(BaseModel):
-    """Standardized valuation result with method metadata."""
-
-    value: float = Field(description="Calculated asset value")
-    method: str = Field(description="Valuation method used")
-    formula_reference: str = Field(description="Reference to valuation formula")
-    steps: list = Field(default_factory=list, description="Calculation steps")
-    assumptions: dict = Field(default_factory=dict, description="Key assumptions used")
-
-    @field_validator("value")
-    @classmethod
-    def value_must_be_non_negative(cls, v: float) -> float:
-        if v < 0:
-            raise ValueError("Value must be non-negative")
-        return v
+from intangible_valuation.core.time_value import ValuationResult
 
 
 def present_value(

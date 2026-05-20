@@ -8,6 +8,7 @@ Implements the method from Chapter 4 with Tax Amortization Benefit (TAB).
 
 from __future__ import annotations
 
+from intangible_valuation.core import ValuationResult
 from intangible_valuation.core.time_value import present_value_of_series
 
 
@@ -18,7 +19,7 @@ def relief_from_royalty(
     tax_rate: float,
     useful_life: int,
     tab_enabled: bool = True,
-) -> dict:
+) -> ValuationResult:
     """Calculate asset value using the Relief from Royalty method.
 
     The Relief from Royalty method values an intangible asset as the present
@@ -44,14 +45,8 @@ def relief_from_royalty(
         tab_enabled: Whether to include Tax Amortization Benefit. Defaults to True.
 
     Returns:
-        Dict with:
-            - value: Present value of relief from royalty (with TAB if enabled)
-            - method: 'Relief from Royalty'
-            - formula_reference: 'Chapter 4: Income Methods - Relief from Royalty'
-            - pv_before_tab: PV before tax amortization benefit
-            - tab_factor: TAB multiplier (1.0 if disabled)
-            - steps: List of calculation steps
-            - assumptions: Key assumptions used
+        ValuationResult with value, method, formula_reference, steps, assumptions.
+        Extra fields: pv_before_tab, tab_factor.
 
     Raises:
         ValueError: If inputs are invalid or inconsistent.
@@ -64,7 +59,7 @@ def relief_from_royalty(
         ...     tax_rate=0.25,
         ...     useful_life=5,
         ... )
-        >>> result["value"] > 0
+        >>> result.value > 0
         True
     """
     if not revenue_projections:
@@ -141,12 +136,12 @@ def relief_from_royalty(
     if tab_enabled:
         assumptions.append("Tax amortization benefit is available and realizable")
 
-    return {
-        "value": value,
-        "method": "Relief from Royalty",
-        "formula_reference": "Chapter 4: Income Methods - Relief from Royalty",
-        "pv_before_tab": pv_before_tab,
-        "tab_factor": tab_factor,
-        "steps": steps,
-        "assumptions": assumptions,
-    }
+    return ValuationResult(
+        value=value,
+        method="Relief from Royalty",
+        formula_reference="Chapter 4: Income Methods - Relief from Royalty",
+        steps=steps,
+        assumptions=assumptions,
+        pv_before_tab=pv_before_tab,
+        tab_factor=tab_factor,
+    )
