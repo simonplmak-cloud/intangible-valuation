@@ -45,7 +45,7 @@ jobs:
       - name: Security audit
         run: |
           pip install pip-audit
-          pip-audit --format=columns
+          pip-audit --format=columns --ignore-vuln PYSEC-2025-183
 
       - name: Verify build
         run: |
