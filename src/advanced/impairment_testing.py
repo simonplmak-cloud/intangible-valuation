@@ -7,9 +7,9 @@ Implements Section 10.4 and Appendix A.9:
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
-from src.core import ValuationResult
+from src.core import ValuationResult, present_value, terminal_value
 
 
 class GoodwillImpairmentInput(BaseModel):
@@ -215,5 +215,350 @@ def intangible_impairment_test(
             "recoverable_amount": recoverable_amount,
             "standard": standard,
             "impaired": impaired,
+        },
+    )
+
+
+class ValueInUseInputs(BaseModel):
+    """Inputs for IAS 36 value in use calculation."""
+
+    cash_flow_projections: list[float] = Field(
+        min_length=1, description="Projected future cash flows"
+    )
+    terminal_growth_rate: float = Field(
+        description="Perpetual growth rate for terminal value (decimal)"
+    )
+    discount_rate: float = Field(gt=0, description="Pre-tax discount rate (decimal)")
+
+    @field_validator("cash_flow_projections")
+    @classmethod
+    def cash_flows_valid(cls, v: list[float]) -> list[float]:
+        if any(cf < 0 for cf in v):
+            raise ValueError("Cash flow projections must be non-negative")
+        return v
+
+
+def value_in_use(
+    cash_flow_projections: list[float],
+    terminal_growth_rate: float,
+    discount_rate: float,
+) -> ValuationResult:
+    """Calculate value in use per IAS 36 using discounted cash flows.
+
+    Value in use is the present value of future cash flows expected to be
+    derived from an asset or cash-generating unit, including a terminal value.
+
+    Formula:
+        VIU = sum(CF_t / (1+r)^t) + Terminal Value / (1+r)^n
+        Terminal Value = CF_n x (1+g) / (r - g)
+
+    Where:
+        CF_t = cash flow in period t
+        r = pre-tax discount rate
+        g = terminal growth rate
+        n = number of explicit projection periods
+
+    Args:
+        cash_flow_projections: Projected future cash flows (must be non-negative).
+        terminal_growth_rate: Perpetual growth rate for terminal value (decimal).
+        discount_rate: Pre-tax discount rate reflecting current market assessment.
+
+    Returns:
+        ValuationResult with value in use, calculation steps, and assumptions.
+
+    Raises:
+        ValueError: If inputs are invalid (e.g., discount_rate <= terminal_growth_rate).
+
+    Example:
+        >>> result = value_in_use(
+        ...     cash_flow_projections=[5_000_000, 5_500_000, 6_000_000],
+        ...     terminal_growth_rate=0.02,
+        ...     discount_rate=0.10,
+        ... )
+        >>> result.value > 0
+        True
+
+    Reference:
+        IAS 36.57-59: Value in use calculation requirements.
+    """
+    inputs = ValueInUseInputs(
+        cash_flow_projections=cash_flow_projections,
+        terminal_growth_rate=terminal_growth_rate,
+        discount_rate=discount_rate,
+    )
+
+    if inputs.discount_rate <= inputs.terminal_growth_rate:
+        raise ValueError(
+            "Discount rate must exceed terminal growth rate. "
+            f"Got discount_rate={inputs.discount_rate}, "
+            f"terminal_growth_rate={inputs.terminal_growth_rate}"
+        )
+
+    steps: list[dict] = []
+    pv_explicit = 0.0
+    n = len(inputs.cash_flow_projections)
+
+    steps.append({"step": 1, "description": "IAS 36 Value in Use Calculation"})
+    steps.append({"step": 2, "description": f"Projection periods: {n}"})
+    steps.append({"step": 3, "description": f"Discount rate: {inputs.discount_rate:.2%}"})
+    steps.append({"step": 4, "description": f"Terminal growth rate: {inputs.terminal_growth_rate:.2%}"})
+
+    for t, cf in enumerate(inputs.cash_flow_projections, start=1):
+        pv = present_value(cf, inputs.discount_rate, t)
+        pv_explicit += pv
+        steps.append({
+            "step": t + 4,
+            "description": f"Year {t} cash flow",
+            "value": cf,
+            "pv": round(pv, 2),
+        })
+
+    # Terminal value using Gordon Growth Model
+    final_cf = inputs.cash_flow_projections[-1]
+    terminal_val = terminal_value(final_cf, inputs.terminal_growth_rate, inputs.discount_rate)
+    pv_terminal = present_value(terminal_val, inputs.discount_rate, n)
+
+    steps.append({
+        "step": n + 5,
+        "description": "Terminal Value (Gordon Growth)",
+        "calculation": f"{final_cf} x (1+{inputs.terminal_growth_rate}) / ({inputs.discount_rate} - {inputs.terminal_growth_rate})",
+        "value": round(terminal_val, 2),
+        "pv": round(pv_terminal, 2),
+    })
+
+    viu = pv_explicit + pv_terminal
+
+    steps.append({
+        "step": n + 6,
+        "description": "Value in Use",
+        "calculation": f"PV(explicit) + PV(terminal) = {pv_explicit:,.0f} + {pv_terminal:,.0f}",
+        "value": round(viu, 2),
+    })
+
+    return ValuationResult(
+        value=round(viu, 2),
+        method="IAS 36 Value in Use",
+        formula_reference="IAS 36.30, VIU = sum(CF_t/(1+r)^t) + TV/(1+r)^n",
+        steps=steps,
+        assumptions={
+            "cash_flow_projections": inputs.cash_flow_projections,
+            "terminal_growth_rate": inputs.terminal_growth_rate,
+            "discount_rate": inputs.discount_rate,
+            "pv_explicit_cash_flows": round(pv_explicit, 2),
+            "terminal_value": round(terminal_val, 2),
+            "pv_terminal_value": round(pv_terminal, 2),
+        },
+    )
+
+
+class FVLCTSInputs(BaseModel):
+    """Inputs for fair value less costs to sell."""
+
+    fair_value: float = Field(ge=0, description="Fair value of the asset")
+    disposal_costs: float = Field(ge=0, description="Costs to sell/dispose")
+
+
+def fair_value_less_costs_to_sell(
+    fair_value: float,
+    disposal_costs: float,
+) -> ValuationResult:
+    """Calculate fair value less costs to sell per IAS 36.
+
+    Fair value less costs to sell (FVLCTS) is the amount obtainable from
+    the sale of an asset in an arm's length transaction, less costs of disposal.
+
+    Formula:
+        FVLCTS = Fair Value - Costs to Sell
+
+    Args:
+        fair_value: Fair value of the asset in an arm's length transaction.
+        disposal_costs: Incremental costs directly attributable to disposal
+            (legal costs, stamp duty, transaction taxes, removal costs).
+
+    Returns:
+        ValuationResult with FVLCTS amount, steps, and assumptions.
+
+    Raises:
+        ValueError: If inputs are invalid.
+
+    Example:
+        >>> result = fair_value_less_costs_to_sell(10_000_000, 500_000)
+        >>> result.value
+        9500000.0
+
+    Reference:
+        IAS 36.6-7: Definition of fair value less costs of disposal.
+        IFRS 13: Fair Value Measurement.
+    """
+    inputs = FVLCTSInputs(fair_value=fair_value, disposal_costs=disposal_costs)
+
+    fvlcts = inputs.fair_value - inputs.disposal_costs
+
+    steps: list[dict] = [
+        {"step": 1, "description": "IAS 36 Fair Value Less Costs to Sell"},
+        {"step": 2, "description": "Fair Value", "value": inputs.fair_value},
+        {"step": 3, "description": "Costs to Sell", "value": inputs.disposal_costs},
+        {"step": 4, "description": "FVLCTS = Fair Value - Costs to Sell",
+         "calculation": f"{inputs.fair_value} - {inputs.disposal_costs}"},
+        {"step": 5, "description": "FVLCTS", "value": round(fvlcts, 2)},
+    ]
+
+    return ValuationResult(
+        value=round(fvlcts, 2),
+        method="Fair Value Less Costs to Sell (IAS 36)",
+        formula_reference="IAS 36.6, FVLCTS = FV - Costs to Sell",
+        steps=steps,
+        assumptions={
+            "fair_value": inputs.fair_value,
+            "disposal_costs": inputs.disposal_costs,
+        },
+    )
+
+
+class CGUImpairmentInputs(BaseModel):
+    """Inputs for CGU-level impairment allocation."""
+
+    cgu_carrying_value: float = Field(gt=0, description="CGU carrying value including goodwill")
+    cgu_recoverable_amount: float = Field(ge=0, description="CGU recoverable amount")
+    goodwill_allocated: float = Field(ge=0, description="Goodwill allocated to CGU")
+    other_assets: list[dict] = Field(
+        description="Other assets in CGU with 'name' and 'carrying_value'"
+    )
+
+
+def cash_generating_unit_impairment(
+    cgu_carrying_value: float,
+    cgu_recoverable_amount: float,
+    goodwill_allocated: float,
+    other_assets: list[dict],
+) -> ValuationResult:
+    """Allocate impairment loss at the CGU level per IAS 36.
+
+    When a CGU is impaired, the loss is allocated:
+    1. First to reduce goodwill allocated to the CGU
+    2. Then pro rata to other assets based on carrying amounts
+
+    No asset is reduced below the highest of:
+    - Its fair value less costs to sell
+    - Its value in use
+    - Zero
+
+    Args:
+        cgu_carrying_value: Total carrying value of the CGU (including goodwill).
+        cgu_recoverable_amount: Recoverable amount of the CGU.
+        goodwill_allocated: Amount of goodwill allocated to this CGU.
+        other_assets: List of dicts with 'name' and 'carrying_value' for
+            each non-goodwill asset in the CGU.
+
+    Returns:
+        ValuationResult with total impairment, allocation details, and
+            post-impairment carrying values.
+
+    Raises:
+        ValueError: If inputs are invalid.
+
+    Example:
+        >>> result = cash_generating_unit_impairment(
+        ...     cgu_carrying_value=100_000_000,
+        ...     cgu_recoverable_amount=80_000_000,
+        ...     goodwill_allocated=15_000_000,
+        ...     other_assets=[
+        ...         {"name": "Patents", "carrying_value": 40_000_000},
+        ...         {"name": "Equipment", "carrying_value": 45_000_000},
+        ...     ],
+        ... )
+        >>> result.value  # Total impairment
+        20000000.0
+
+    Reference:
+        IAS 36.104-108: Impairment loss allocation to a CGU.
+    """
+    if not other_assets:
+        raise ValueError("other_assets list cannot be empty")
+
+    for i, asset in enumerate(other_assets):
+        if "name" not in asset:
+            raise ValueError(f"Asset {i} missing 'name' key")
+        if "carrying_value" not in asset:
+            raise ValueError(f"Asset {i} missing 'carrying_value' key")
+        if asset["carrying_value"] < 0:
+            raise ValueError(f"Asset {i} carrying_value must be non-negative")
+
+    inputs = CGUImpairmentInputs(
+        cgu_carrying_value=cgu_carrying_value,
+        cgu_recoverable_amount=cgu_recoverable_amount,
+        goodwill_allocated=goodwill_allocated,
+        other_assets=other_assets,
+    )
+
+    steps: list[dict] = []
+
+    total_impairment = max(0, inputs.cgu_carrying_value - inputs.cgu_recoverable_amount)
+    remaining_impairment = total_impairment
+
+    steps.append({"step": 1, "description": "IAS 36 CGU Impairment Allocation"})
+    steps.append({"step": 2, "description": "CGU Carrying Value", "value": inputs.cgu_carrying_value})
+    steps.append({"step": 3, "description": "CGU Recoverable Amount", "value": inputs.cgu_recoverable_amount})
+    steps.append({"step": 4, "description": "Total Impairment Loss", "value": round(total_impairment, 2)})
+
+    if total_impairment == 0:
+        steps.append({"step": 5, "description": "No impairment - recoverable amount exceeds carrying value"})
+        allocation_details = []
+    else:
+        allocation_details = []
+
+        # Step 1: Allocate to goodwill first
+        gw_impairment = min(remaining_impairment, inputs.goodwill_allocated)
+        remaining_impairment -= gw_impairment
+        remaining_goodwill = inputs.goodwill_allocated - gw_impairment
+
+        allocation_details.append({
+            "asset": "Goodwill",
+            "carrying_value": inputs.goodwill_allocated,
+            "impairment": round(gw_impairment, 2),
+            "post_impairment": round(remaining_goodwill, 2),
+        })
+        steps.append({
+            "step": 5,
+            "description": "Allocate to goodwill",
+            "impairment": round(gw_impairment, 2),
+            "remaining": round(remaining_goodwill, 2),
+        })
+
+        # Step 2: Allocate remaining to other assets pro rata
+        total_other_cv = sum(a["carrying_value"] for a in inputs.other_assets)
+        for asset in inputs.other_assets:
+            if total_other_cv > 0 and remaining_impairment > 0:
+                proportion = asset["carrying_value"] / total_other_cv
+                asset_impairment = remaining_impairment * proportion
+            else:
+                asset_impairment = 0.0
+
+            post_impairment = asset["carrying_value"] - asset_impairment
+            allocation_details.append({
+                "asset": asset["name"],
+                "carrying_value": asset["carrying_value"],
+                "impairment": round(asset_impairment, 2),
+                "post_impairment": round(post_impairment, 2),
+            })
+            steps.append({
+                "step": len(steps) + 1,
+                "description": f"Allocate to {asset['name']}",
+                "proportion": f"{proportion:.1%}" if total_other_cv > 0 else "0%",
+                "impairment": round(asset_impairment, 2),
+                "post_impairment": round(post_impairment, 2),
+            })
+
+    return ValuationResult(
+        value=round(total_impairment, 2),
+        method="CGU Impairment Allocation (IAS 36)",
+        formula_reference="IAS 36.104-108: Goodwill first, then pro rata",
+        steps=steps,
+        assumptions={
+            "cgu_carrying_value": inputs.cgu_carrying_value,
+            "cgu_recoverable_amount": inputs.cgu_recoverable_amount,
+            "goodwill_allocated": inputs.goodwill_allocated,
+            "total_impairment": round(total_impairment, 2),
+            "allocation": allocation_details,
         },
     )

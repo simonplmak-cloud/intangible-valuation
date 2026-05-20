@@ -1,21 +1,64 @@
 [project]
 name = "intangible-valuation"
 version = "0.1.0"
-description = "Complete intangible asset valuation library implementing all methodologies from Ascent Partners textbook. Python library + MCP server + AI-Agent Skills."
+description = "Complete intangible asset valuation library implementing all methodologies from 'Intangible Asset Valuation' (Ascent Partners Group Limited, 2025, ISBN: 9798272663375). Provides 124+ Python functions for patent valuation, brand valuation, goodwill calculation, purchase price allocation (PPA), relief from royalty, MPEEM, discount rate construction, Monte Carlo simulation, and impairment testing. Includes an MCP server with 54 tools for AI agent integration and 3 AI-Agent Skills for valuation workflows. Built for financial analysts, accountants, valuation professionals, and AI agents performing ASC 805 / IFRS 3 compliant valuations."
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.11"
 authors = [
     {name = "Intangible Valuation Contributors"}
 ]
-keywords = ["valuation", "intangible-assets", "finance", "mcp", "ai-agents", "ppa", "goodwill", "royalty", "patent", "brand"]
+keywords = [
+    "intangible-asset-valuation",
+    "patent-valuation",
+    "brand-valuation",
+    "goodwill-calculation",
+    "purchase-price-allocation",
+    "ppa",
+    "relief-from-royalty",
+    "mpeem",
+    "multi-period-excess-earnings",
+    "discount-rate",
+    "wacc",
+    "capm",
+    "monte-carlo-simulation",
+    "decision-tree",
+    "impairment-testing",
+    "asc-805",
+    "ifrs-3",
+    "asc-350",
+    "ias-36",
+    "dloM",
+    "control-premium",
+    "tax-amortization-benefit",
+    "royalty-rate",
+    "transfer-pricing",
+    "litigation-damages",
+    "customer-relationship-valuation",
+    "technology-valuation",
+    "mcp-server",
+    "ai-valuation-tool",
+    "model-context-protocol",
+    "ai-agents",
+    "financial-analysis",
+    "valuation",
+    "finance",
+]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial",
+    "Topic :: Office/Business :: Financial :: Accounting",
     "Topic :: Office/Business :: Financial :: Investment",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Typing :: Typed",
 ]
 
 dependencies = [
@@ -41,6 +84,13 @@ docs = [
 
 [project.scripts]
 intangible-valuation-mcp = "mcp_server.server:main"
+
+[project.urls]
+Homepage = "https://github.com/simonplmak-cloud/intangible-valuation"
+Documentation = "https://simonplmak-cloud.github.io/intangible-valuation/"
+Repository = "https://github.com/simonplmak-cloud/intangible-valuation"
+Changelog = "https://github.com/simonplmak-cloud/intangible-valuation/releases"
+"Bug Tracker" = "https://github.com/simonplmak-cloud/intangible-valuation/issues"
 
 [build-system]
 requires = ["hatchling"]

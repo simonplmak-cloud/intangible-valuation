@@ -3,7 +3,13 @@
 import math
 import pytest
 
-from src.core.statistics import decision_tree_valuation, monte_carlo_valuation
+from src.core.statistics import (
+    decision_tree_valuation,
+    monte_carlo_valuation,
+    monte_carlo_with_correlation,
+    scenario_analysis,
+    sensitivity_tornado,
+)
 
 
 class TestMonteCarloValuation:
@@ -151,6 +157,256 @@ class TestMonteCarloValuation:
                     {"name": "x", "distribution": "triangular", "params": {"low": 10, "high": 20, "mode": 30}},
                 ],
             )
+
+
+class TestMonteCarloWithCorrelation:
+    """Test monte_carlo_with_correlation function."""
+
+    def _simple_valuation(self, revenue, discount_rate):
+        return revenue / discount_rate
+
+    def test_basic_correlated_mc(self):
+        """Monte Carlo with correlated inputs."""
+        result = monte_carlo_with_correlation(
+            valuation_fn=self._simple_valuation,
+            distributions=[
+                {"name": "revenue", "distribution": "normal", "params": {"mean": 1_000_000, "std": 100_000}},
+                {"name": "discount_rate", "distribution": "normal", "params": {"mean": 0.10, "std": 0.01}},
+            ],
+            correlation_matrix=[[1.0, 0.3], [0.3, 1.0]],
+            iterations=1000,
+            seed=42,
+        )
+
+        assert "mean" in result
+        assert result["method"] == "Monte Carlo with Correlation"
+        assert result["correlation_used"] is True
+        assert result["iterations"] == 1000
+
+    def test_correlated_vs_uncorrelated(self):
+        """Correlated MC should produce different std than uncorrelated."""
+        correlated = monte_carlo_with_correlation(
+            valuation_fn=self._simple_valuation,
+            distributions=[
+                {"name": "revenue", "distribution": "normal", "params": {"mean": 1_000_000, "std": 100_000}},
+                {"name": "discount_rate", "distribution": "normal", "params": {"mean": 0.10, "std": 0.01}},
+            ],
+            correlation_matrix=[[1.0, 0.8], [0.8, 1.0]],
+            iterations=5000,
+            seed=42,
+        )
+        assert correlated["std"] > 0
+
+    def test_identity_correlation(self):
+        """Identity correlation matrix should behave like uncorrelated."""
+        result = monte_carlo_with_correlation(
+            valuation_fn=self._simple_valuation,
+            distributions=[
+                {"name": "revenue", "distribution": "normal", "params": {"mean": 1_000_000, "std": 50_000}},
+                {"name": "discount_rate", "distribution": "normal", "params": {"mean": 0.10, "std": 0.005}},
+            ],
+            correlation_matrix=[[1.0, 0.0], [0.0, 1.0]],
+            iterations=2000,
+            seed=42,
+        )
+        assert result["mean"] > 0
+
+    def test_three_variables_correlation(self):
+        """Three correlated variables."""
+        def valuation(revenue, cost, discount_rate):
+            return (revenue - cost) / discount_rate
+
+        result = monte_carlo_with_correlation(
+            valuation_fn=valuation,
+            distributions=[
+                {"name": "revenue", "distribution": "normal", "params": {"mean": 1_000_000, "std": 100_000}},
+                {"name": "cost", "distribution": "normal", "params": {"mean": 600_000, "std": 50_000}},
+                {"name": "discount_rate", "distribution": "normal", "params": {"mean": 0.10, "std": 0.01}},
+            ],
+            correlation_matrix=[
+                [1.0, 0.5, -0.2],
+                [0.5, 1.0, 0.1],
+                [-0.2, 0.1, 1.0],
+            ],
+            iterations=1000,
+            seed=42,
+        )
+        assert result["mean"] > 0
+        assert len(result["steps"]) > 0
+
+    def test_invalid_correlation_matrix_size_raises(self):
+        with pytest.raises(ValueError, match="must be"):
+            monte_carlo_with_correlation(
+                valuation_fn=self._simple_valuation,
+                distributions=[
+                    {"name": "revenue", "distribution": "normal", "params": {"mean": 100, "std": 10}},
+                    {"name": "rate", "distribution": "normal", "params": {"mean": 0.1, "std": 0.01}},
+                ],
+                correlation_matrix=[[1.0]],
+                iterations=100,
+            )
+
+    def test_empty_distributions_raises(self):
+        with pytest.raises(ValueError, match="at least one"):
+            monte_carlo_with_correlation(
+                valuation_fn=self._simple_valuation,
+                distributions=[],
+                correlation_matrix=[],
+            )
+
+
+class TestSensitivityTornado:
+    """Test sensitivity_tornado function."""
+
+    def test_basic_tornado(self):
+        """Tornado diagram for PV sensitivity."""
+        result = sensitivity_tornado(
+            function_name="present_value",
+            base_params={"future_value": 1_000_000, "discount_rate": 0.10, "periods": 10},
+            parameter_ranges={
+                "discount_rate": [0.08, 0.10, 0.12],
+                "periods": [8, 10, 12],
+            },
+        )
+
+        assert "base_value" in result
+        assert "tornado" in result
+        assert result["method"] == "Tornado Sensitivity Analysis"
+        assert len(result["tornado"]) == 2
+
+    def test_tornado_sorted_by_impact(self):
+        """Tornado data should be sorted by impact descending."""
+        result = sensitivity_tornado(
+            function_name="present_value",
+            base_params={"future_value": 1_000_000, "discount_rate": 0.10, "periods": 10},
+            parameter_ranges={
+                "discount_rate": [0.08, 0.10, 0.12],
+                "periods": [8, 10, 12],
+            },
+        )
+
+        impacts = [item["impact"] for item in result["tornado"]]
+        assert impacts == sorted(impacts, reverse=True)
+
+    def test_tornado_perpetuity(self):
+        """Tornado for perpetuity PV."""
+        result = sensitivity_tornado(
+            function_name="perpetuity_pv",
+            base_params={"payment": 100_000, "discount_rate": 0.10},
+            parameter_ranges={
+                "payment": [80_000, 100_000, 120_000],
+                "discount_rate": [0.08, 0.10, 0.12],
+            },
+        )
+
+        assert len(result["tornado"]) == 2
+        assert result["base_value"] > 0
+
+    def test_tornado_single_parameter_raises(self):
+        """Parameter range with only one value should raise."""
+        with pytest.raises(ValueError, match="at least 2"):
+            sensitivity_tornado(
+                function_name="present_value",
+                base_params={"future_value": 1000, "discount_rate": 0.10, "periods": 5},
+                parameter_ranges={"discount_rate": [0.10]},
+            )
+
+    def test_tornado_empty_ranges_raises(self):
+        with pytest.raises(ValueError, match="at least one"):
+            sensitivity_tornado(
+                function_name="present_value",
+                base_params={"future_value": 1000, "discount_rate": 0.10, "periods": 5},
+                parameter_ranges={},
+            )
+
+
+class TestScenarioAnalysis:
+    """Test scenario_analysis function."""
+
+    def test_basic_scenario(self):
+        """Three scenarios with probability-weighted expected value."""
+        result = scenario_analysis([
+            {
+                "name": "Base",
+                "probability": 0.6,
+                "params": {"future_value": 1_000_000, "discount_rate": 0.10, "periods": 5},
+                "function_name": "present_value",
+            },
+            {
+                "name": "Upside",
+                "probability": 0.2,
+                "params": {"future_value": 1_500_000, "discount_rate": 0.09, "periods": 5},
+                "function_name": "present_value",
+            },
+            {
+                "name": "Downside",
+                "probability": 0.2,
+                "params": {"future_value": 700_000, "discount_rate": 0.12, "periods": 5},
+                "function_name": "present_value",
+            },
+        ])
+
+        assert "expected_value" in result
+        assert len(result["scenarios"]) == 3
+        assert result["method"] == "Scenario Analysis"
+
+    def test_scenario_expected_value(self):
+        """Verify expected value calculation."""
+        from src.core.time_value import present_value
+
+        base_pv = present_value(future_value=1_000_000, discount_rate=0.10, periods=5).value
+        upside_pv = present_value(future_value=1_500_000, discount_rate=0.09, periods=5).value
+        downside_pv = present_value(future_value=700_000, discount_rate=0.12, periods=5).value
+
+        expected = 0.6 * base_pv + 0.2 * upside_pv + 0.2 * downside_pv
+
+        result = scenario_analysis([
+            {"name": "Base", "probability": 0.6, "params": {"future_value": 1_000_000, "discount_rate": 0.10, "periods": 5}, "function_name": "present_value"},
+            {"name": "Upside", "probability": 0.2, "params": {"future_value": 1_500_000, "discount_rate": 0.09, "periods": 5}, "function_name": "present_value"},
+            {"name": "Downside", "probability": 0.2, "params": {"future_value": 700_000, "discount_rate": 0.12, "periods": 5}, "function_name": "present_value"},
+        ])
+
+        assert math.isclose(result["expected_value"], expected, abs_tol=1)
+
+    def test_scenario_contributions(self):
+        """Each scenario should have correct contribution."""
+        result = scenario_analysis([
+            {"name": "A", "probability": 0.5, "params": {"future_value": 100, "discount_rate": 0.0, "periods": 1}, "function_name": "present_value"},
+            {"name": "B", "probability": 0.5, "params": {"future_value": 200, "discount_rate": 0.0, "periods": 1}, "function_name": "present_value"},
+        ])
+
+        assert math.isclose(result["scenarios"][0]["contribution"], 50, abs_tol=1)
+        assert math.isclose(result["scenarios"][1]["contribution"], 100, abs_tol=1)
+        assert math.isclose(result["expected_value"], 150, abs_tol=1)
+
+    def test_scenario_probability_not_one_raises(self):
+        with pytest.raises(ValueError, match="sum to"):
+            scenario_analysis([
+                {"name": "A", "probability": 0.3, "params": {"future_value": 100, "discount_rate": 0.10, "periods": 1}, "function_name": "present_value"},
+                {"name": "B", "probability": 0.3, "params": {"future_value": 200, "discount_rate": 0.10, "periods": 1}, "function_name": "present_value"},
+            ])
+
+    def test_scenario_empty_raises(self):
+        with pytest.raises(ValueError, match="at least one"):
+            scenario_analysis([])
+
+    def test_scenario_missing_name_raises(self):
+        with pytest.raises(ValueError, match="name"):
+            scenario_analysis([
+                {"probability": 1.0, "params": {"future_value": 100, "discount_rate": 0.10, "periods": 1}, "function_name": "present_value"},
+            ])
+
+    def test_scenario_missing_function_raises(self):
+        with pytest.raises(ValueError, match="function_name"):
+            scenario_analysis([
+                {"name": "Test", "probability": 1.0, "params": {"future_value": 100, "discount_rate": 0.10, "periods": 1}},
+            ])
+
+    def test_scenario_invalid_function_raises(self):
+        with pytest.raises(ValueError, match="Unsupported function"):
+            scenario_analysis([
+                {"name": "Test", "probability": 1.0, "params": {"x": 100}, "function_name": "nonexistent"},
+            ])
 
 
 class TestDecisionTreeValuation:

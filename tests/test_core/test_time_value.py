@@ -8,11 +8,16 @@ import pytest
 
 from src.core.time_value import (
     ValuationResult,
+    annuity_due_pv,
     annuity_pv,
+    continuous_compounding,
+    effective_annual_rate,
     future_value,
     growing_annuity_pv,
+    growing_perpetuity_pv,
     perpetuity_pv,
     present_value,
+    present_value_graduated,
     terminal_value,
 )
 
@@ -253,6 +258,195 @@ class TestTerminalValue:
                 discount_rate=0.10,
                 method="gordon_growth",
             )
+
+
+class TestPresentValueGraduated:
+    """Test present_value_graduated function."""
+
+    def test_basic_graduated(self):
+        """3 periods with increasing discount rates."""
+        result = present_value_graduated(
+            cash_flows=[100, 200, 300],
+            discount_rates=[0.05, 0.055, 0.06],
+        )
+        assert result.value > 0
+        assert result.method == "Present Value with Graduated Discount Rates"
+        assert len(result.pv_by_period) == 3
+
+    def test_graduated_vs_flat(self):
+        """When all rates are equal, should match flat discount PV."""
+        from src.core.time_value import present_value_of_series
+        flat = present_value_of_series([100, 200, 300], discount_rate=0.10)
+        graduated = present_value_graduated(
+            cash_flows=[100, 200, 300],
+            discount_rates=[0.10, 0.10, 0.10],
+        )
+        assert math.isclose(flat.value, graduated.value, abs_tol=0.01)
+
+    def test_graduated_single_period(self):
+        """Single period should match simple PV."""
+        result = present_value_graduated(
+            cash_flows=[1000],
+            discount_rates=[0.10],
+        )
+        expected = 1000 / 1.10
+        assert math.isclose(result.value, expected, abs_tol=0.01)
+
+    def test_graduated_length_mismatch_raises(self):
+        with pytest.raises(ValueError, match="must match"):
+            present_value_graduated(
+                cash_flows=[100, 200],
+                discount_rates=[0.05, 0.06, 0.07],
+            )
+
+    def test_graduated_empty_raises(self):
+        with pytest.raises(ValueError, match="must not be empty"):
+            present_value_graduated(cash_flows=[], discount_rates=[])
+
+    def test_graduated_invalid_rate_raises(self):
+        with pytest.raises(ValueError, match="must be > -1.0"):
+            present_value_graduated(
+                cash_flows=[100, 200],
+                discount_rates=[0.05, -1.5],
+            )
+
+
+class TestAnnuityDuePV:
+    """Test annuity_due_pv function."""
+
+    def test_basic_annuity_due(self):
+        """$1000 payment, 8% rate, 5 periods, beginning of period."""
+        result = annuity_due_pv(payment=1000, discount_rate=0.08, periods=5)
+        ordinary = annuity_pv(payment=1000, discount_rate=0.08, periods=5)
+        expected = ordinary.value * 1.08
+        assert math.isclose(result.value, expected, abs_tol=0.01)
+
+    def test_annuity_due_vs_ordinary(self):
+        """Annuity due should be higher than ordinary annuity."""
+        due = annuity_due_pv(payment=100, discount_rate=0.10, periods=5)
+        ordinary = annuity_pv(payment=100, discount_rate=0.10, periods=5)
+        assert due.value > ordinary.value
+
+    def test_annuity_due_zero_periods(self):
+        """Zero periods should return 0."""
+        result = annuity_due_pv(payment=100, discount_rate=0.10, periods=0)
+        assert math.isclose(result.value, 0, abs_tol=0.01)
+
+    def test_annuity_due_zero_rate(self):
+        """Zero rate should return payment * periods."""
+        result = annuity_due_pv(payment=100, discount_rate=0.0, periods=5)
+        assert math.isclose(result.value, 500, abs_tol=0.01)
+
+    def test_annuity_due_single_period(self):
+        """Single period annuity due = payment (paid immediately)."""
+        result = annuity_due_pv(payment=100, discount_rate=0.10, periods=1)
+        assert math.isclose(result.value, 100, abs_tol=0.01)
+
+    def test_annuity_due_negative_payment_raises(self):
+        with pytest.raises(ValueError, match="non-negative"):
+            annuity_due_pv(payment=-100, discount_rate=0.10, periods=5)
+
+    def test_annuity_due_negative_periods_raises(self):
+        with pytest.raises(ValueError, match="non-negative"):
+            annuity_due_pv(payment=100, discount_rate=0.10, periods=-1)
+
+
+class TestGrowingPerpetuityPV:
+    """Test growing_perpetuity_pv function."""
+
+    def test_basic_growing_perpetuity(self):
+        """$100 payment, 10% discount, 3% growth."""
+        result = growing_perpetuity_pv(first_payment=100, discount_rate=0.10, growth_rate=0.03)
+        expected = 100 / (0.10 - 0.03)
+        assert math.isclose(result.value, expected, abs_tol=0.01)
+
+    def test_growing_perpetuity_vs_perpetuity(self):
+        """Zero growth should match simple perpetuity."""
+        gp = growing_perpetuity_pv(first_payment=100, discount_rate=0.10, growth_rate=0.0)
+        p = perpetuity_pv(payment=100, discount_rate=0.10)
+        assert math.isclose(gp.value, p.value, abs_tol=0.01)
+
+    def test_growing_perpetuity_rate_equals_growth_raises(self):
+        with pytest.raises(ValueError, match="must be greater"):
+            growing_perpetuity_pv(first_payment=100, discount_rate=0.05, growth_rate=0.05)
+
+    def test_growing_perpetuity_rate_less_than_growth_raises(self):
+        with pytest.raises(ValueError, match="must be greater"):
+            growing_perpetuity_pv(first_payment=100, discount_rate=0.03, growth_rate=0.05)
+
+    def test_growing_perpetuity_negative_payment_raises(self):
+        with pytest.raises(ValueError, match="non-negative"):
+            growing_perpetuity_pv(first_payment=-100, discount_rate=0.10, growth_rate=0.03)
+
+
+class TestEffectiveAnnualRate:
+    """Test effective_annual_rate function."""
+
+    def test_annual_compounding(self):
+        """Annual compounding: EAR = nominal rate."""
+        result = effective_annual_rate(nominal_rate=0.12, compounding_periods=1)
+        assert math.isclose(result.value, 0.12, abs_tol=1e-6)
+
+    def test_monthly_compounding(self):
+        """12% nominal, monthly: EAR = (1 + 0.12/12)^12 - 1 = 12.68%."""
+        result = effective_annual_rate(nominal_rate=0.12, compounding_periods=12)
+        expected = (1 + 0.12 / 12) ** 12 - 1
+        assert math.isclose(result.value, expected, abs_tol=1e-6)
+
+    def test_daily_compounding(self):
+        """Daily compounding produces higher EAR than monthly."""
+        monthly = effective_annual_rate(nominal_rate=0.12, compounding_periods=12)
+        daily = effective_annual_rate(nominal_rate=0.12, compounding_periods=365)
+        assert daily.value > monthly.value
+
+    def test_semi_annual_compounding(self):
+        """10% nominal, semi-annual: EAR = (1 + 0.10/2)^2 - 1 = 10.25%."""
+        result = effective_annual_rate(nominal_rate=0.10, compounding_periods=2)
+        assert math.isclose(result.value, 0.1025, abs_tol=1e-6)
+
+    def test_zero_periods_raises(self):
+        with pytest.raises(ValueError, match="at least 1"):
+            effective_annual_rate(nominal_rate=0.10, compounding_periods=0)
+
+    def test_negative_rate_raises(self):
+        with pytest.raises(ValueError, match=">= -1.0"):
+            effective_annual_rate(nominal_rate=-2.0, compounding_periods=12)
+
+
+class TestContinuousCompounding:
+    """Test continuous_compounding function."""
+
+    def test_basic_continuous(self):
+        """$1000 at 5% for 3 years: FV = 1000 * e^(0.05*3) = ~$1,161.83."""
+        result = continuous_compounding(principal=1000, rate=0.05, time=3)
+        expected = 1000 * math.exp(0.05 * 3)
+        assert math.isclose(result.value, expected, abs_tol=0.01)
+
+    def test_zero_time(self):
+        """Zero time: FV = PV."""
+        result = continuous_compounding(principal=1000, rate=0.05, time=0)
+        assert math.isclose(result.value, 1000, abs_tol=0.01)
+
+    def test_continuous_vs_discrete(self):
+        """Continuous should produce higher FV than annual compounding."""
+        from src.core.time_value import future_value
+        discrete = future_value(present_value=1000, discount_rate=0.05, periods=3)
+        continuous = continuous_compounding(principal=1000, rate=0.05, time=3)
+        assert continuous.value > discrete.value
+
+    def test_large_values(self):
+        """Large principal and long time period."""
+        result = continuous_compounding(principal=1_000_000, rate=0.08, time=30)
+        expected = 1_000_000 * math.exp(0.08 * 30)
+        assert math.isclose(result.value, expected, abs_tol=1)
+
+    def test_negative_principal_raises(self):
+        with pytest.raises(ValueError, match="non-negative"):
+            continuous_compounding(principal=-1000, rate=0.05, time=3)
+
+    def test_negative_time_raises(self):
+        with pytest.raises(ValueError, match="non-negative"):
+            continuous_compounding(principal=1000, rate=0.05, time=-1)
 
 
 class TestValuationResult:

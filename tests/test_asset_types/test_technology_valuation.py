@@ -3,10 +3,13 @@
 import pytest
 
 from src.asset_types.technology_valuation import (
+    algorithm_valuation,
+    api_valuation,
     data_asset_valuation,
     developed_technology_valuation,
     platform_valuation,
     software_valuation,
+    technology_obsolescence_curve,
 )
 
 
@@ -278,3 +281,185 @@ class TestPlatformValuation:
                 growth_rate=-0.10,
                 discount_rate=0.10,
             )
+
+
+class TestTechnologyObsolescenceCurve:
+    """Tests for technology_obsolescence_curve function."""
+
+    def test_happy_path_basic(self):
+        result = technology_obsolescence_curve(1_000_000, 0.20, 5)
+        assert result["value"] > 0
+        assert result["value"] < 1_000_000
+        assert "Obsolescence" in result["method"]
+
+    def test_happy_path_high_obsolescence(self):
+        result = technology_obsolescence_curve(1_000_000, 0.50, 3)
+        assert result["value"] == pytest.approx(125_000, rel=0.01)
+
+    def test_happy_path_low_obsolescence(self):
+        result = technology_obsolescence_curve(1_000_000, 0.05, 5)
+        assert result["value"] > 700_000
+
+    def test_happy_path_single_period(self):
+        result = technology_obsolescence_curve(1_000_000, 0.20, 1)
+        assert result["value"] == pytest.approx(800_000, rel=0.01)
+
+    def test_error_zero_initial_value(self):
+        with pytest.raises(ValueError):
+            technology_obsolescence_curve(0, 0.20, 5)
+
+    def test_error_zero_obsolescence_rate(self):
+        with pytest.raises(ValueError):
+            technology_obsolescence_curve(1_000_000, 0, 5)
+
+    def test_error_zero_periods(self):
+        with pytest.raises(ValueError):
+            technology_obsolescence_curve(1_000_000, 0.20, 0)
+
+    def test_returns_value_at_each_period(self):
+        result = technology_obsolescence_curve(1_000_000, 0.20, 3)
+        assert "value_at_each_period" in result["assumptions"]
+        assert len(result["assumptions"]["value_at_each_period"]) == 3
+
+
+class TestApiValuation:
+    """Tests for api_valuation function."""
+
+    def test_happy_path_basic(self):
+        result = api_valuation(
+            api_calls_per_month=1_000_000,
+            revenue_per_call=0.001,
+            growth_rate=0.15,
+            useful_life=5,
+            discount_rate=0.10,
+        )
+        assert result["value"] > 0
+        assert "API Income" in result["method"]
+
+    def test_happy_path_no_growth(self):
+        result = api_valuation(
+            api_calls_per_month=500_000,
+            revenue_per_call=0.005,
+            growth_rate=0.0,
+            useful_life=3,
+            discount_rate=0.10,
+        )
+        assert result["value"] > 0
+
+    def test_happy_path_high_volume(self):
+        result = api_valuation(
+            api_calls_per_month=10_000_000,
+            revenue_per_call=0.0001,
+            growth_rate=0.20,
+            useful_life=7,
+            discount_rate=0.12,
+        )
+        assert result["value"] > 0
+
+    def test_error_zero_calls(self):
+        with pytest.raises(ValueError):
+            api_valuation(
+                api_calls_per_month=0,
+                revenue_per_call=0.001,
+                growth_rate=0.10,
+                useful_life=5,
+                discount_rate=0.10,
+            )
+
+    def test_error_zero_discount_rate(self):
+        with pytest.raises(ValueError):
+            api_valuation(
+                api_calls_per_month=1_000_000,
+                revenue_per_call=0.001,
+                growth_rate=0.10,
+                useful_life=5,
+                discount_rate=0,
+            )
+
+    def test_error_zero_useful_life(self):
+        with pytest.raises(ValueError):
+            api_valuation(
+                api_calls_per_month=1_000_000,
+                revenue_per_call=0.001,
+                growth_rate=0.10,
+                useful_life=0,
+                discount_rate=0.10,
+            )
+
+    def test_returns_year1_revenue(self):
+        result = api_valuation(
+            api_calls_per_month=1_000_000,
+            revenue_per_call=0.001,
+            growth_rate=0.0,
+            useful_life=1,
+            discount_rate=0.10,
+        )
+        assert "year1_revenue" in result["assumptions"]
+
+
+class TestAlgorithmValuation:
+    """Tests for algorithm_valuation function."""
+
+    def test_happy_path_basic(self):
+        result = algorithm_valuation(
+            computational_savings=500_000,
+            deployment_scale=3.0,
+            competitive_advantage_years=5,
+            discount_rate=0.12,
+        )
+        assert result["value"] > 0
+        assert "Algorithm" in result["method"]
+
+    def test_happy_path_single_year(self):
+        result = algorithm_valuation(
+            computational_savings=1_000_000,
+            deployment_scale=1.0,
+            competitive_advantage_years=1,
+            discount_rate=0.10,
+        )
+        assert result["value"] == pytest.approx(1_000_000 / 1.10, rel=0.01)
+
+    def test_happy_path_large_scale(self):
+        result = algorithm_valuation(
+            computational_savings=100_000,
+            deployment_scale=10.0,
+            competitive_advantage_years=7,
+            discount_rate=0.10,
+        )
+        assert result["value"] > 0
+
+    def test_error_zero_savings(self):
+        with pytest.raises(ValueError):
+            algorithm_valuation(
+                computational_savings=0,
+                deployment_scale=1.0,
+                competitive_advantage_years=5,
+                discount_rate=0.10,
+            )
+
+    def test_error_zero_scale(self):
+        with pytest.raises(ValueError):
+            algorithm_valuation(
+                computational_savings=500_000,
+                deployment_scale=0,
+                competitive_advantage_years=5,
+                discount_rate=0.10,
+            )
+
+    def test_error_zero_advantage_years(self):
+        with pytest.raises(ValueError):
+            algorithm_valuation(
+                computational_savings=500_000,
+                deployment_scale=1.0,
+                competitive_advantage_years=0,
+                discount_rate=0.10,
+            )
+
+    def test_returns_annual_benefit(self):
+        result = algorithm_valuation(
+            computational_savings=500_000,
+            deployment_scale=2.0,
+            competitive_advantage_years=3,
+            discount_rate=0.10,
+        )
+        assert result["assumptions"]["annual_benefit"] == 1_000_000

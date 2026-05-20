@@ -398,3 +398,326 @@ def contributory_asset_charges(
             "Charges represent opportunity cost of capital tied up in supporting assets",
         ],
     }
+
+
+def straight_line_amortization(
+    asset_value: float,
+    useful_life: int,
+) -> dict[str, Any]:
+    """Generate a straight-line amortization schedule.
+
+    Under straight-line amortization, the asset value is allocated evenly over
+    its useful life. Each period has the same amortization expense.
+
+    Formula:
+        Annual Amortization = Asset Value / Useful Life
+        Book Value_t = Asset Value - sum(Amortization_1..t)
+
+    Parameters:
+        asset_value: The initial value of the intangible asset
+        useful_life: The amortization period in years
+
+    Returns:
+        Dict with keys:
+            - schedule: List of {"year": int, "amortization": float, "accumulated": float, "book_value": float}
+            - total_amortization: Total amortized amount
+            - method: "Straight-Line Amortization"
+            - formula_reference: Reference description
+            - steps: Step-by-step calculation
+            - assumptions: List of assumptions
+
+    Raises:
+        ValueError: If asset_value is negative or useful_life < 1
+
+    Example:
+        >>> result = straight_line_amortization(asset_value=1_000_000, useful_life=5)
+        >>> result["schedule"][0]["amortization"]  # 200,000
+
+    Book Reference:
+        Chapter 3, Section 3.4 — Amortization Methods
+        ASC 350 / IFRS IAS 38 — Intangible Assets amortization guidance
+    """
+    if asset_value < 0:
+        raise ValueError("asset_value must be non-negative")
+    if useful_life < 1:
+        raise ValueError("useful_life must be at least 1")
+
+    annual_amortization = asset_value / useful_life
+    schedule = []
+    accumulated = 0.0
+    steps = []
+
+    steps.append(f"Asset Value = ${asset_value:,.2f}")
+    steps.append(f"Useful Life = {useful_life} years")
+    steps.append(f"Annual Amortization = ${asset_value:,.2f} / {useful_life} = ${annual_amortization:,.2f}")
+
+    for year in range(1, useful_life + 1):
+        accumulated += annual_amortization
+        book_value = asset_value - accumulated
+        schedule.append({
+            "year": year,
+            "amortization": round(annual_amortization, 2),
+            "accumulated": round(accumulated, 2),
+            "book_value": round(book_value, 2),
+        })
+        steps.append(
+            f"Year {year}: Amort=${annual_amortization:,.2f}, "
+            f"Accum=${accumulated:,.2f}, BV=${book_value:,.2f}"
+        )
+
+    return {
+        "schedule": schedule,
+        "total_amortization": round(accumulated, 2),
+        "method": "Straight-Line Amortization",
+        "formula_reference": "Annual Amortization = Asset Value / Useful Life",
+        "steps": steps,
+        "assumptions": [
+            "Amortization expense is constant each year",
+            "No residual value assumed",
+            "Useful life is known and fixed",
+            "Straight-line method reflects pattern of economic benefit consumption",
+        ],
+    }
+
+
+def sum_of_years_digits_amortization(
+    asset_value: float,
+    useful_life: int,
+) -> dict[str, Any]:
+    """Generate a sum-of-years'-digits (SYD) amortization schedule.
+
+    SYD is an accelerated amortization method that allocates more expense to
+    earlier years. The fraction for each year is (remaining life) / (sum of years' digits).
+
+    Formula:
+        Sum of Years' Digits = n * (n + 1) / 2
+        Year t Amortization = Asset Value * (n - t + 1) / SYD
+
+    Parameters:
+        asset_value: The initial value of the intangible asset
+        useful_life: The amortization period in years
+
+    Returns:
+        Dict with keys:
+            - schedule: List of {"year": int, "amortization": float, "accumulated": float, "book_value": float}
+            - total_amortization: Total amortized amount
+            - method: "Sum-of-Years'-Digits Amortization"
+            - formula_reference: Reference description
+            - steps: Step-by-step calculation
+            - assumptions: List of assumptions
+
+    Raises:
+        ValueError: If asset_value is negative or useful_life < 1
+
+    Example:
+        >>> result = sum_of_years_digits_amortization(asset_value=1_000_000, useful_life=5)
+        >>> result["schedule"][0]["amortization"]  # 333,333.33 (largest in year 1)
+
+    Book Reference:
+        Chapter 3, Section 3.4 — Accelerated Amortization Methods
+        GAAP allows SYD when economic benefits decline over time
+    """
+    if asset_value < 0:
+        raise ValueError("asset_value must be non-negative")
+    if useful_life < 1:
+        raise ValueError("useful_life must be at least 1")
+
+    syd_sum = useful_life * (useful_life + 1) / 2
+    schedule = []
+    accumulated = 0.0
+    steps = []
+
+    steps.append(f"Asset Value = ${asset_value:,.2f}")
+    steps.append(f"Useful Life = {useful_life} years")
+    steps.append(f"Sum of Years' Digits = {useful_life} * {useful_life + 1} / 2 = {syd_sum:.0f}")
+
+    for year in range(1, useful_life + 1):
+        remaining_life = useful_life - year + 1
+        fraction = remaining_life / syd_sum
+        amortization = asset_value * fraction
+        accumulated += amortization
+        book_value = asset_value - accumulated
+        schedule.append({
+            "year": year,
+            "amortization": round(amortization, 2),
+            "accumulated": round(accumulated, 2),
+            "book_value": round(book_value, 2),
+            "fraction": f"{remaining_life}/{syd_sum:.0f}",
+        })
+        steps.append(
+            f"Year {year}: Fraction={remaining_life}/{syd_sum:.0f}={fraction:.4f}, "
+            f"Amort=${amortization:,.2f}, BV=${book_value:,.2f}"
+        )
+
+    return {
+        "schedule": schedule,
+        "total_amortization": round(accumulated, 2),
+        "method": "Sum-of-Years'-Digits Amortization",
+        "formula_reference": "Year t Amort = Asset Value * (n - t + 1) / [n*(n+1)/2]",
+        "steps": steps,
+        "assumptions": [
+            "Economic benefits decline over the asset's useful life",
+            "Accelerated method reflects front-loaded benefit pattern",
+            "No residual value assumed",
+            "Useful life is known and fixed",
+        ],
+    }
+
+
+def double_declining_balance_amortization(
+    asset_value: float,
+    useful_life: int,
+) -> dict[str, Any]:
+    """Generate a double-declining balance (DDB) amortization schedule.
+
+    DDB is the most common accelerated amortization method. It applies twice the
+    straight-line rate to the remaining book value each year. In the final year,
+    the remaining book value is fully amortized.
+
+    Formula:
+        DDB Rate = 2 / Useful Life
+        Year t Amortization = Book Value_(t-1) * DDB Rate
+        Final Year: Amortization = Remaining Book Value
+
+    Parameters:
+        asset_value: The initial value of the intangible asset
+        useful_life: The amortization period in years
+
+    Returns:
+        Dict with keys:
+            - schedule: List of {"year": int, "amortization": float, "accumulated": float, "book_value": float}
+            - total_amortization: Total amortized amount
+            - method: "Double-Declining Balance Amortization"
+            - formula_reference: Reference description
+            - steps: Step-by-step calculation
+            - assumptions: List of assumptions
+
+    Raises:
+        ValueError: If asset_value is negative or useful_life < 1
+
+    Example:
+        >>> result = double_declining_balance_amortization(asset_value=1_000_000, useful_life=5)
+        >>> result["schedule"][0]["amortization"]  # 400,000 (40% of $1M)
+
+    Book Reference:
+        Chapter 3, Section 3.4 — Accelerated Amortization Methods
+        IRS MACRS uses 200% declining balance for many asset classes
+    """
+    if asset_value < 0:
+        raise ValueError("asset_value must be non-negative")
+    if useful_life < 1:
+        raise ValueError("useful_life must be at least 1")
+
+    ddb_rate = 2.0 / useful_life
+    schedule = []
+    accumulated = 0.0
+    book_value = asset_value
+    steps = []
+
+    steps.append(f"Asset Value = ${asset_value:,.2f}")
+    steps.append(f"Useful Life = {useful_life} years")
+    steps.append(f"DDB Rate = 2 / {useful_life} = {ddb_rate:.4f} ({ddb_rate:.2%})")
+
+    for year in range(1, useful_life + 1):
+        if year < useful_life:
+            amortization = book_value * ddb_rate
+        else:
+            amortization = book_value
+
+        accumulated += amortization
+        book_value -= amortization
+        schedule.append({
+            "year": year,
+            "amortization": round(amortization, 2),
+            "accumulated": round(accumulated, 2),
+            "book_value": round(book_value, 2),
+        })
+        steps.append(
+            f"Year {year}: BV_start=${book_value + amortization:,.2f}, "
+            f"Amort=${amortization:,.2f}, BV_end=${book_value:,.2f}"
+        )
+
+    return {
+        "schedule": schedule,
+        "total_amortization": round(accumulated, 2),
+        "method": "Double-Declining Balance Amortization",
+        "formula_reference": "DDB Rate = 2/n; Year t Amort = BV_(t-1) * DDB Rate; Final year = remaining BV",
+        "steps": steps,
+        "assumptions": [
+            "DDB rate is 200% of straight-line rate",
+            "Economic benefits are heavily front-loaded",
+            "Final year fully amortizes remaining book value",
+            "No residual value assumed",
+        ],
+    }
+
+
+def valuation_multiple(
+    value: float,
+    metric: float,
+    multiple_type: str = "EV/Revenue",
+) -> dict[str, Any]:
+    """Calculate a valuation multiple from enterprise value (or equity value) and a financial metric.
+
+    Valuation multiples express the relationship between a company's value and a
+    key financial metric. Common multiples include EV/Revenue, EV/EBITDA, P/E, and P/B.
+
+    Formula:
+        Multiple = Value / Metric
+
+    Parameters:
+        value: Enterprise value or equity value (numerator)
+        metric: Financial metric (denominator) — revenue, EBITDA, earnings, book value, etc.
+        multiple_type: Label for the multiple (e.g., "EV/Revenue", "P/E", "EV/EBITDA")
+
+    Returns:
+        Dict with keys:
+            - multiple: The calculated multiple (as a number, e.g., 5.2 means 5.2x)
+            - value: The input value
+            - metric: The input metric
+            - multiple_type: The type label
+            - method: "Valuation Multiple"
+            - formula_reference: Reference description
+            - steps: Step-by-step calculation
+            - assumptions: List of assumptions
+
+    Raises:
+        ValueError: If metric is zero or value is negative
+
+    Example:
+        >>> result = valuation_multiple(value=50_000_000, metric=10_000_000, multiple_type="EV/Revenue")
+        >>> result["multiple"]  # 5.0
+
+    Book Reference:
+        Chapter 4, Section 4.1 — Market Approach and Valuation Multiples
+        Used in comparable company analysis and precedent transactions
+    """
+    if value < 0:
+        raise ValueError("value must be non-negative")
+    if math.isclose(metric, 0.0, abs_tol=1e-12):
+        raise ValueError("metric cannot be zero (division by zero)")
+    if metric < 0:
+        raise ValueError("metric must be positive for standard valuation multiples")
+
+    multiple = value / metric
+
+    return {
+        "multiple": round(multiple, 4),
+        "value": round(value, 2),
+        "metric": round(metric, 2),
+        "multiple_type": multiple_type,
+        "method": "Valuation Multiple",
+        "formula_reference": "Multiple = Value / Metric",
+        "steps": [
+            f"Value = ${value:,.2f}",
+            f"Metric = ${metric:,.2f}",
+            f"Multiple Type = {multiple_type}",
+            f"{multiple_type} = ${value:,.2f} / ${metric:,.2f} = {multiple:.4f}x",
+        ],
+        "assumptions": [
+            f"Value and metric are measured on a consistent basis",
+            f"Multiple is comparable to industry benchmarks",
+            f"Metric ({multiple_type.split('/')[-1]}) is positive and meaningful",
+            "Multiple reflects current market conditions",
+        ],
+    }

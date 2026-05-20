@@ -584,3 +584,419 @@ def present_value_of_series(
         present_value=round(pv, 2),
         pv_by_period=pv_by_period,
     )
+
+
+def present_value_graduated(
+    cash_flows: list[float],
+    discount_rates: list[float],
+) -> ValuationResult:
+    """Calculate present value using a graduated (yield curve) discount rate schedule.
+
+    Each period has its own discount rate, reflecting the term structure of interest
+    rates (yield curve). This is more realistic than a single flat discount rate when
+    valuing long-duration cash flows.
+
+    Formula:
+        PV = sum(CF_t / Product(1 + r_i) for i = 1 to t) for t = 1 to n
+
+    Parameters:
+        cash_flows: List of cash flows for each period (index 0 = period 1)
+        discount_rates: List of discount rates for each period (must match cash_flows length)
+
+    Returns:
+        ValuationResult with computed present value and per-period breakdown
+
+    Raises:
+        ValueError: If cash_flows is empty, discount_rates length mismatch, or invalid rates
+
+    Example:
+        >>> result = present_value_graduated(
+        ...     cash_flows=[100, 200, 300],
+        ...     discount_rates=[0.05, 0.055, 0.06],
+        ... )
+        >>> result.value  # ~535.08
+
+    Book Reference:
+        Chapter 2, Section 2.1 — Present Value (generalized for yield curve)
+        Damodaran, Investment Valuation: Chapter on term structure in discounting
+    """
+    if not cash_flows:
+        raise ValueError("cash_flows must not be empty")
+    if len(discount_rates) != len(cash_flows):
+        raise ValueError(
+            f"discount_rates length ({len(discount_rates)}) must match "
+            f"cash_flows length ({len(cash_flows)})"
+        )
+
+    pv = 0.0
+    steps = []
+    pv_by_period = []
+    cumulative_factor = 1.0
+
+    steps.append(f"Number of Periods = {len(cash_flows)}")
+    steps.append("Using graduated discount rates (yield curve)")
+
+    for t, (cf, rate) in enumerate(zip(cash_flows, discount_rates), 1):
+        if rate <= -1:
+            raise ValueError(f"Discount rate for period {t} must be > -1.0")
+        cumulative_factor *= (1 + rate)
+        period_pv = cf / cumulative_factor
+        pv += period_pv
+        pv_by_period.append({
+            "period": t,
+            "cash_flow": cf,
+            "discount_rate": rate,
+            "cumulative_factor": round(cumulative_factor, 6),
+            "present_value": round(period_pv, 2),
+        })
+        steps.append(
+            f"Period {t}: CF=${cf:,.2f}, r={rate:.2%}, "
+            f"Cumulative Factor={cumulative_factor:.6f}, PV=${period_pv:,.2f}"
+        )
+
+    steps.append(f"Total PV = ${pv:,.2f}")
+
+    return ValuationResult(
+        value=round(pv, 2),
+        method="Present Value with Graduated Discount Rates",
+        formula_reference="PV = sum(CF_t / Product(1 + r_i) for i=1..t)",
+        steps=steps,
+        assumptions=[
+            "Cash flows occur at end of each period",
+            "Each period has its own discount rate (yield curve)",
+            f"Projection period is {len(cash_flows)} years",
+            "Cumulative discounting applied across periods",
+        ],
+        present_value=round(pv, 2),
+        pv_by_period=pv_by_period,
+    )
+
+
+def annuity_due_pv(
+    payment: float,
+    discount_rate: float,
+    periods: int,
+) -> ValuationResult:
+    """Calculate the present value of an annuity due (payments at beginning of period).
+
+    Unlike an ordinary annuity where payments occur at period end, an annuity due
+    has payments at the beginning of each period. This shifts each payment one
+    period earlier, increasing the present value.
+
+    Formula:
+        PV_due = PMT * [1 - (1 + r)^(-n)] / r * (1 + r)
+        Equivalently: PV_due = PV_ordinary * (1 + r)
+
+    Parameters:
+        payment: The periodic payment amount (PMT)
+        discount_rate: The discount rate per period (r), as a decimal
+        periods: Number of periods (n)
+
+    Returns:
+        ValuationResult with computed annuity due present value
+
+    Raises:
+        ValueError: If payment is negative, discount_rate <= -1 or == 0, or periods < 0
+
+    Example:
+        >>> result = annuity_due_pv(payment=1000, discount_rate=0.08, periods=5)
+        >>> result.value  # ~4,312.13
+
+    Book Reference:
+        Chapter 2, Section 2.3 — Annuity Due (payments at beginning of period)
+        Brealey, Myers & Allen, Principles of Corporate Finance, Chapter 2
+    """
+    inputs = TVMInputs(payment=payment, discount_rate=discount_rate, periods=periods)
+
+    if inputs.payment is None or inputs.discount_rate is None or inputs.periods is None:
+        raise ValueError("payment, discount_rate, and periods are required")
+    if inputs.payment < 0:
+        raise ValueError("payment must be non-negative")
+    if inputs.discount_rate <= -1:
+        raise ValueError("discount_rate must be > -1.0")
+    if inputs.periods < 0:
+        raise ValueError("periods must be non-negative")
+
+    pmt = inputs.payment
+    r = inputs.discount_rate
+    n = inputs.periods
+
+    if n == 0:
+        return ValuationResult(
+            value=0.0,
+            method="Present Value of Annuity Due",
+            formula_reference="PV_due = PMT * [1 - (1 + r)^(-n)] / r * (1 + r)",
+            steps=[
+                "Payment (PMT) = $0.00",
+                "Number of Periods (n) = 0",
+                "PV = $0.00 (no payments)",
+            ],
+            assumptions=["Zero periods means no payments are made"],
+        )
+
+    if math.isclose(r, 0.0, abs_tol=1e-12):
+        pv = pmt * n
+        formula_used = "PV_due = PMT * n [special case: r = 0]"
+        steps = [
+            f"Payment (PMT) = ${pmt:,.2f}",
+            f"Discount Rate (r) = 0.00%",
+            f"Number of Periods (n) = {n}",
+            f"Special case: r = 0, PV_due = PMT * n = ${pv:,.2f}",
+        ]
+    else:
+        annuity_factor = (1 - (1 + r) ** (-n)) / r
+        pv = pmt * annuity_factor * (1 + r)
+        formula_used = "PV_due = PMT * [1 - (1 + r)^(-n)] / r * (1 + r)"
+        steps = [
+            f"Payment (PMT) = ${pmt:,.2f}",
+            f"Discount Rate (r) = {r:.2%}",
+            f"Number of Periods (n) = {n}",
+            f"Ordinary Annuity Factor = [1 - (1 + {r})^(-{n})] / {r} = {annuity_factor:,.6f}",
+            f"Annuity Due Adjustment = Ordinary Factor * (1 + {r}) = {annuity_factor * (1 + r):,.6f}",
+            f"PV_due = ${pmt:,.2f} * {annuity_factor * (1 + r):,.6f} = ${pv:,.2f}",
+        ]
+
+    return ValuationResult(
+        value=round(pv, 2),
+        method="Present Value of Annuity Due",
+        formula_reference=formula_used,
+        steps=steps,
+        assumptions=[
+            "Payments occur at the beginning of each period",
+            "Payment amount is constant",
+            "Discount rate is constant across all periods",
+            f"First payment occurs immediately (time 0)",
+        ],
+    )
+
+
+def growing_perpetuity_pv(
+    first_payment: float,
+    discount_rate: float,
+    growth_rate: float,
+) -> ValuationResult:
+    """Calculate the present value of a growing perpetuity.
+
+    A growing perpetuity is a stream of cash flows that continues forever and
+    grows at a constant rate each period. This is the foundation of the Gordon
+    Growth Model used in terminal value calculations.
+
+    Formula:
+        PV = PMT_1 / (r - g)
+        where PMT_1 is the first payment (one period from now)
+
+    Parameters:
+        first_payment: The first period payment amount (PMT_1)
+        discount_rate: The discount rate per period (r), as a decimal
+        growth_rate: The perpetual growth rate (g), as a decimal
+
+    Returns:
+        ValuationResult with computed growing perpetuity present value
+
+    Raises:
+        ValueError: If payment is negative, r <= g, or rates out of valid range
+
+    Example:
+        >>> result = growing_perpetuity_pv(first_payment=100, discount_rate=0.10, growth_rate=0.03)
+        >>> result.value  # ~1,428.57
+
+    Book Reference:
+        Chapter 2, Section 2.6 — Gordon Growth Model
+        Damodaran, Investment Valuation: Chapter on perpetuity valuation
+    """
+    inputs = TVMInputs(
+        payment=first_payment, discount_rate=discount_rate, growth_rate=growth_rate,
+    )
+
+    if inputs.payment is None or inputs.discount_rate is None or inputs.growth_rate is None:
+        raise ValueError("first_payment, discount_rate, and growth_rate are required")
+    if inputs.payment < 0:
+        raise ValueError("first_payment must be non-negative")
+    if inputs.discount_rate <= -1:
+        raise ValueError("discount_rate must be > -1.0")
+    if inputs.growth_rate < -1:
+        raise ValueError("growth_rate must be >= -1.0")
+    if inputs.discount_rate <= inputs.growth_rate:
+        raise ValueError(
+            f"discount_rate ({inputs.discount_rate:.2%}) must be greater than "
+            f"growth_rate ({inputs.growth_rate:.2%}) for convergence"
+        )
+
+    pmt = inputs.payment
+    r = inputs.discount_rate
+    g = inputs.growth_rate
+
+    pv = pmt / (r - g)
+
+    return ValuationResult(
+        value=round(pv, 2),
+        method="Present Value of Growing Perpetuity",
+        formula_reference="PV = PMT_1 / (r - g)",
+        steps=[
+            f"First Payment (PMT_1) = ${pmt:,.2f}",
+            f"Discount Rate (r) = {r:.2%}",
+            f"Growth Rate (g) = {g:.2%}",
+            f"Denominator (r - g) = {r:.2%} - {g:.2%} = {r - g:.2%}",
+            f"PV = ${pmt:,.2f} / {r - g:.4f} = ${pv:,.2f}",
+        ],
+        assumptions=[
+            "Payments grow at constant rate g forever",
+            "Discount rate exceeds growth rate (r > g) for convergence",
+            "First payment occurs one period from now",
+            "Growth rate is sustainable in perpetuity (typically <= long-term GDP growth)",
+        ],
+    )
+
+
+def effective_annual_rate(
+    nominal_rate: float,
+    compounding_periods: int,
+) -> ValuationResult:
+    """Calculate the Effective Annual Rate (EAR) from a nominal rate.
+
+    The EAR accounts for the effect of compounding within a year. A nominal rate
+    compounded more frequently than annually produces a higher effective rate.
+
+    Formula:
+        EAR = (1 + r/n)^n - 1
+        where r = nominal annual rate, n = compounding periods per year
+
+    Parameters:
+        nominal_rate: The nominal annual interest rate (r), as a decimal
+        compounding_periods: Number of compounding periods per year (n)
+
+    Returns:
+        ValuationResult with computed effective annual rate
+
+    Raises:
+        ValueError: If nominal_rate < -1 or compounding_periods < 1
+
+    Example:
+        >>> result = effective_annual_rate(nominal_rate=0.12, compounding_periods=12)
+        >>> result.value  # ~0.1268 (12.68%)
+
+    Book Reference:
+        Chapter 2, Section 2.2 — Effective Annual Rate
+        Brealey, Myers & Allen, Principles of Corporate Finance, Chapter 2
+    """
+    if nominal_rate < -1:
+        raise ValueError("nominal_rate must be >= -1.0")
+    if compounding_periods < 1:
+        raise ValueError("compounding_periods must be at least 1")
+    if nominal_rate > 10.0:
+        raise ValueError("nominal_rate must be <= 10.0 (1000%)")
+
+    n = compounding_periods
+    r = nominal_rate
+
+    ear = (1 + r / n) ** n - 1
+
+    compounding_labels = {
+        1: "Annual",
+        2: "Semi-annual",
+        4: "Quarterly",
+        12: "Monthly",
+        365: "Daily",
+        8760: "Hourly",
+    }
+    freq_label = compounding_labels.get(n, f"{n} times per year")
+
+    return ValuationResult(
+        value=round(ear, 6),
+        method="Effective Annual Rate",
+        formula_reference="EAR = (1 + r/n)^n - 1",
+        steps=[
+            f"Nominal Rate (r) = {r:.2%}",
+            f"Compounding Frequency (n) = {n} ({freq_label})",
+            f"Periodic Rate = {r:.2%} / {n} = {r / n:.6f}",
+            f"EAR = (1 + {r / n:.6f})^{n} - 1 = {ear:.6f}",
+            f"EAR = {ear:.2%}",
+        ],
+        assumptions=[
+            f"Nominal rate of {r:.2%} compounded {freq_label.lower()}",
+            "Compounding occurs at regular intervals",
+            "Rate is constant throughout the year",
+        ],
+    )
+
+
+def continuous_compounding(
+    principal: float,
+    rate: float,
+    time: float,
+) -> ValuationResult:
+    """Calculate future value with continuous compounding.
+
+    Continuous compounding assumes that interest is compounded an infinite number
+    of times per period, using the mathematical constant e. This represents the
+    theoretical limit of compounding frequency.
+
+    Formula:
+        FV = PV * e^(r*t)
+        where e = Euler's number (~2.71828)
+
+    Parameters:
+        principal: The present value / initial investment (PV)
+        rate: The annual interest rate (r), as a decimal
+        time: The time period in years (t)
+
+    Returns:
+        ValuationResult with computed future value
+
+    Raises:
+        ValueError: If principal is negative, rate < -1, or time < 0
+
+    Example:
+        >>> result = continuous_compounding(principal=1000, rate=0.05, time=3)
+        >>> result.value  # ~1,161.83
+
+    Book Reference:
+        Chapter 2, Section 2.2 — Continuous Compounding
+        Hull, Options, Futures and Other Derivatives: Chapter on continuous compounding
+    """
+    if principal < 0:
+        raise ValueError("principal must be non-negative")
+    if rate < -1:
+        raise ValueError("rate must be >= -1.0")
+    if time < 0:
+        raise ValueError("time must be non-negative")
+    if math.isnan(principal):
+        raise ValueError("principal cannot be NaN")
+
+    pv = principal
+    r = rate
+    t = time
+
+    if t == 0:
+        fv = pv
+        steps = [
+            f"Principal (PV) = ${pv:,.2f}",
+            f"Rate (r) = {r:.2%}",
+            f"Time (t) = 0 years",
+            f"FV = ${pv:,.2f} (no time elapsed)",
+        ]
+    else:
+        exponent = r * t
+        compounding_factor = math.exp(exponent)
+        fv = pv * compounding_factor
+        steps = [
+            f"Principal (PV) = ${pv:,.2f}",
+            f"Rate (r) = {r:.2%}",
+            f"Time (t) = {t} years",
+            f"Exponent (r * t) = {r} * {t} = {exponent:.6f}",
+            f"e^(rt) = e^{exponent:.6f} = {compounding_factor:.6f}",
+            f"FV = ${pv:,.2f} * {compounding_factor:.6f} = ${fv:,.2f}",
+        ]
+
+    return ValuationResult(
+        value=round(fv, 2),
+        method="Continuous Compounding",
+        formula_reference="FV = PV * e^(r*t)",
+        steps=steps,
+        assumptions=[
+            "Interest compounds continuously (infinite frequency)",
+            "Rate is constant over the entire time period",
+            "No intermediate withdrawals or additions",
+            f"Time horizon is {t} years",
+        ],
+    )

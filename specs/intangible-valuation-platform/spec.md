@@ -1,7 +1,7 @@
 # Intangible Asset Valuation Platform
 
-Status: Draft
-Version: 1.0
+Status: Approved
+Version: 2.0
 Last updated: 2026-05-20
 
 ## Overview
@@ -9,7 +9,7 @@ Last updated: 2026-05-20
 A Python library, MCP server, and AI-Agent Skills that implements every calculation methodology,
 formula, and framework from "Intangible Asset Valuation" (Ascent Partners, 2025, 19 chapters + 3 appendices).
 The platform provides programmatic, testable, and AI-accessible valuation calculations for
-all intangible asset types covered in the book.
+all intangible asset types covered in the book, plus advanced methods from professional practice.
 
 ## User Stories
 
@@ -318,6 +318,154 @@ Then it guides the user through the full PPA process: identify assets → value 
 Given an asset or reporting unit
 When the AI agent loads the impairment-checker skill
 Then it guides the user through impairment testing with appropriate methodology selection
+
+### Error Handling
+
+### Advanced Core Methods (Enhanced)
+
+### AC-50: Graduated Discount Rate PV [SHOULD]
+Given cash flows with period-specific discount rates (yield curve)
+When the user calls present_value_graduated()
+Then the function returns the PV using each period's specific rate
+
+### AC-51: Annuity Due [SHOULD]
+Given payment, discount rate, and periods for beginning-of-period payments
+When the user calls annuity_due_pv()
+Then the function returns PV = PMT * [(1 - (1+r)^-n) / r] * (1+r)
+
+### AC-52: Growing Perpetuity [SHOULD]
+Given first payment, discount rate, and growth rate
+When the user calls growing_perpetuity_pv()
+Then the function returns PV = PMT / (r - g)
+
+### AC-53: Effective Annual Rate [SHOULD]
+Given nominal rate and compounding frequency
+When the user calls effective_annual_rate()
+Then the function returns EAR = (1 + r/n)^n - 1
+
+### AC-54: Continuous Compounding [SHOULD]
+Given principal, rate, and time
+When the user calls continuous_compounding()
+Then the function returns FV = PV * e^(rt)
+
+### AC-55: WACC with Preferred Stock [SHOULD]
+Given equity, debt, preferred values and their respective costs
+When the user calls wacc_with_preferred()
+Then the function returns WACC including preferred stock in capital structure
+
+### AC-56: Beta Unlevering/Relevering [SHOULD]
+Given levered beta, D/E ratio, and tax rate
+When the user calls beta_unlevered() or beta_relevered()
+Then the function returns the unlevered/relevered beta using Hamada equation
+
+### AC-57: Fama-French 3-Factor Cost of Equity [SHOULD]
+Given market beta, SMB beta, HML beta, and respective premiums
+When the user calls cost_of_equity_fama_french()
+Then the function returns cost of equity using Fama-French model
+
+### AC-58: Implied ERP from Market P/E [SHOULD]
+Given market P/E ratio and perpetual growth rate
+When the user calls implied_erp()
+Then the function returns implied equity risk premium
+
+### AC-59: Monte Carlo with Correlated Inputs [SHOULD]
+Given input distributions and correlation matrix
+When the user calls monte_carlo_with_correlation()
+Then the function returns simulation results using Cholesky decomposition
+
+### AC-60: Scenario Analysis [SHOULD]
+Given multiple scenarios with probabilities and parameters
+When the user calls scenario_analysis()
+Then the function returns probability-weighted expected value
+
+### AC-61: Sensitivity Tornado [SHOULD]
+Given base parameters and ranges for each parameter
+When the user calls sensitivity_tornado()
+Then the function returns tornado diagram data sorted by impact
+
+### Enhanced Asset Type Methods
+
+### AC-62: Patent Portfolio Valuation [SHOULD]
+Given a portfolio of patents with individual values
+When the user calls patent_portfolio_valuation()
+Then the function returns total portfolio value with diversification adjustment
+
+### AC-63: Real Options Patent Valuation [SHOULD]
+Given exercise cost, expected value, volatility, time to expiry
+When the user calls option_pricing_patent()
+Then the function returns patent value using Black-Scholes approximation
+
+### AC-64: Interbrand Brand Valuation [SHOULD]
+Given brand earnings, role of brand index, brand strength score
+When the user calls interbrand_brand_valuation()
+Then the function returns brand value using Interbrand methodology
+
+### AC-65: Brand Strength Index [SHOULD]
+Given revenue stability, market share, geographic reach, loyalty, investment
+When the user calls brand_strength_index()
+Then the function returns composite brand strength score (0-100)
+
+### AC-66: Customer Lifetime Value [SHOULD]
+Given revenue per period, retention rate, discount rate, margin
+When the user calls customer_lifetime_value()
+Then the function returns infinite-horizon CLV
+
+### AC-67: Order Backlog Valuation [SHOULD]
+Given contract backlog, completion probabilities, discount rate
+When the user calls backlog_valuation()
+Then the function returns risk-adjusted PV of backlog
+
+### AC-68: Churn Impact Analysis [SHOULD]
+Given churn rates before/after, customer count, revenue per customer
+When the user calls churn_impact_analysis()
+Then the function returns value impact of churn change
+
+### AC-69: Technology Obsolescence Curve [SHOULD]
+Given initial value, obsolescence rate, projection periods
+When the user calls technology_obsolescence_curve()
+Then the function returns technology value decay over time
+
+### AC-70: API Valuation [SHOULD]
+Given API call volume, revenue per call, growth rate
+When the user calls api_valuation()
+Then the function returns API asset value via income approach
+
+### Enhanced Advanced Methods
+
+### AC-71: Value in Use (IAS 36) [SHOULD]
+Given cash flow projections, terminal growth rate, discount rate
+When the user calls value_in_use()
+Then the function returns IAS 36 value in use with terminal value
+
+### AC-72: CGU Impairment Allocation [SHOULD]
+Given CGU carrying value, recoverable amount, allocated goodwill
+When the user calls cash_generating_unit_impairment()
+Then the function returns impairment allocated to goodwill first, then pro rata
+
+### AC-73: Contingent Consideration Valuation [SHOULD]
+Given earn-out scenarios with probabilities and discount rate
+When the user calls contingent_consideration_valuation()
+Then the function returns probability-weighted earn-out value
+
+### AC-74: Deferred Tax Liability from PPA [SHOULD]
+Given identified intangibles, tax basis, statutory rate
+When the user calls deferred_tax_liability_ppa()
+Then the function returns DTL from PPA step-up
+
+### AC-75: Bargain Purchase Analysis [SHOULD]
+Given purchase price below fair value of net assets
+When the user calls bargain_purchase_analysis()
+Then the function returns bargain purchase amount with documentation
+
+### AC-76: Amortization Schedules [SHOULD]
+Given asset value and useful life
+When the user calls straight_line_amortization(), sum_of_years_digits_amortization(), or double_declining_balance_amortization()
+Then the function returns the complete amortization schedule
+
+### AC-77: Profit Split Method [SHOULD]
+Given licensor and licensee contribution percentages
+When the user calls profit_split_method()
+Then the function returns royalty using OECD profit split approach
 
 ### Error Handling
 

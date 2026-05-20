@@ -4,6 +4,8 @@ import pytest
 
 from src.asset_types.ip_valuation import (
     copyright_valuation,
+    option_pricing_patent,
+    patent_portfolio_valuation,
     patent_valuation,
     trade_secret_valuation,
 )
@@ -216,3 +218,177 @@ class TestTradeSecretValuation:
                 discount_rate=0.10,
                 secrecy_probability=0.8,
             )
+
+
+class TestPatentPortfolioValuation:
+    """Tests for patent_portfolio_valuation function."""
+
+    def test_happy_path_basic(self):
+        patents = [
+            {"value": 1000000, "category": "pharma"},
+            {"value": 500000, "category": "tech"},
+            {"value": 750000, "category": "pharma"},
+        ]
+        result = patent_portfolio_valuation(patents)
+        assert result["value"] > 0
+        assert "Portfolio" in result["method"]
+        assert "hhi" in result["assumptions"]
+
+    def test_happy_path_single_category(self):
+        patents = [
+            {"value": 1000000, "category": "pharma"},
+            {"value": 500000, "category": "pharma"},
+        ]
+        result = patent_portfolio_valuation(patents)
+        assert result["value"] > 0
+        assert result["assumptions"]["num_categories"] == 1
+
+    def test_happy_path_diversified(self):
+        patents = [
+            {"value": 500000, "category": "pharma"},
+            {"value": 500000, "category": "tech"},
+            {"value": 500000, "category": "mfg"},
+            {"value": 500000, "category": "chem"},
+        ]
+        result = patent_portfolio_valuation(patents)
+        diversified_value = result["value"]
+        concentrated = patent_portfolio_valuation([
+            {"value": 2000000, "category": "pharma"},
+        ])
+        assert diversified_value > concentrated["value"]
+
+    def test_happy_path_no_categories(self):
+        patents = [
+            {"value": 1000000},
+            {"value": 500000},
+        ]
+        result = patent_portfolio_valuation(patents)
+        assert result["value"] > 0
+        assert result["assumptions"]["num_categories"] == 1
+
+    def test_error_empty_patents(self):
+        with pytest.raises(ValueError):
+            patent_portfolio_valuation([])
+
+    def test_error_negative_value(self):
+        with pytest.raises(ValueError):
+            patent_portfolio_valuation([{"value": -1000}])
+
+    def test_error_missing_value(self):
+        with pytest.raises(ValueError):
+            patent_portfolio_valuation([{"category": "pharma"}])
+
+
+class TestOptionPricingPatent:
+    """Tests for option_pricing_patent function."""
+
+    def test_happy_path_basic(self):
+        result = option_pricing_patent(
+            exercise_cost=5_000_000,
+            expected_value=10_000_000,
+            volatility=0.40,
+            time_to_expiry=10,
+            risk_free_rate=0.03,
+        )
+        assert result["value"] > 0
+        assert "Black-Scholes" in result["method"]
+        assert "d1" in result["assumptions"]
+        assert "d2" in result["assumptions"]
+
+    def test_happy_path_deep_in_the_money(self):
+        result = option_pricing_patent(
+            exercise_cost=1_000_000,
+            expected_value=20_000_000,
+            volatility=0.30,
+            time_to_expiry=15,
+            risk_free_rate=0.04,
+        )
+        assert result["value"] > 0
+        assert result["value"] > 10_000_000
+
+    def test_happy_path_out_of_the_money(self):
+        result = option_pricing_patent(
+            exercise_cost=20_000_000,
+            expected_value=10_000_000,
+            volatility=0.50,
+            time_to_expiry=10,
+            risk_free_rate=0.03,
+        )
+        assert result["value"] >= 0
+
+    def test_happy_path_high_volatility(self):
+        result = option_pricing_patent(
+            exercise_cost=5_000_000,
+            expected_value=8_000_000,
+            volatility=0.80,
+            time_to_expiry=10,
+            risk_free_rate=0.03,
+        )
+        low_vol = option_pricing_patent(
+            exercise_cost=5_000_000,
+            expected_value=8_000_000,
+            volatility=0.20,
+            time_to_expiry=10,
+            risk_free_rate=0.03,
+        )
+        assert result["value"] > low_vol["value"]
+
+    def test_error_zero_exercise_cost(self):
+        with pytest.raises(ValueError):
+            option_pricing_patent(
+                exercise_cost=0,
+                expected_value=10_000_000,
+                volatility=0.40,
+                time_to_expiry=10,
+                risk_free_rate=0.03,
+            )
+
+    def test_error_zero_expected_value(self):
+        with pytest.raises(ValueError):
+            option_pricing_patent(
+                exercise_cost=5_000_000,
+                expected_value=0,
+                volatility=0.40,
+                time_to_expiry=10,
+                risk_free_rate=0.03,
+            )
+
+    def test_error_invalid_volatility(self):
+        with pytest.raises(ValueError):
+            option_pricing_patent(
+                exercise_cost=5_000_000,
+                expected_value=10_000_000,
+                volatility=2.5,
+                time_to_expiry=10,
+                risk_free_rate=0.03,
+            )
+
+    def test_error_zero_time(self):
+        with pytest.raises(ValueError):
+            option_pricing_patent(
+                exercise_cost=5_000_000,
+                expected_value=10_000_000,
+                volatility=0.40,
+                time_to_expiry=0,
+                risk_free_rate=0.03,
+            )
+
+    def test_error_negative_risk_free_rate(self):
+        with pytest.raises(ValueError):
+            option_pricing_patent(
+                exercise_cost=5_000_000,
+                expected_value=10_000_000,
+                volatility=0.40,
+                time_to_expiry=10,
+                risk_free_rate=-0.01,
+            )
+
+    def test_returns_steps(self):
+        result = option_pricing_patent(
+            exercise_cost=5_000_000,
+            expected_value=10_000_000,
+            volatility=0.40,
+            time_to_expiry=10,
+            risk_free_rate=0.03,
+        )
+        assert len(result["steps"]) > 5

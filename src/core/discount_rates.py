@@ -628,3 +628,467 @@ def currency_adjusted_discount_rate(
             "Premiums are additive (no interaction effects)",
         ],
     )
+
+
+def wacc_with_preferred(
+    equity_value: float,
+    debt_value: float,
+    preferred_value: float,
+    cost_of_equity: float,
+    cost_of_debt: float,
+    cost_of_preferred: float,
+    tax_rate: float,
+) -> ValuationResult:
+    """Calculate WACC including preferred stock in the capital structure.
+
+    Extends the standard WACC formula to include preferred equity, which has
+    different tax treatment than debt (preferred dividends are not tax-deductible).
+
+    Formula:
+        WACC = (E/V) * Re + (D/V) * Rd * (1 - Tc) + (P/V) * Rp
+        where V = E + D + P
+
+    Parameters:
+        equity_value: Market value of common equity (E)
+        debt_value: Market value of debt (D)
+        preferred_value: Market value of preferred stock (P)
+        cost_of_equity: Cost of common equity (Re)
+        cost_of_debt: Pre-tax cost of debt (Rd)
+        cost_of_preferred: Cost of preferred stock (Rp)
+        tax_rate: Corporate tax rate (Tc)
+
+    Returns:
+        ValuationResult with computed WACC
+
+    Raises:
+        ValueError: If total capital is zero or values are negative
+
+    Example:
+        >>> result = wacc_with_preferred(
+        ...     equity_value=600, debt_value=300, preferred_value=100,
+        ...     cost_of_equity=0.12, cost_of_debt=0.06, cost_of_preferred=0.08,
+        ...     tax_rate=0.25,
+        ... )
+
+    Book Reference:
+        Chapter 2, Section 2.9 — WACC with Preferred Stock
+        Pratt, Cost of Capital: Estimation and Applications, Chapter 5
+    """
+    inputs = DiscountRateInputs(
+        equity_value=equity_value,
+        debt_value=debt_value,
+        cost_of_equity=cost_of_equity,
+        cost_of_debt=cost_of_debt,
+        tax_rate=tax_rate,
+    )
+
+    e = inputs.equity_value
+    d = inputs.debt_value
+    re = inputs.cost_of_equity
+    rd = inputs.cost_of_debt
+    tc = inputs.tax_rate
+
+    if e is None or d is None or re is None or rd is None:
+        raise ValueError("equity_value, debt_value, cost_of_equity, and cost_of_debt are required")
+    if e < 0 or d < 0 or preferred_value < 0:
+        raise ValueError("equity_value, debt_value, and preferred_value must be non-negative")
+    v = e + d + preferred_value
+    if v == 0:
+        raise ValueError("Total capital (equity + debt + preferred) must be positive")
+    if tc < 0 or tc > 1:
+        raise ValueError("tax_rate must be between 0 and 1")
+    if cost_of_preferred < -1:
+        raise ValueError("cost_of_preferred must be >= -1.0")
+
+    we = e / v
+    wd = d / v
+    wp = preferred_value / v
+    after_tax_debt = rd * (1 - tc)
+    result = we * re + wd * after_tax_debt + wp * cost_of_preferred
+
+    return ValuationResult(
+        value=round(result, 6),
+        method="WACC with Preferred Stock",
+        formula_reference="WACC = (E/V)*Re + (D/V)*Rd*(1-Tc) + (P/V)*Rp",
+        steps=[
+            f"Equity Value (E) = ${e:,.2f}",
+            f"Debt Value (D) = ${d:,.2f}",
+            f"Preferred Value (P) = ${preferred_value:,.2f}",
+            f"Total Capital (V) = ${v:,.2f}",
+            f"Weight of Equity (E/V) = {we:.4f}",
+            f"Weight of Debt (D/V) = {wd:.4f}",
+            f"Weight of Preferred (P/V) = {wp:.4f}",
+            f"Cost of Equity (Re) = {re:.2%}",
+            f"Pre-tax Cost of Debt (Rd) = {rd:.2%}",
+            f"After-tax Cost of Debt = {rd:.2%} * (1 - {tc:.2%}) = {after_tax_debt:.2%}",
+            f"Cost of Preferred (Rp) = {cost_of_preferred:.2%}",
+            f"WACC = {we:.4f}*{re:.2%} + {wd:.4f}*{after_tax_debt:.2%} + {wp:.4f}*{cost_of_preferred:.2%} = {result:.2%}",
+        ],
+        assumptions=[
+            "Capital structure weights are based on market values",
+            "Cost of debt is the pre-tax yield to maturity",
+            "Preferred dividends are not tax-deductible",
+            "Tax shield from debt interest is fully utilized",
+            "Capital structure is stable over the projection period",
+        ],
+    )
+
+
+def build_up_with_country_risk(
+    risk_free_rate: float,
+    erp: float,
+    size_premium: float = 0.0,
+    industry_premium: float = 0.0,
+    specific_premium: float = 0.0,
+    country_risk_premium: float = 0.0,
+) -> ValuationResult:
+    """Calculate discount rate using build-up method with country risk adjustment.
+
+    Extends the standard build-up method to include a country risk premium (CRP),
+    which is essential for valuations in emerging markets or cross-border transactions.
+
+    Formula:
+        r = Rf + ERP + Size Premium + Industry Premium + Specific Premium + Country Risk Premium
+
+    Parameters:
+        risk_free_rate: Risk-free rate (Rf), typically government bond yield
+        erp: Equity risk premium for developed market
+        size_premium: Additional premium for company size risk (default 0)
+        industry_premium: Additional premium for industry-specific risk (default 0)
+        specific_premium: Company-specific risk premium (default 0)
+        country_risk_premium: Sovereign/country risk premium (default 0)
+
+    Returns:
+        ValuationResult with computed discount rate
+
+    Raises:
+        ValueError: If risk_free_rate or erp is negative
+
+    Example:
+        >>> result = build_up_with_country_risk(
+        ...     risk_free_rate=0.04, erp=0.06, size_premium=0.02,
+        ...     country_risk_premium=0.03,
+        ... )
+        >>> result.value  # 0.15 (15%)
+
+    Book Reference:
+        Chapter 2, Section 2.7 — Build-Up Method with Country Risk
+        Damodaran, Investment Valuation: Chapter on country risk premiums
+    """
+    inputs = DiscountRateInputs(
+        risk_free_rate=risk_free_rate,
+        equity_risk_premium=erp,
+        size_premium=size_premium,
+        industry_risk_premium=industry_premium,
+        specific_risk_premium=specific_premium,
+        country_risk_premium=country_risk_premium,
+    )
+
+    rf = inputs.risk_free_rate
+    equity_rp = inputs.equity_risk_premium
+    sp = inputs.size_premium
+    irp = inputs.industry_risk_premium
+    srp = inputs.specific_risk_premium
+    crp = inputs.country_risk_premium
+
+    if rf is None or equity_rp is None:
+        raise ValueError("risk_free_rate and erp are required")
+    if rf < 0:
+        raise ValueError("risk_free_rate must be non-negative")
+    if equity_rp < 0:
+        raise ValueError("erp must be non-negative")
+    if crp < 0:
+        raise ValueError("country_risk_premium must be non-negative")
+
+    rate = rf + equity_rp + sp + irp + srp + crp
+
+    return ValuationResult(
+        value=round(rate, 6),
+        method="Build-Up with Country Risk",
+        formula_reference="r = Rf + ERP + Size + Industry + Specific + Country RP",
+        steps=[
+            f"Risk-Free Rate (Rf) = {rf:.2%}",
+            f"Equity Risk Premium (ERP) = {equity_rp:.2%}",
+            f"Size Premium = {sp:.2%}",
+            f"Industry Risk Premium = {irp:.2%}",
+            f"Specific Risk Premium = {srp:.2%}",
+            f"Country Risk Premium = {crp:.2%}",
+            f"Discount Rate = {rf:.2%} + {equity_rp:.2%} + {sp:.2%} + {irp:.2%} + {srp:.2%} + {crp:.2%} = {rate:.2%}",
+        ],
+        assumptions=[
+            "Risk-free rate reflects long-term government bond yield",
+            "Equity risk premium is for a developed market baseline",
+            "Country risk premium captures sovereign and political risk",
+            "All risk premiums are additive (no interaction effects)",
+        ],
+    )
+
+
+def implied_erp(
+    market_pe_ratio: float,
+    perpetual_growth_rate: float,
+) -> ValuationResult:
+    """Calculate the implied Equity Risk Premium from market P/E ratio.
+
+    Uses the inverse of the P/E ratio (earnings yield) minus the risk-free rate
+    to derive the market-implied equity risk premium. Based on the Gordon Growth
+    relationship where E/P = r - g.
+
+    Formula:
+        Earnings Yield = 1 / P/E
+        Implied ERP = Earnings Yield - Risk-Free Rate (embedded)
+        Or: Implied ERP = (1 / P/E) - g - Rf (when Rf is separated)
+        Simplified: Implied ERP = (1 / P/E) - g (total expected return minus growth)
+
+    Parameters:
+        market_pe_ratio: Current market P/E ratio (price-to-earnings)
+        perpetual_growth_rate: Expected long-term earnings growth rate (g)
+
+    Returns:
+        ValuationResult with computed implied ERP
+
+    Raises:
+        ValueError: If P/E ratio is non-positive or growth rate >= earnings yield
+
+    Example:
+        >>> result = implied_erp(market_pe_ratio=20, perpetual_growth_rate=0.03)
+        >>> result.value  # 0.02 (2% implied ERP above risk-free)
+
+    Book Reference:
+        Chapter 2, Section 2.8 — Implied ERP from Market Multiples
+        Damodaran, Investment Valuation: Chapter on implied cost of capital
+    """
+    if market_pe_ratio <= 0:
+        raise ValueError("market_pe_ratio must be positive")
+    if perpetual_growth_rate < -1:
+        raise ValueError("perpetual_growth_rate must be >= -1.0")
+    if perpetual_growth_rate >= 1.0:
+        raise ValueError("perpetual_growth_rate must be < 1.0 (100%)")
+
+    earnings_yield = 1.0 / market_pe_ratio
+    implied_total_return = earnings_yield + perpetual_growth_rate
+    implied_erp_value = earnings_yield - perpetual_growth_rate
+
+    return ValuationResult(
+        value=round(implied_erp_value, 6),
+        method="Implied Equity Risk Premium",
+        formula_reference="Implied ERP = (1 / P/E) - g",
+        steps=[
+            f"Market P/E Ratio = {market_pe_ratio:.2f}x",
+            f"Earnings Yield (E/P) = 1 / {market_pe_ratio:.2f} = {earnings_yield:.4f} ({earnings_yield:.2%})",
+            f"Perpetual Growth Rate (g) = {perpetual_growth_rate:.2%}",
+            f"Implied Total Return = {earnings_yield:.2%} + {perpetual_growth_rate:.2%} = {implied_total_return:.2%}",
+            f"Implied ERP = {earnings_yield:.2%} - {perpetual_growth_rate:.2%} = {implied_erp_value:.2%}",
+        ],
+        assumptions=[
+            "Market P/E ratio reflects current equilibrium valuation",
+            "Earnings growth rate is sustainable in perpetuity",
+            "Gordon Growth model assumptions apply",
+            "Market is fairly valued at current levels",
+        ],
+    )
+
+
+def beta_unlevered(
+    beta_levered: float,
+    debt_to_equity: float,
+    tax_rate: float,
+) -> ValuationResult:
+    """Calculate unlevered (asset) beta using the Hamada equation.
+
+    Unlevering removes the financial risk component from beta, isolating the
+    pure business risk. This is used to compare companies with different capital
+    structures or to derive beta from comparable companies.
+
+    Formula (Hamada):
+        Beta_unlevered = Beta_levered / [1 + (1 - Tc) * (D/E)]
+
+    Parameters:
+        beta_levered: The levered (equity) beta
+        debt_to_equity: Debt-to-equity ratio (D/E)
+        tax_rate: Corporate tax rate (Tc)
+
+    Returns:
+        ValuationResult with computed unlevered beta
+
+    Raises:
+        ValueError: If inputs are invalid
+
+    Example:
+        >>> result = beta_unlevered(beta_levered=1.2, debt_to_equity=0.5, tax_rate=0.25)
+        >>> result.value  # ~0.8696
+
+    Book Reference:
+        Chapter 2, Section 2.8 — Hamada Equation for Beta Unlevering
+        Damodaran, Investment Valuation: Chapter on beta estimation
+    """
+    if debt_to_equity < 0:
+        raise ValueError("debt_to_equity must be non-negative")
+    if tax_rate < 0 or tax_rate > 1:
+        raise ValueError("tax_rate must be between 0 and 1")
+
+    tax_shield = 1 + (1 - tax_rate) * debt_to_equity
+    beta_u = beta_levered / tax_shield
+
+    return ValuationResult(
+        value=round(beta_u, 6),
+        method="Unlevered Beta (Hamada)",
+        formula_reference="Beta_unlevered = Beta_levered / [1 + (1 - Tc) * (D/E)]",
+        steps=[
+            f"Levered Beta = {beta_levered:.4f}",
+            f"Debt-to-Equity Ratio (D/E) = {debt_to_equity:.4f}",
+            f"Tax Rate (Tc) = {tax_rate:.2%}",
+            f"Tax Shield Factor = 1 + (1 - {tax_rate:.2%}) * {debt_to_equity:.4f} = {tax_shield:.4f}",
+            f"Unlevered Beta = {beta_levered:.4f} / {tax_shield:.4f} = {beta_u:.4f}",
+        ],
+        assumptions=[
+            "Debt beta is zero (debt has no systematic risk)",
+            "Tax shield is fully utilized",
+            "Capital structure is stable",
+            "Hamada equation assumptions hold",
+        ],
+    )
+
+
+def beta_relevered(
+    beta_unlevered: float,
+    target_debt_to_equity: float,
+    tax_rate: float,
+) -> ValuationResult:
+    """Calculate relevered beta for a target capital structure.
+
+    Relevering applies the target capital structure's financial risk to the
+    unlevered beta, producing the equity beta appropriate for the subject company.
+
+    Formula (Hamada):
+        Beta_relevered = Beta_unlevered * [1 + (1 - Tc) * (D/E_target)]
+
+    Parameters:
+        beta_unlevered: The unlevered (asset) beta
+        target_debt_to_equity: Target debt-to-equity ratio
+        tax_rate: Corporate tax rate (Tc)
+
+    Returns:
+        ValuationResult with computed relevered beta
+
+    Raises:
+        ValueError: If inputs are invalid
+
+    Example:
+        >>> result = beta_relevered(beta_unlevered=0.87, target_debt_to_equity=0.6, tax_rate=0.25)
+        >>> result.value  # ~1.2615
+
+    Book Reference:
+        Chapter 2, Section 2.8 — Hamada Equation for Beta Relevering
+        Used when applying comparable company betas to subject company
+    """
+    if target_debt_to_equity < 0:
+        raise ValueError("target_debt_to_equity must be non-negative")
+    if tax_rate < 0 or tax_rate > 1:
+        raise ValueError("tax_rate must be between 0 and 1")
+
+    tax_shield = 1 + (1 - tax_rate) * target_debt_to_equity
+    beta_l = beta_unlevered * tax_shield
+
+    return ValuationResult(
+        value=round(beta_l, 6),
+        method="Relevered Beta (Hamada)",
+        formula_reference="Beta_relevered = Beta_unlevered * [1 + (1 - Tc) * (D/E_target)]",
+        steps=[
+            f"Unlevered Beta = {beta_unlevered:.4f}",
+            f"Target Debt-to-Equity (D/E) = {target_debt_to_equity:.4f}",
+            f"Tax Rate (Tc) = {tax_rate:.2%}",
+            f"Tax Shield Factor = 1 + (1 - {tax_rate:.2%}) * {target_debt_to_equity:.4f} = {tax_shield:.4f}",
+            f"Relevered Beta = {beta_unlevered:.4f} * {tax_shield:.4f} = {beta_l:.4f}",
+        ],
+        assumptions=[
+            "Debt beta is zero (debt has no systematic risk)",
+            "Tax shield is fully utilized at target capital structure",
+            "Business risk (unlevered beta) is unchanged by capital structure",
+            "Hamada equation assumptions hold",
+        ],
+    )
+
+
+def cost_of_equity_fama_french(
+    risk_free_rate: float,
+    market_beta: float,
+    smb_beta: float,
+    hml_beta: float,
+    market_premium: float,
+    smb_premium: float,
+    hml_premium: float,
+) -> ValuationResult:
+    """Calculate cost of equity using the Fama-French 3-factor model.
+
+    Extends CAPM by adding size (SMB: Small Minus Big) and value (HML: High Minus Low)
+    factors to capture additional sources of systematic risk not explained by market beta alone.
+
+    Formula:
+        Re = Rf + beta_mkt * (Rm - Rf) + beta_smb * SMB + beta_hml * HML
+
+    Parameters:
+        risk_free_rate: Risk-free rate (Rf)
+        market_beta: Market factor beta (sensitivity to market excess return)
+        smb_beta: Size factor beta (sensitivity to SMB factor)
+        hml_beta: Value factor beta (sensitivity to HML factor)
+        market_premium: Market risk premium (Rm - Rf)
+        smb_premium: Size premium (expected SMB factor return)
+        hml_premium: Value premium (expected HML factor return)
+
+    Returns:
+        ValuationResult with computed cost of equity
+
+    Raises:
+        ValueError: If risk_free_rate is negative or premiums are invalid
+
+    Example:
+        >>> result = cost_of_equity_fama_french(
+        ...     risk_free_rate=0.04, market_beta=1.1, smb_beta=0.5, hml_beta=0.3,
+        ...     market_premium=0.06, smb_premium=0.03, hml_premium=0.04,
+        ... )
+        >>> result.value  # ~0.125 (12.5%)
+
+    Book Reference:
+        Chapter 2, Section 2.8 — Fama-French 3-Factor Model
+        Fama & French (1993), "Common Risk Factors in the Returns on Stocks and Bonds"
+    """
+    inputs = DiscountRateInputs(
+        risk_free_rate=risk_free_rate,
+    )
+
+    rf = inputs.risk_free_rate
+    if rf is None:
+        raise ValueError("risk_free_rate is required")
+    if rf < -1:
+        raise ValueError("risk_free_rate must be >= -1.0")
+
+    market_contribution = market_beta * market_premium
+    smb_contribution = smb_beta * smb_premium
+    hml_contribution = hml_beta * hml_premium
+    cost_of_equity = rf + market_contribution + smb_contribution + hml_contribution
+
+    return ValuationResult(
+        value=round(cost_of_equity, 6),
+        method="Fama-French 3-Factor Model",
+        formula_reference="Re = Rf + beta_mkt*(Rm-Rf) + beta_smb*SMB + beta_hml*HML",
+        steps=[
+            f"Risk-Free Rate (Rf) = {rf:.2%}",
+            f"Market Beta = {market_beta:.4f}",
+            f"Market Premium = {market_premium:.2%}",
+            f"Market Contribution = {market_beta:.4f} * {market_premium:.2%} = {market_contribution:.4f}",
+            f"SMB Beta (Size) = {smb_beta:.4f}",
+            f"SMB Premium = {smb_premium:.2%}",
+            f"SMB Contribution = {smb_beta:.4f} * {smb_premium:.2%} = {smb_contribution:.4f}",
+            f"HML Beta (Value) = {hml_beta:.4f}",
+            f"HML Premium = {hml_premium:.2%}",
+            f"HML Contribution = {hml_beta:.4f} * {hml_premium:.2%} = {hml_contribution:.4f}",
+            f"Cost of Equity = {rf:.2%} + {market_contribution:.2%} + {smb_contribution:.2%} + {hml_contribution:.2%} = {cost_of_equity:.2%}",
+        ],
+        assumptions=[
+            "Fama-French factors capture all relevant systematic risk",
+            "Factor betas are estimated from historical regression",
+            "Factor premiums are forward-looking expectations",
+            "Model assumes linear factor relationships",
+        ],
+    )

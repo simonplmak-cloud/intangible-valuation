@@ -405,3 +405,264 @@ def platform_valuation(
             "projection_years": projection_years,
         },
     }
+
+
+class TechObsolescenceInputs(BaseModel):
+    """Inputs for technology obsolescence curve."""
+
+    initial_value: float = Field(gt=0, description="Initial technology value")
+    obsolescence_rate: float = Field(
+        gt=0, le=1, description="Annual obsolescence rate (decimal)"
+    )
+    periods: int = Field(ge=1, description="Number of periods to project")
+
+
+def technology_obsolescence_curve(
+    initial_value: float,
+    obsolescence_rate: float,
+    periods: int,
+) -> dict:
+    """Calculate technology value decay over time due to obsolescence.
+
+    Models the decline in technology value as newer alternatives emerge.
+    Uses exponential decay: V(t) = V0 x (1 - obsolescence_rate)^t
+
+    Args:
+        initial_value: Initial technology value at t=0.
+        obsolescence_rate: Annual rate of value decay (0-1, decimal).
+        periods: Number of periods to project.
+
+    Returns:
+        Dict with value (remaining value at end), method, formula_reference,
+        steps (value at each period), and assumptions.
+
+    Raises:
+        ValueError: If any input is invalid.
+
+    Example:
+        >>> result = technology_obsolescence_curve(1_000_000, 0.20, 5)
+        >>> result["value"]  # ~327,680
+        327680.0
+    """
+    inputs = TechObsolescenceInputs(
+        initial_value=initial_value,
+        obsolescence_rate=obsolescence_rate,
+        periods=periods,
+    )
+
+    steps: list[str] = []
+    values: list[float] = []
+    current_value = inputs.initial_value
+
+    steps.append(f"Initial value: {inputs.initial_value:,.0f}")
+    steps.append(f"Annual obsolescence rate: {inputs.obsolescence_rate:.2%}")
+    steps.append(f"Projection periods: {inputs.periods}")
+
+    for t in range(1, inputs.periods + 1):
+        current_value = current_value * (1 - inputs.obsolescence_rate)
+        values.append(current_value)
+        pct_remaining = current_value / inputs.initial_value
+        steps.append(
+            f"Period {t}: value = {current_value:,.0f} "
+            f"({pct_remaining:.1%} of original)"
+        )
+
+    return {
+        "value": current_value,
+        "method": "Technology Obsolescence Curve",
+        "formula_reference": "V(t) = V0 x (1 - r)^t",
+        "steps": steps,
+        "assumptions": {
+            "initial_value": inputs.initial_value,
+            "obsolescence_rate": inputs.obsolescence_rate,
+            "periods": inputs.periods,
+            "value_at_each_period": [round(v, 2) for v in values],
+            "total_value_lost": round(inputs.initial_value - current_value, 2),
+        },
+    }
+
+
+class ApiValuationInputs(BaseModel):
+    """Inputs for API valuation."""
+
+    api_calls_per_month: float = Field(gt=0, description="Monthly API call volume")
+    revenue_per_call: float = Field(ge=0, description="Revenue per API call")
+    growth_rate: float = Field(ge=0, description="Annual growth rate (decimal)")
+    useful_life: int = Field(ge=1, description="Useful life in years")
+    discount_rate: float = Field(gt=0, description="Discount rate (decimal)")
+
+
+def api_valuation(
+    api_calls_per_month: float,
+    revenue_per_call: float,
+    growth_rate: float,
+    useful_life: int,
+    discount_rate: float,
+) -> dict:
+    """Value an API as an intangible asset based on call volume and revenue.
+
+    Projects annual revenue from API usage with growth, then discounts
+    to present value over the API's useful life.
+
+    Formula:
+        Annual Revenue(t) = calls_per_month x 12 x revenue_per_call x (1 + g)^(t-1)
+        Value = sum(Annual Revenue(t) / (1 + r)^t)
+
+    Args:
+        api_calls_per_month: Current monthly API call volume.
+        revenue_per_call: Revenue generated per API call.
+        growth_rate: Annual growth rate of API usage (decimal).
+        useful_life: Expected useful life of the API (years).
+        discount_rate: Discount rate (decimal).
+
+    Returns:
+        Dict with value, method, formula_reference, steps, and assumptions.
+
+    Raises:
+        ValueError: If any input is invalid.
+
+    Example:
+        >>> result = api_valuation(
+        ...     api_calls_per_month=1_000_000,
+        ...     revenue_per_call=0.001,
+        ...     growth_rate=0.15,
+        ...     useful_life=5,
+        ...     discount_rate=0.10,
+        ... )
+        >>> result["value"] > 0
+        True
+    """
+    inputs = ApiValuationInputs(
+        api_calls_per_month=api_calls_per_month,
+        revenue_per_call=revenue_per_call,
+        growth_rate=growth_rate,
+        useful_life=useful_life,
+        discount_rate=discount_rate,
+    )
+
+    steps: list[str] = []
+    annual_calls = inputs.api_calls_per_month * 12
+    annual_revenue_year1 = annual_calls * inputs.revenue_per_call
+
+    steps.append(f"Monthly API calls: {inputs.api_calls_per_month:,.0f}")
+    steps.append(f"Annual calls: {annual_calls:,.0f}")
+    steps.append(f"Revenue per call: ${inputs.revenue_per_call:.4f}")
+    steps.append(f"Year 1 annual revenue: {annual_revenue_year1:,.0f}")
+    steps.append(f"Growth rate: {inputs.growth_rate:.2%}")
+    steps.append(f"Useful life: {inputs.useful_life} years")
+
+    total_pv = 0.0
+    for t in range(1, inputs.useful_life + 1):
+        revenue = annual_revenue_year1 * (1 + inputs.growth_rate) ** (t - 1)
+        pv = present_value(revenue, inputs.discount_rate, t)
+        total_pv += pv
+        steps.append(
+            f"Year {t}: revenue={revenue:,.0f}, PV={pv:,.0f}"
+        )
+
+    steps.append(f"Total PV: {total_pv:,.0f}")
+
+    return {
+        "value": total_pv,
+        "method": "API Income Approach",
+        "formula_reference": "V = sum(Calls x 12 x RPC x (1+g)^(t-1) / (1+r)^t)",
+        "steps": steps,
+        "assumptions": {
+            "api_calls_per_month": inputs.api_calls_per_month,
+            "revenue_per_call": inputs.revenue_per_call,
+            "growth_rate": inputs.growth_rate,
+            "useful_life": inputs.useful_life,
+            "discount_rate": inputs.discount_rate,
+            "year1_revenue": annual_revenue_year1,
+        },
+    }
+
+
+class AlgorithmValuationInputs(BaseModel):
+    """Inputs for ML algorithm valuation."""
+
+    computational_savings: float = Field(
+        gt=0, description="Annual computational cost savings"
+    )
+    deployment_scale: float = Field(gt=0, description="Deployment scale factor")
+    competitive_advantage_years: int = Field(
+        ge=1, description="Expected competitive advantage period (years)"
+    )
+    discount_rate: float = Field(gt=0, description="Discount rate (decimal)")
+
+
+def algorithm_valuation(
+    computational_savings: float,
+    deployment_scale: float,
+    competitive_advantage_years: int,
+    discount_rate: float,
+) -> dict:
+    """Value an ML algorithm based on computational savings and competitive advantage.
+
+    Values the algorithm by the cost savings it generates at scale,
+    projected over the period of competitive advantage.
+
+    Formula:
+        Annual Benefit = Computational Savings x Deployment Scale
+        Value = sum(Annual Benefit / (1 + r)^t) for t = 1 to advantage_years
+
+    Args:
+        computational_savings: Annual computational cost savings from the algorithm.
+        deployment_scale: Scale factor representing breadth of deployment (>0).
+        competitive_advantage_years: Expected years of competitive advantage.
+        discount_rate: Discount rate (decimal).
+
+    Returns:
+        Dict with value, method, formula_reference, steps, and assumptions.
+
+    Raises:
+        ValueError: If any input is invalid.
+
+    Example:
+        >>> result = algorithm_valuation(
+        ...     computational_savings=500_000,
+        ...     deployment_scale=3.0,
+        ...     competitive_advantage_years=5,
+        ...     discount_rate=0.12,
+        ... )
+        >>> result["value"] > 0
+        True
+    """
+    inputs = AlgorithmValuationInputs(
+        computational_savings=computational_savings,
+        deployment_scale=deployment_scale,
+        competitive_advantage_years=competitive_advantage_years,
+        discount_rate=discount_rate,
+    )
+
+    steps: list[str] = []
+
+    annual_benefit = inputs.computational_savings * inputs.deployment_scale
+
+    steps.append(f"Computational savings: {inputs.computational_savings:,.0f}")
+    steps.append(f"Deployment scale: {inputs.deployment_scale:.1f}x")
+    steps.append(f"Annual benefit: {annual_benefit:,.0f}")
+    steps.append(f"Competitive advantage: {inputs.competitive_advantage_years} years")
+    steps.append(f"Discount rate: {inputs.discount_rate:.2%}")
+
+    total_pv = 0.0
+    for t in range(1, inputs.competitive_advantage_years + 1):
+        pv = present_value(annual_benefit, inputs.discount_rate, t)
+        total_pv += pv
+        steps.append(f"Year {t}: PV={pv:,.0f}")
+
+    steps.append(f"Total algorithm value: {total_pv:,.0f}")
+
+    return {
+        "value": total_pv,
+        "method": "ML Algorithm Income Approach",
+        "formula_reference": "V = sum(Savings x Scale / (1+r)^t)",
+        "steps": steps,
+        "assumptions": {
+            "computational_savings": inputs.computational_savings,
+            "deployment_scale": inputs.deployment_scale,
+            "competitive_advantage_years": inputs.competitive_advantage_years,
+            "discount_rate": inputs.discount_rate,
+            "annual_benefit": annual_benefit,
+        },
+    }

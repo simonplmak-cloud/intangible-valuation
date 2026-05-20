@@ -3,8 +3,10 @@
 import pytest
 
 from src.advanced.royalty_benchmark import (
-    royalty_rate_benchmark,
     adjust_royalty_rate,
+    analytical_method_valuation,
+    profit_split_method,
+    royalty_rate_benchmark,
     twenty_five_percent_rule,
 )
 
@@ -129,3 +131,103 @@ class TestTwentyFivePercentRule:
         result = twenty_five_percent_rule(10_000_000, 0.8)
         assert len(result.steps) >= 4
         assert "25%" in result.method
+
+
+class TestProfitSplitMethod:
+    """Tests for profit_split_method function."""
+
+    def test_happy_path_basic(self):
+        result = profit_split_method(0.40, 0.60, 10_000_000)
+        assert result["value"] == pytest.approx(4_000_000.0, rel=0.01)
+        assert "Profit Split" in result["method"]
+
+    def test_happy_path_equal_split(self):
+        result = profit_split_method(0.50, 0.50, 10_000_000)
+        assert result["value"] == pytest.approx(5_000_000.0, rel=0.01)
+
+    def test_happy_path_licensor_dominant(self):
+        result = profit_split_method(0.80, 0.20, 10_000_000)
+        assert result["value"] == pytest.approx(8_000_000.0, rel=0.01)
+
+    def test_happy_path_licensee_dominant(self):
+        result = profit_split_method(0.20, 0.80, 10_000_000)
+        assert result["value"] == pytest.approx(2_000_000.0, rel=0.01)
+
+    def test_error_zero_licensor(self):
+        with pytest.raises(ValueError):
+            profit_split_method(0, 0.60, 10_000_000)
+
+    def test_error_zero_licensee(self):
+        with pytest.raises(ValueError):
+            profit_split_method(0.40, 0, 10_000_000)
+
+    def test_error_zero_profit(self):
+        with pytest.raises(ValueError):
+            profit_split_method(0.40, 0.60, 0)
+
+    def test_error_over_one_contribution(self):
+        with pytest.raises(ValueError):
+            profit_split_method(1.5, 0.60, 10_000_000)
+
+    def test_returns_shares(self):
+        result = profit_split_method(0.40, 0.60, 10_000_000)
+        assert "licensor_share_pct" in result["assumptions"]
+        assert "licensee_share_pct" in result["assumptions"]
+
+
+class TestAnalyticalMethodValuation:
+    """Tests for analytical_method_valuation function."""
+
+    def test_happy_path_basic(self):
+        result = analytical_method_valuation(
+            advantage_margin=0.05,
+            volume=10_000_000,
+            discount_rate=0.12,
+            economic_life=7,
+        )
+        assert result["value"] > 0
+        assert "Analytical Method" in result["method"]
+
+    def test_happy_path_single_year(self):
+        result = analytical_method_valuation(
+            advantage_margin=0.10,
+            volume=5_000_000,
+            discount_rate=0.10,
+            economic_life=1,
+        )
+        assert result["value"] == pytest.approx(500_000 / 1.10, rel=0.01)
+
+    def test_happy_path_high_margin(self):
+        result = analytical_method_valuation(
+            advantage_margin=0.15,
+            volume=20_000_000,
+            discount_rate=0.10,
+            economic_life=10,
+        )
+        assert result["value"] > 0
+
+    def test_error_zero_margin(self):
+        with pytest.raises(ValueError):
+            analytical_method_valuation(0, 10_000_000, 0.12, 7)
+
+    def test_error_zero_volume(self):
+        with pytest.raises(ValueError):
+            analytical_method_valuation(0.05, 0, 0.12, 7)
+
+    def test_error_zero_discount_rate(self):
+        with pytest.raises(ValueError):
+            analytical_method_valuation(0.05, 10_000_000, 0, 7)
+
+    def test_error_zero_economic_life(self):
+        with pytest.raises(ValueError):
+            analytical_method_valuation(0.05, 10_000_000, 0.12, 0)
+
+    def test_returns_implied_royalty_rate(self):
+        result = analytical_method_valuation(
+            advantage_margin=0.05,
+            volume=10_000_000,
+            discount_rate=0.12,
+            economic_life=7,
+        )
+        assert "implied_royalty_rate" in result["assumptions"]
+        assert result["assumptions"]["implied_royalty_rate"] > 0

@@ -5,8 +5,12 @@ import pytest
 
 from src.utils.formulas import (
     contributory_asset_charges,
+    double_declining_balance_amortization,
     estimate_useful_life,
     sensitivity_analysis,
+    straight_line_amortization,
+    sum_of_years_digits_amortization,
+    valuation_multiple,
 )
 
 
@@ -263,3 +267,158 @@ class TestContributoryAssetCharges:
             contributory_asset_charges([
                 {"type": "working_capital", "value": 100_000, "return_rate": -0.01},
             ])
+
+
+class TestStraightLineAmortization:
+    """Test straight_line_amortization function."""
+
+    def test_basic_schedule(self):
+        """$1M over 5 years = $200K/year."""
+        result = straight_line_amortization(asset_value=1_000_000, useful_life=5)
+        assert len(result["schedule"]) == 5
+        assert math.isclose(result["schedule"][0]["amortization"], 200_000, abs_tol=1)
+        assert result["method"] == "Straight-Line Amortization"
+
+    def test_total_amortization_equals_asset(self):
+        """Total amortization should equal asset value."""
+        result = straight_line_amortization(asset_value=500_000, useful_life=10)
+        assert math.isclose(result["total_amortization"], 500_000, abs_tol=1)
+
+    def test_final_book_value_zero(self):
+        """Final year book value should be zero."""
+        result = straight_line_amortization(asset_value=1_000_000, useful_life=5)
+        assert math.isclose(result["schedule"][-1]["book_value"], 0, abs_tol=1)
+
+    def test_accumulated_increases(self):
+        """Accumulated amortization should increase each year."""
+        result = straight_line_amortization(asset_value=1_000_000, useful_life=5)
+        for i in range(1, len(result["schedule"])):
+            assert result["schedule"][i]["accumulated"] > result["schedule"][i - 1]["accumulated"]
+
+    def test_single_year(self):
+        """Single year: full amortization."""
+        result = straight_line_amortization(asset_value=100_000, useful_life=1)
+        assert math.isclose(result["schedule"][0]["amortization"], 100_000, abs_tol=1)
+        assert math.isclose(result["schedule"][0]["book_value"], 0, abs_tol=1)
+
+    def test_negative_value_raises(self):
+        with pytest.raises(ValueError, match="non-negative"):
+            straight_line_amortization(asset_value=-1000, useful_life=5)
+
+    def test_zero_life_raises(self):
+        with pytest.raises(ValueError, match="at least 1"):
+            straight_line_amortization(asset_value=1000, useful_life=0)
+
+
+class TestSumOfYearsDigitsAmortization:
+    """Test sum_of_years_digits_amortization function."""
+
+    def test_basic_syd(self):
+        """$1M over 5 years: SYD = 15, Year 1 = 5/15 * 1M = 333,333."""
+        result = sum_of_years_digits_amortization(asset_value=1_000_000, useful_life=5)
+        assert len(result["schedule"]) == 5
+        assert math.isclose(result["schedule"][0]["amortization"], 333_333.33, abs_tol=1)
+        assert result["method"] == "Sum-of-Years'-Digits Amortization"
+
+    def test_first_year_highest(self):
+        """First year should have highest amortization."""
+        result = sum_of_years_digits_amortization(asset_value=1_000_000, useful_life=5)
+        for i in range(1, len(result["schedule"])):
+            assert result["schedule"][i]["amortization"] < result["schedule"][i - 1]["amortization"]
+
+    def test_total_amortization_equals_asset(self):
+        """Total should equal asset value."""
+        result = sum_of_years_digits_amortization(asset_value=1_000_000, useful_life=5)
+        assert math.isclose(result["total_amortization"], 1_000_000, abs_tol=1)
+
+    def test_final_book_value_zero(self):
+        """Final book value should be zero."""
+        result = sum_of_years_digits_amortization(asset_value=1_000_000, useful_life=5)
+        assert math.isclose(result["schedule"][-1]["book_value"], 0, abs_tol=1)
+
+    def test_single_year(self):
+        """Single year: full amortization."""
+        result = sum_of_years_digits_amortization(asset_value=100_000, useful_life=1)
+        assert math.isclose(result["schedule"][0]["amortization"], 100_000, abs_tol=1)
+
+    def test_negative_value_raises(self):
+        with pytest.raises(ValueError, match="non-negative"):
+            sum_of_years_digits_amortization(asset_value=-1000, useful_life=5)
+
+
+class TestDoubleDecliningBalanceAmortization:
+    """Test double_declining_balance_amortization function."""
+
+    def test_basic_ddb(self):
+        """$1M over 5 years: DDB rate = 40%, Year 1 = $400K."""
+        result = double_declining_balance_amortization(asset_value=1_000_000, useful_life=5)
+        assert len(result["schedule"]) == 5
+        assert math.isclose(result["schedule"][0]["amortization"], 400_000, abs_tol=1)
+        assert result["method"] == "Double-Declining Balance Amortization"
+
+    def test_first_year_highest(self):
+        """First year should have highest amortization (excluding final year plug)."""
+        result = double_declining_balance_amortization(asset_value=1_000_000, useful_life=5)
+        for i in range(1, len(result["schedule"]) - 1):
+            assert result["schedule"][i]["amortization"] < result["schedule"][i - 1]["amortization"]
+
+    def test_final_year_plug(self):
+        """Final year should fully amortize remaining value."""
+        result = double_declining_balance_amortization(asset_value=1_000_000, useful_life=5)
+        assert math.isclose(result["schedule"][-1]["book_value"], 0, abs_tol=1)
+
+    def test_total_amortization_equals_asset(self):
+        """Total should equal asset value."""
+        result = double_declining_balance_amortization(asset_value=1_000_000, useful_life=5)
+        assert math.isclose(result["total_amortization"], 1_000_000, abs_tol=1)
+
+    def test_accelerated_vs_straight_line(self):
+        """DDB year 1 should be higher than straight-line year 1."""
+        ddb = double_declining_balance_amortization(asset_value=1_000_000, useful_life=5)
+        sl = straight_line_amortization(asset_value=1_000_000, useful_life=5)
+        assert ddb["schedule"][0]["amortization"] > sl["schedule"][0]["amortization"]
+
+    def test_single_year(self):
+        """Single year: full amortization."""
+        result = double_declining_balance_amortization(asset_value=100_000, useful_life=1)
+        assert math.isclose(result["schedule"][0]["amortization"], 100_000, abs_tol=1)
+
+    def test_negative_value_raises(self):
+        with pytest.raises(ValueError, match="non-negative"):
+            double_declining_balance_amortization(asset_value=-1000, useful_life=5)
+
+    def test_zero_life_raises(self):
+        with pytest.raises(ValueError, match="at least 1"):
+            double_declining_balance_amortization(asset_value=1000, useful_life=0)
+
+
+class TestValuationMultiple:
+    """Test valuation_multiple function."""
+
+    def test_basic_ev_revenue(self):
+        """EV/Revenue = $50M / $10M = 5.0x."""
+        result = valuation_multiple(value=50_000_000, metric=10_000_000, multiple_type="EV/Revenue")
+        assert math.isclose(result["multiple"], 5.0, abs_tol=0.01)
+        assert result["multiple_type"] == "EV/Revenue"
+
+    def test_pe_ratio(self):
+        """P/E = $100 / $5 = 20x."""
+        result = valuation_multiple(value=100, metric=5, multiple_type="P/E")
+        assert math.isclose(result["multiple"], 20.0, abs_tol=0.01)
+
+    def test_ev_ebitda(self):
+        """EV/EBITDA = $500M / $50M = 10x."""
+        result = valuation_multiple(value=500_000_000, metric=50_000_000, multiple_type="EV/EBITDA")
+        assert math.isclose(result["multiple"], 10.0, abs_tol=0.01)
+
+    def test_zero_metric_raises(self):
+        with pytest.raises(ValueError, match="cannot be zero"):
+            valuation_multiple(value=100, metric=0, multiple_type="P/E")
+
+    def test_negative_value_raises(self):
+        with pytest.raises(ValueError, match="non-negative"):
+            valuation_multiple(value=-100, metric=10, multiple_type="P/E")
+
+    def test_negative_metric_raises(self):
+        with pytest.raises(ValueError, match="positive"):
+            valuation_multiple(value=100, metric=-10, multiple_type="P/E")

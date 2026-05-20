@@ -7,13 +7,19 @@ import math
 import pytest
 
 from src.core.discount_rates import (
+    beta_relevered,
+    beta_unlevered,
     build_up_discount_rate,
+    build_up_with_country_risk,
     capm_discount_rate,
     control_premium,
+    cost_of_equity_fama_french,
     currency_adjusted_discount_rate,
     dlom_finnerty,
+    implied_erp,
     tax_amortization_benefit,
     wacc,
+    wacc_with_preferred,
 )
 
 
@@ -162,6 +168,235 @@ class TestWACC:
                 cost_of_debt=0.06,
                 tax_rate=0.25,
             )
+
+
+class TestWACCWithPreferred:
+    """Test wacc_with_preferred function."""
+
+    def test_basic_wacc_preferred(self):
+        """WACC with equity, debt, and preferred stock."""
+        result = wacc_with_preferred(
+            equity_value=600,
+            debt_value=300,
+            preferred_value=100,
+            cost_of_equity=0.12,
+            cost_of_debt=0.06,
+            cost_of_preferred=0.08,
+            tax_rate=0.25,
+        )
+        expected = 0.6 * 0.12 + 0.3 * 0.06 * 0.75 + 0.1 * 0.08
+        assert math.isclose(result.value, expected, abs_tol=1e-6)
+
+    def test_wacc_preferred_no_preferred(self):
+        """Zero preferred should match standard WACC."""
+        result = wacc_with_preferred(
+            equity_value=600,
+            debt_value=400,
+            preferred_value=0,
+            cost_of_equity=0.12,
+            cost_of_debt=0.06,
+            cost_of_preferred=0.08,
+            tax_rate=0.25,
+        )
+        standard = wacc(
+            equity_value=600, debt_value=400,
+            cost_of_equity=0.12, cost_of_debt=0.06,
+            tax_rate=0.25,
+        )
+        assert math.isclose(result.value, standard.value, abs_tol=1e-6)
+
+    def test_wacc_preferred_all_preferred(self):
+        """All preferred financing."""
+        result = wacc_with_preferred(
+            equity_value=0,
+            debt_value=0,
+            preferred_value=1000,
+            cost_of_equity=0.12,
+            cost_of_debt=0.06,
+            cost_of_preferred=0.08,
+            tax_rate=0.25,
+        )
+        assert math.isclose(result.value, 0.08, abs_tol=1e-6)
+
+    def test_wacc_preferred_zero_capital_raises(self):
+        with pytest.raises(ValueError, match="Total capital"):
+            wacc_with_preferred(
+                equity_value=0, debt_value=0, preferred_value=0,
+                cost_of_equity=0.12, cost_of_debt=0.06, cost_of_preferred=0.08,
+                tax_rate=0.25,
+            )
+
+
+class TestBuildUpWithCountryRisk:
+    """Test build_up_with_country_risk function."""
+
+    def test_basic_with_country_risk(self):
+        """Build-up with country risk premium."""
+        result = build_up_with_country_risk(
+            risk_free_rate=0.04,
+            erp=0.06,
+            size_premium=0.02,
+            country_risk_premium=0.03,
+        )
+        assert math.isclose(result.value, 0.15, abs_tol=1e-6)
+
+    def test_no_country_risk(self):
+        """Zero country risk should match standard build-up."""
+        result = build_up_with_country_risk(
+            risk_free_rate=0.04,
+            erp=0.06,
+        )
+        standard = build_up_discount_rate(risk_free_rate=0.04, equity_risk_premium=0.06)
+        assert math.isclose(result.value, standard.value, abs_tol=1e-6)
+
+    def test_emerging_market(self):
+        """Emerging market with high country risk."""
+        result = build_up_with_country_risk(
+            risk_free_rate=0.04,
+            erp=0.06,
+            size_premium=0.02,
+            industry_premium=0.01,
+            specific_premium=0.02,
+            country_risk_premium=0.05,
+        )
+        assert math.isclose(result.value, 0.20, abs_tol=1e-6)
+
+    def test_negative_country_risk_raises(self):
+        with pytest.raises(ValueError, match="non-negative"):
+            build_up_with_country_risk(
+                risk_free_rate=0.04, erp=0.06,
+                country_risk_premium=-0.01,
+            )
+
+
+class TestImpliedERP:
+    """Test implied_erp function."""
+
+    def test_basic_implied_erp(self):
+        """P/E = 20, growth = 3%: ERP = 1/20 - 0.03 = 0.02."""
+        result = implied_erp(market_pe_ratio=20, perpetual_growth_rate=0.03)
+        assert math.isclose(result.value, 0.02, abs_tol=1e-6)
+
+    def test_high_pe_low_erp(self):
+        """High P/E implies low ERP."""
+        result = implied_erp(market_pe_ratio=25, perpetual_growth_rate=0.03)
+        assert result.value < 0.02
+
+    def test_low_pe_high_erp(self):
+        """Low P/E implies high ERP."""
+        result = implied_erp(market_pe_ratio=10, perpetual_growth_rate=0.02)
+        expected = 1 / 10 - 0.02  # 0.08
+        assert math.isclose(result.value, expected, abs_tol=1e-6)
+
+    def test_zero_growth(self):
+        """Zero growth: ERP = 1/P/E."""
+        result = implied_erp(market_pe_ratio=20, perpetual_growth_rate=0.0)
+        assert math.isclose(result.value, 0.05, abs_tol=1e-6)
+
+    def test_negative_pe_raises(self):
+        with pytest.raises(ValueError, match="positive"):
+            implied_erp(market_pe_ratio=-10, perpetual_growth_rate=0.03)
+
+    def test_zero_pe_raises(self):
+        with pytest.raises(ValueError, match="positive"):
+            implied_erp(market_pe_ratio=0, perpetual_growth_rate=0.03)
+
+
+class TestBetaUnlevered:
+    """Test beta_unlevered function."""
+
+    def test_basic_unlevered(self):
+        """Hamada: beta_u = 1.2 / [1 + (1-0.25)*0.5] = ~0.8696."""
+        result = beta_unlevered(beta_levered=1.2, debt_to_equity=0.5, tax_rate=0.25)
+        expected = 1.2 / (1 + 0.75 * 0.5)
+        assert math.isclose(result.value, expected, abs_tol=1e-6)
+
+    def test_no_debt(self):
+        """No debt: unlevered = levered."""
+        result = beta_unlevered(beta_levered=1.2, debt_to_equity=0.0, tax_rate=0.25)
+        assert math.isclose(result.value, 1.2, abs_tol=1e-6)
+
+    def test_high_debt(self):
+        """High debt reduces unlevered beta significantly."""
+        result = beta_unlevered(beta_levered=1.5, debt_to_equity=2.0, tax_rate=0.25)
+        expected = 1.5 / (1 + 0.75 * 2.0)
+        assert math.isclose(result.value, expected, abs_tol=1e-6)
+        assert result.value < 1.5
+
+    def test_negative_de_raises(self):
+        with pytest.raises(ValueError, match="non-negative"):
+            beta_unlevered(beta_levered=1.2, debt_to_equity=-0.5, tax_rate=0.25)
+
+
+class TestBetaRelevered:
+    """Test beta_relevered function."""
+
+    def test_basic_relevered(self):
+        """Hamada: beta_l = 0.87 * [1 + (1-0.25)*0.6] = ~1.2615."""
+        result = beta_relevered(beta_unlevered=0.87, target_debt_to_equity=0.6, tax_rate=0.25)
+        expected = 0.87 * (1 + 0.75 * 0.6)
+        assert math.isclose(result.value, expected, abs_tol=1e-6)
+
+    def test_no_debt(self):
+        """No debt: relevered = unlevered."""
+        result = beta_relevered(beta_unlevered=0.87, target_debt_to_equity=0.0, tax_rate=0.25)
+        assert math.isclose(result.value, 0.87, abs_tol=1e-6)
+
+    def test_roundtrip(self):
+        """Unlever then relever should return original beta."""
+        original = 1.3
+        unlevered = beta_unlevered(beta_levered=original, debt_to_equity=0.5, tax_rate=0.25)
+        relevered = beta_relevered(beta_unlevered=unlevered.value, target_debt_to_equity=0.5, tax_rate=0.25)
+        assert math.isclose(relevered.value, original, abs_tol=1e-4)
+
+    def test_negative_de_raises(self):
+        with pytest.raises(ValueError, match="non-negative"):
+            beta_relevered(beta_unlevered=0.87, target_debt_to_equity=-0.5, tax_rate=0.25)
+
+
+class TestCostOfEquityFamaFrench:
+    """Test cost_of_equity_fama_french function."""
+
+    def test_basic_fama_french(self):
+        """3-factor model calculation."""
+        result = cost_of_equity_fama_french(
+            risk_free_rate=0.04,
+            market_beta=1.1,
+            smb_beta=0.5,
+            hml_beta=0.3,
+            market_premium=0.06,
+            smb_premium=0.03,
+            hml_premium=0.04,
+        )
+        expected = 0.04 + 1.1 * 0.06 + 0.5 * 0.03 + 0.3 * 0.04
+        assert math.isclose(result.value, expected, abs_tol=1e-6)
+
+    def test_reduces_to_capm(self):
+        """Zero SMB and HML betas should reduce to CAPM."""
+        result = cost_of_equity_fama_french(
+            risk_free_rate=0.04,
+            market_beta=1.2,
+            smb_beta=0.0,
+            hml_beta=0.0,
+            market_premium=0.06,
+            smb_premium=0.03,
+            hml_premium=0.04,
+        )
+        expected = 0.04 + 1.2 * 0.06
+        assert math.isclose(result.value, expected, abs_tol=1e-6)
+
+    def test_small_cap_value_stock(self):
+        """Small cap value stock has positive SMB and HML betas."""
+        result = cost_of_equity_fama_french(
+            risk_free_rate=0.04,
+            market_beta=1.0,
+            smb_beta=0.8,
+            hml_beta=0.6,
+            market_premium=0.06,
+            smb_premium=0.03,
+            hml_premium=0.04,
+        )
+        assert result.value > 0.10  # Higher than CAPM due to size and value premiums
 
 
 class TestTaxAmortizationBenefit:
