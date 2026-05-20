@@ -94,9 +94,9 @@ Arguments:
   useful_life: 5
 
 Result:
-  value: 387654.32
+  value: 194163.77
   method: Relief from Royalty
-  tab_factor: 1.23
+  tab_factor: 1.22
 ```
 
 ## Architecture

@@ -6,7 +6,7 @@
 [![CI](https://github.com/simonplmak-cloud/intangible-valuation/actions/workflows/ci.yml/badge.svg)](https://github.com/simonplmak-cloud/intangible-valuation/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Docs](https://img.shields.io/badge/docs-GitHub_Pages-blue)](https://simonplmak-cloud.github.io/intangible-valuation/)
+[![Docs](https://img.shields.io/badge/docs-intangible--valuation.simonmak.com-blue)](https://intangible-valuation.simonmak.com)
 
 ## Overview
 
@@ -119,7 +119,7 @@ mypy src/
 
 ## Documentation
 
-- **API Reference:** [GitHub Pages](https://simonplmak-cloud.github.io/intangible-valuation/)
+- **API Reference:** [intangible-valuation.simonmak.com](https://intangible-valuation.simonmak.com)
 - **PyPI:** [pypi.org/project/intangible-valuation](https://pypi.org/project/intangible-valuation/)
 - **MCP Server Guide:** [docs/mcp.md](docs/mcp.md)
 - **AI Skills Guide:** [docs/skills.md](docs/skills.md)
