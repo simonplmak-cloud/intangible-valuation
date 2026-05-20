@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] — 2026-05-20
+
+### Added
+- MIT LICENSE file
+- Official GitHub Actions deployment workflow (bypasses Jekyll)
+- PyPI publish workflow aligned with release triggers
+- Example documentation pages (core methods, advanced methods, industry models)
+- Chapter index documentation page
+
+### Fixed
+- 59 E501 line-too-long errors in `mcp_server/tools.py`
+- Import sorting in `mcp_server/server.py`
+- `monte_carlo.py` type annotation for strict mypy build
+- PyPI description field length (under 512 char limit)
+- GitHub Pages layout (switched from Jekyll branch to GitHub Actions)
+
+### Changed
+- Version bumped from 0.1.0 to 1.0.0
+- Development status from Alpha to Production/Stable
+
 ## [0.1.0] — 2026-05-20
 
 ### Added
