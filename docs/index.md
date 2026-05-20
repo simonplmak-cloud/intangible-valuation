@@ -1,5 +1,34 @@
 # Intangible Asset Valuation: A Comprehensive Guide
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Intangible Asset Valuation",
+  "description": "Python library for intangible asset valuation — patents, brands, goodwill, PPA, impairment testing. 124+ functions aligned to ASC 805, IFRS 3, ASC 350.",
+  "url": "https://intangible-valuation.simonmak.com",
+  "author": {
+    "@type": "Organization",
+    "name": "Ascent Partners",
+    "url": "https://www.linkedin.com/company/ascent-partners-group-"
+  },
+  "license": "https://opensource.org/licenses/MIT",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Any",
+  "programmingLanguage": "Python",
+  "runtimePlatform": "Python 3.11+",
+  "softwareVersion": "1.0.0",
+  "downloadUrl": "https://pypi.org/project/intangible-valuation/",
+  "codeRepository": "https://github.com/simonplmak-cloud/intangible-valuation",
+  "keywords": ["intangible asset valuation", "patent valuation", "brand valuation", "goodwill", "purchase price allocation", "PPA", "impairment testing", "ASC 805", "IFRS 3", "relief from royalty", "MPEEM", "MCP server", "AI valuation"],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+
 <div class="book-hero">
   <div class="book-cover">
     <img src="assets/images/book-cover.jpg" alt="Intangible Asset Valuation book cover">

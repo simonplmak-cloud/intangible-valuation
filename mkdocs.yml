@@ -1,5 +1,7 @@
 site_name: Intangible Asset Valuation
-site_description: Complete intangible asset valuation library with 124+ functions, MCP server, and AI-agent skills
+site_description: >-
+  Python library for intangible asset valuation — patents, brands, goodwill,
+  PPA, impairment testing. 124+ functions aligned to ASC 805, IFRS 3, ASC 350.
 site_author: Ascent Partners
 site_url: https://intangible-valuation.simonmak.com
 repo_url: https://github.com/simonplmak-cloud/intangible-valuation
@@ -8,6 +10,7 @@ edit_uri: edit/main/docs/
 
 theme:
   name: material
+  custom_dir: docs/overrides
   logo: assets/images/ascent-logo.png
   favicon: assets/images/ascent-logo.png
   palette:
@@ -42,16 +45,26 @@ extra_css:
   - assets/stylesheets/extra.css
 
 extra:
+  analytics:
+    provider: google
+    property: G-XXXXXXXXXX
   social:
     - icon: fontawesome/brands/linkedin
       link: https://www.linkedin.com/company/ascent-partners-group-
       name: Ascent Partners on LinkedIn
+    - icon: fontawesome/brands/github
+      link: https://github.com/simonplmak-cloud/intangible-valuation
+      name: GitHub Repository
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/intangible-valuation/
+      name: PyPI Package
   generator: false
 
 copyright: "© 2026 Ascent Partners Group Ltd, All rights reserved. | Part of the <a href='https://www.amazon.com/Intangible-Asset-Valuation-Comprehensive-Technology/dp/B0FZ8742R1' target='_blank' rel='noopener'>Valuation in Practice Series</a>"
 
 plugins:
   - search
+  - privacy
   - mkdocstrings:
       handlers:
         python:

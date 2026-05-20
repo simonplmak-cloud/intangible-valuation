@@ -33,6 +33,23 @@ jobs:
       - name: Add CNAME for custom domain
         run: echo "intangible-valuation.simonmak.com" > site/CNAME
 
+      - name: Add security headers
+        run: |
+          cat > site/_headers << 'EOF'
+          /*
+            X-Content-Type-Options: nosniff
+            X-Frame-Options: DENY
+            Referrer-Policy: strict-origin-when-cross-origin
+            Permissions-Policy: camera=(), microphone=(), geolocation=()
+            Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'
+            Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+            Cache-Control: public, max-age=3600
+          /*.html
+            Cache-Control: public, max-age=3600
+          /assets/*
+            Cache-Control: public, max-age=31536000, immutable
+          EOF
+
       - name: Upload artifact
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
