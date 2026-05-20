@@ -29,7 +29,11 @@ from intangible_valuation.core.time_value import (
     present_value,
     terminal_value,
 )
-from intangible_valuation.income_methods.excess_earnings import contributory_asset_charges, mpeem, single_period_excess_earnings
+from intangible_valuation.income_methods.excess_earnings import (
+    contributory_asset_charges,
+    mpeem,
+    single_period_excess_earnings,
+)
 from intangible_valuation.income_methods.incremental_cashflow import incremental_cashflow
 from intangible_valuation.income_methods.relief_from_royalty import relief_from_royalty
 from intangible_valuation.utils.formulas import (
