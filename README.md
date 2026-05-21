@@ -93,7 +93,7 @@ Copy the `skills/` directory to your agent's skills folder:
 ## Why This Library?
 
 - **Auditable** — Every function returns `ValuationResult` with value, method, inputs, assumptions, and step-by-step calculation breakdown
-- **Textbook-accurate** — All 124+ formulas verified against book example values with 698 unit tests
+- **Textbook-accurate** — All 124+ formulas verified against book example values with 1056 unit tests
 - **AI-ready** — MCP server and Skills for seamless AI agent integration
 - **Complete coverage** — All three valuation approaches (cost, market, income) across 19 chapters
 - **Open source** — MIT license, extensible, well-documented

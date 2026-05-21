@@ -104,7 +104,7 @@ print(f"Patent value: ${value.value:,.2f}")
 - **Typed Python API** with structured `ValuationResult` returns (value + assumptions + step-by-step calculation)
 - **MCP Server** exposing 49 valuation tools for AI agents (Claude, OpenCode, etc.)
 - **AI-Agent Skills** with workflow guidance for asset valuation, discount rate construction, and PPA
-- **698 tests** — every function verified against textbook example values
+- **1056 tests** — every function verified against textbook example values
 
 ## Modules
 
