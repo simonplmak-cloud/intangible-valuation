@@ -14,7 +14,7 @@ A production-grade Python library for intangible asset valuation, implementing e
 
 **Three-layer architecture:**
 1. **Python Library** — 22 modules, 124+ typed functions, all returning `ValuationResult` (value + assumptions + sensitivity)
-2. **MCP Server** — 54 tools for AI agents (Claude, OpenCode, etc.) via stdio/SSE
+2. **MCP Server** — 49 tools for AI agents (Claude, OpenCode, etc.) via stdio/SSE
 3. **AI-Agent Skills** — 3 skill definitions with workflow guidance for valuation domains
 
 ## Installation
@@ -59,7 +59,7 @@ print(f"Patent value: ${value.value:,.2f}")
 cd mcp_server && python server.py
 ```
 
-Connect with any MCP-compatible AI agent. All 54 valuation tools available.
+Connect with any MCP-compatible AI agent. All 49 valuation tools available.
 
 ### AI-Agent Skills
 

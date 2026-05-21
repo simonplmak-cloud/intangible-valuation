@@ -43,7 +43,7 @@
       The definitive textbook for finance professionals, valuation analysts, accountants, and students navigating the complexities of intangible asset valuation. Covers all three valuation approaches, 19 chapters of frameworks for patents, trademarks, brands, technology, customer relationships, goodwill, purchase price allocation, and impairment testing — with step-by-step methodologies aligned to ASC 805, IFRS 3, ASC 350, and IAS 36.
     </p>
     <p class="book-features">
-      19 chapters · 3 appendices · 124+ functions · 698 tests · 54 MCP tools · 3 AI-Agent Skills
+      19 chapters · 3 appendices · 124+ functions · 1056 tests · 49 MCP tools · 3 AI-Agent Skills
     </p>
     <a href="https://www.amazon.com/Intangible-Asset-Valuation-Comprehensive-Technology/dp/B0FZ8742R1" class="amazon-btn" target="_blank" rel="noopener">
       Buy on Amazon
@@ -102,7 +102,7 @@ print(f"Patent value: ${value.value:,.2f}")
 
 - **124+ valuation functions** across all three approaches covering every methodology in the textbook
 - **Typed Python API** with structured `ValuationResult` returns (value + assumptions + step-by-step calculation)
-- **MCP Server** exposing 54 valuation tools for AI agents (Claude, OpenCode, etc.)
+- **MCP Server** exposing 49 valuation tools for AI agents (Claude, OpenCode, etc.)
 - **AI-Agent Skills** with workflow guidance for asset valuation, discount rate construction, and PPA
 - **698 tests** — every function verified against textbook example values
 
@@ -134,7 +134,7 @@ pip install intangible-valuation[mcp]
 intangible-valuation-mcp
 ```
 
-Connect with any MCP-compatible AI agent. All 54 valuation tools are available.
+Connect with any MCP-compatible AI agent. All 49 valuation tools are available.
 
 ## AI-Agent Skills
 
