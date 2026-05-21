@@ -2,17 +2,147 @@
 
 {% block extrahead %}
   <meta property="og:type" content="website">
-  <meta property="og:title" content="{{ config.site_name }}">
-  <meta property="og:description" content="{{ config.site_description | e }}">
-  <meta property="og:url" content="{{ page.canonical_url | default(config.site_url) }}">
+  <meta property="og:title" content="Intangible Asset Valuation — 124+ Formulas, MCP Server, AI-Agent Skills">
+  <meta property="og:description" content="Complete intangible asset valuation library implementing 124+ functions from the Intangible Asset Valuation textbook">
+  <meta property="og:url" content="{{ page.canonical_url }}">
   <meta property="og:image" content="{{ config.site_url }}assets/images/book-cover.jpg">
-  <meta property="og:image:width" content="600">
-  <meta property="og:image:height" content="800">
-  <meta property="og:site_name" content="{{ config.site_name }}">
-  <meta property="og:locale" content="en_US">
+  <meta property="og:site_name" content="Intangible Asset Valuation">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="{{ config.site_name }}">
-  <meta name="twitter:description" content="{{ config.site_description | e }}">
+  <meta name="twitter:title" content="Intangible Asset Valuation — 124+ Formulas, MCP Server, AI-Agent Skills">
+  <meta name="twitter:description" content="Complete intangible asset valuation library implementing 124+ functions from the Intangible Asset Valuation textbook">
   <meta name="twitter:image" content="{{ config.site_url }}assets/images/book-cover.jpg">
-  <meta name="google-site-verification" content="YOUR_VERIFICATION_CODE">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com; connect-src 'self' https://www.google-analytics.com">
+{% endblock %}
+
+{% block site_nav %}
+  <div class="top-bar">
+    <div class="top-bar-inner">
+      <a href="https://www.simonmak.com" target="_blank" rel="noopener noreferrer">Simon Mak</a>
+      <span class="top-bar-sep">|</span>
+      <a href="https://ascent-partners.com" target="_blank" rel="noopener noreferrer">Ascent Partners</a>
+      <span class="top-bar-sep">|</span>
+      <a href="https://github.com/simonplmak-cloud/intangible-valuation" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </div>
+  </div>
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+  {% if page and page.file and page.file.src_path == "index.md" %}
+    <!-- Custom Hero Section -->
+    <div class="custom-hero">
+      <div class="hero-content">
+        <h1>Intangible Asset Valuation Engine</h1>
+        <p class="hero-subtitle">A Comprehensive Guide to Valuing Brands, IP, Technology, and Human Capital</p>
+        <p class="hero-tagline">Theory, Methods, Regulation, and Practice — Valuation in Practice Series by Ascent Partners</p>
+        <div class="hero-ctas">
+          <a href="https://www.amazon.com/Intangible-Asset-Valuation-Comprehensive-Technology/dp/B0FZ8742R1" class="btn-primary" target="_blank" rel="noopener noreferrer">
+            Buy on Amazon
+          </a>
+          <a href="https://github.com/simonplmak-cloud/intangible-valuation" class="btn-secondary" target="_blank" rel="noopener noreferrer">
+            View on GitHub
+          </a>
+        </div>
+      </div>
+      <div class="hero-book-cover">
+        <img src="{{ config.site_url }}assets/images/book-cover.jpg" alt="Intangible Asset Valuation book cover">
+      </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-item">
+        <p class="stat-number">124+</p>
+        <p class="stat-label">Valuation Functions</p>
+      </div>
+      <div class="stat-item">
+        <p class="stat-number">22</p>
+        <p class="stat-label">Python Modules</p>
+      </div>
+      <div class="stat-item">
+        <p class="stat-number">1056</p>
+        <p class="stat-label">Unit Tests</p>
+      </div>
+      <div class="stat-item">
+        <p class="stat-number">49</p>
+        <p class="stat-label">MCP Tools</p>
+      </div>
+    </div>
+
+    <!-- Quick Start Section -->
+    <div class="quick-start-section">
+      <h2>Quick Start</h2>
+      <pre><code class="language-python">pip install intangible-valuation</code></pre>
+      <pre><code class="language-python">from intangible_valuation.core.time_value import present_value
+from intangible_valuation.income_methods.relief_from_royalty import relief_from_royalty
+
+# Present Value
+result = present_value(future_value=500_000, discount_rate=0.10, periods=8)
+print(f"PV: ${result.value:,.2f}")  # $233,253.69
+
+# Relief from Royalty — Patent Valuation
+value = relief_from_royalty(
+    revenue_projections=[1_000_000, 1_100_000, 1_200_000, 1_300_000, 1_400_000],
+    royalty_rate=0.05, discount_rate=0.12, tax_rate=0.25, useful_life=5,
+)
+print(f"Patent value: ${value.value:,.2f}")</code></pre>
+    </div>
+
+    <!-- Architecture Cards -->
+    <div class="arch-cards">
+      <a href="api/core/" class="arch-card">
+        <div class="arch-card-icon">&#128218;</div>
+        <h3>Python Library</h3>
+        <p>22 modules, 124+ typed functions, all returning ValuationResult with value, assumptions, and step-by-step calculation breakdown.</p>
+        <span class="arch-card-link">Explore API Reference &rarr;</span>
+      </a>
+      <a href="https://github.com/simonplmak-cloud/intangible-valuation/tree/main/mcp_server" class="arch-card" target="_blank" rel="noopener noreferrer">
+        <div class="arch-card-icon">&#129302;</div>
+        <h3>MCP Server</h3>
+        <p>49 tools for AI agents (Claude, OpenCode, etc.) via stdio/SSE. Connect any MCP-compatible agent.</p>
+        <span class="arch-card-link">View on GitHub &rarr;</span>
+      </a>
+      <a href="https://github.com/simonplmak-cloud/intangible-valuation/tree/main/skills" class="arch-card" target="_blank" rel="noopener noreferrer">
+        <div class="arch-card-icon">&#9889;</div>
+        <h3>AI-Agent Skills</h3>
+        <p>3 skill definitions with workflow guidance for asset valuation, discount rate construction, and purchase price allocation.</p>
+        <span class="arch-card-link">Browse Skills &rarr;</span>
+      </a>
+    </div>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Intangible Asset Valuation",
+      "description": "Complete intangible asset valuation library implementing 124+ functions from the Intangible Asset Valuation textbook. Python library + MCP server + AI-Agent Skills.",
+      "url": "https://intangible-valuation.simonmak.com",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Python 3.11+",
+      "license": "https://opensource.org/licenses/MIT",
+      "version": "1.0.2",
+      "author": {
+        "@type": "Organization",
+        "name": "Ascent Partners",
+        "url": "https://www.linkedin.com/company/ascent-partners-group-"
+      },
+      "codeRepository": "https://github.com/simonplmak-cloud/intangible-valuation",
+      "documentation": "https://intangible-valuation.simonmak.com",
+      "downloadUrl": "https://pypi.org/project/intangible-valuation/",
+      "keywords": ["intangible asset valuation", "patent valuation", "brand valuation", "goodwill", "purchase price allocation", "MCP", "AI agents"]
+    }
+    </script>
+  {% endif %}
+
+  {{ super() }}
+{% endblock %}
+
+{% block footer %}
+  {{ super() }}
+  <div class="footer-crosslinks">
+    <a href="https://www.simonmak.com" class="footer-crosslink" target="_blank" rel="noopener noreferrer">Simon Mak</a>
+    <a href="https://ascent-partners.com" class="footer-crosslink" target="_blank" rel="noopener noreferrer">Ascent Partners</a>
+    <a href="https://github.com/simonplmak-cloud/intangible-valuation" class="footer-crosslink" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <a href="https://www.linkedin.com/company/ascent-partners-group-" class="footer-crosslink" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+  </div>
 {% endblock %}

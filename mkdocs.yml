@@ -64,19 +64,15 @@ copyright: "© 2026 Ascent Partners Group Ltd, All rights reserved. | Part of th
 
 plugins:
   - search
-  - privacy
   - mkdocstrings:
       handlers:
         python:
           options:
             show_source: true
             show_root_heading: true
-            show_root_full_path: false
-            show_signature_annotations: true
             show_category_heading: true
-            merge_init_into_class: true
+            members_order: source
             docstring_style: google
-            docstring_section_style: table
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -85,7 +81,6 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - admonition
-  - tables
   - toc:
       permalink: true
 

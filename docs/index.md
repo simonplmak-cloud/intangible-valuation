@@ -1,56 +1,5 @@
 # Intangible Asset Valuation: A Comprehensive Guide
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Intangible Asset Valuation",
-  "description": "Python library for intangible asset valuation — patents, brands, goodwill, PPA, impairment testing. 124+ functions aligned to ASC 805, IFRS 3, ASC 350.",
-  "url": "https://intangible-valuation.simonmak.com",
-  "author": {
-    "@type": "Organization",
-    "name": "Ascent Partners",
-    "url": "https://www.linkedin.com/company/ascent-partners-group-"
-  },
-  "license": "https://opensource.org/licenses/MIT",
-  "applicationCategory": "FinanceApplication",
-  "operatingSystem": "Any",
-  "programmingLanguage": "Python",
-  "runtimePlatform": "Python 3.11+",
-  "softwareVersion": "1.0.0",
-  "downloadUrl": "https://pypi.org/project/intangible-valuation/",
-  "codeRepository": "https://github.com/simonplmak-cloud/intangible-valuation",
-  "keywords": ["intangible asset valuation", "patent valuation", "brand valuation", "goodwill", "purchase price allocation", "PPA", "impairment testing", "ASC 805", "IFRS 3", "relief from royalty", "MPEEM", "MCP server", "AI valuation"],
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  }
-}
-</script>
-
-<div class="book-hero">
-  <div class="book-cover">
-    <img src="assets/images/book-cover.jpg" alt="Intangible Asset Valuation book cover">
-  </div>
-  <div class="book-info">
-    <h2>Intangible Asset Valuation</h2>
-    <p class="book-subtitle">A Comprehensive Guide to Valuing Brands, IP, Technology, and Human Capital</p>
-    <p class="book-subtitle-2">Theory, Methods, Regulation, and Practice</p>
-    <p class="book-series">Valuation in Practice Series by Ascent Partners</p>
-    <p class="book-author">By Simon Mak</p>
-    <p class="book-description">
-      The definitive textbook for finance professionals, valuation analysts, accountants, and students navigating the complexities of intangible asset valuation. Covers all three valuation approaches, 19 chapters of frameworks for patents, trademarks, brands, technology, customer relationships, goodwill, purchase price allocation, and impairment testing — with step-by-step methodologies aligned to ASC 805, IFRS 3, ASC 350, and IAS 36.
-    </p>
-    <p class="book-features">
-      19 chapters · 3 appendices · 124+ functions · 1056 tests · 49 MCP tools · 3 AI-Agent Skills
-    </p>
-    <a href="https://www.amazon.com/Intangible-Asset-Valuation-Comprehensive-Technology/dp/B0FZ8742R1" class="amazon-btn" target="_blank" rel="noopener">
-      Buy on Amazon
-    </a>
-  </div>
-</div>
-
 ## Companion Library
 
 This site is the companion documentation for the Python library implementing **124+ functions** from the Intangible Asset Valuation textbook.
