@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] — 2026-05-21
+
+### Fixed
+- Updated MCP tool count from 54 to 49 in all docs (actual count)
+- Updated test count from 698 to 1056 in all docs (actual count)
+- Removed all stale `github.io` URL references from README
+
 ## [1.0.1] — 2026-05-21
 
 ### Fixed

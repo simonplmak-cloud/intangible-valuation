@@ -1,7 +1,7 @@
 cff-version: "1.2.0"
 message: "If you use this software, please cite it as below."
 title: "Intangible Asset Valuation Engine"
-version: "1.0.1"
+version: "1.0.2"
 authors:
   - family-names: "Mak"
     given-names: "Simon"
