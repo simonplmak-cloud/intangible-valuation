@@ -37,7 +37,8 @@ def goodwill(purchase_price: float, fair_value_net_identifiable_assets: float) -
         >>> result = goodwill(100_000_000, 75_000_000)
         >>> result.value
         25000000.0
-    """
+    Book Reference: Chapter 10.1, ASC 805-30-30-1
+        """
     GoodwillInput(purchase_price=purchase_price, fair_value_net_identifiable_assets=fair_value_net_identifiable_assets)
 
     goodwill_value = purchase_price - fair_value_net_identifiable_assets
