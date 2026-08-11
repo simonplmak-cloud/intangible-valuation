@@ -88,3 +88,7 @@ specs/
 constitution.md
 AGENTS.md
 vdd/
+.vercel
+.env.local
+.vercel
+.env*
