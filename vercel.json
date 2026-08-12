@@ -2,6 +2,6 @@
   "version": 2,
   "outputDirectory": "site",
   "framework": null,
-  "installCommand": "echo 'pre-built deployment'",
-  "buildCommand": "echo 'site already built'"
+  "installCommand": "echo 'pre-built'",
+  "buildCommand": "echo 'ready'"
 }
