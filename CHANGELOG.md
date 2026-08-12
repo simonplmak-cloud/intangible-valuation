@@ -7,12 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] — 2026-05-21
+
+### Authority Milestones
+- Docs site migrated to Vercel (intangible-valuation.simonmak.com)
+- GitHub Pages fully decommissioned (docs.yml, CNAME, gh-pages branch removed)
+- Single `main` branch enforced — all side branches merged and deleted
+
+### Content
+- 3 example pages populated with 26 copy-paste runnable scenarios
+  - Core Methods: 8 examples (PV, WACC, CAPM, annuities, terminal value, TAB, DLOM, control premium)
+  - Advanced Methods: 10 examples (RFR, MPEEM, goodwill, PPA, impairment, Monte Carlo, decision trees, transfer pricing)
+  - Industry Models: 8 case studies (pharma, SaaS, fintech, enterprise, retail, services, manufacturing, media)
+- 4th AI Agent Skill added: impairment-testing (ASC 350 / IAS 36)
+- discount-rate-construction skill rewritten with actual discount rate content
+- 18-page GitHub Wiki published with valuation guides, regulatory references, case studies
+
+### Technical
+- `ValuationResult.__contains__` protocol added for dict-style access
+- All 88 valuation functions return ValuationResult consistently
+- Custom exceptions exported (ValuationError, InputValidationError, etc.)
+- `brand_strength_index` accepts 0-100 scale (normalized internally)
+- `mpeem()` handles simple list inputs for contributory_asset_charges
+- All doc counts updated (49 MCP tools, 1056 tests)
+
 ## [1.0.2] — 2026-05-21
 
 ### Fixed
-- Updated MCP tool count from 54 to 49 in all docs (actual count)
-- Updated test count from 698 to 1056 in all docs (actual count)
-- Removed all stale `github.io` URL references from README
+- Updated MCP tool count from 54 to 49 in all docs
+- Updated test count from 698 to 1056 in all docs
+- Removed stale `github.io` URL references from README
 
 ## [1.0.1] — 2026-05-21
 
