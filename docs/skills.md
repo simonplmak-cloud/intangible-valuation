@@ -45,6 +45,16 @@ Step-by-step PPA workflow:
 6. Compute goodwill as residual
 7. Validate allocation percentages
 
+### Impairment Testing Skill
+
+Goodwill and intangible asset impairment under ASC 350 and IAS 36:
+
+1. Identify the asset or reporting unit to test
+2. Gather carrying value from accounting records
+3. Estimate fair value using market, income, or cost approaches
+4. Run impairment test using `goodwill_impairment_test` or `intangible_impairment_test`
+5. Document impairment loss and key assumptions
+
 ## Using Skills
 
 Skills are located in the `skills/` directory. Each skill is a markdown file with:

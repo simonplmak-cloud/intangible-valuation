@@ -67,6 +67,7 @@ Copy the `skills/` directory to your agent's skills folder:
 - **`asset-valuation`** — Patents, trademarks, technology, customer relationships, human capital
 - **`discount-rate-construction`** — Build-up, CAPM, WACC, risk premiums, adjustments
 - **`purchase-price-allocation`** — ASC 805 / IFRS 3 PPA workflow, goodwill calculation, impairment testing
+- **`impairment-testing`** — ASC 350, IAS 36 goodwill and intangible impairment
 
 ## Valuation Methods by Category
 

@@ -3,175 +3,148 @@
 ## When to Use
 
 Use this skill when a user asks to:
-- Test goodwill for impairment
-- Test intangible assets for impairment
-- Perform annual impairment testing
-- Assess whether an asset's carrying value exceeds its fair value
-- Compare ASC 350 vs IAS 36 impairment methodologies
-- Determine impairment loss amount for financial reporting
+- Build a discount rate for valuation (WACC, cost of equity, cost of debt)
+- Calculate discount rate using build-up method, CAPM, or WACC
+- Apply risk premiums (size, industry, company-specific, country, currency)
+- Adjust for lack of marketability (DLOM) or control premium
+- Calculate tax amortization benefit (TAB)
+- Select the appropriate discount rate method for a given asset type
 
-## ASC 350 vs IAS 36 Methodology Selection
+## Discount Rate Methods
 
-| Feature | ASC 350 (US GAAP) | IAS 36 (IFRS) |
-|---|---|---|
-| **Goodwill Test** | One-step: Compare reporting unit FV to carrying value | Compare CGU carrying value to recoverable amount |
-| **Recoverable Amount** | Not applicable | Higher of (FV less costs to sell, value in use) |
-| **Intangible (indefinite)** | Compare FV to carrying value | Compare recoverable amount to carrying value |
-| **Intangible (finite-lived)** | Test only if triggering events occur | Test only if triggering events occur |
-| **Impairment Reversal** | Not permitted | Permitted for assets other than goodwill |
-| **Reporting Unit** | Operating segment or one level below | Cash-Generating Unit (CGU) |
-| **Frequency** | Annual (or when triggering events) | Annual (or when triggering events) |
+| Method | Formula | Best For | MCP Tool |
+|--------|---------|----------|----------|
+| Build-Up | r = Rf + ERP + Size + Industry + Specific | Private companies, no beta | `build_up_discount_rate` |
+| CAPM | r = Rf + β × (Rm − Rf) | Public companies, available beta | `capm_discount_rate` |
+| WACC | (E/V)×Re + (D/V)×Rd×(1−Tc) | Enterprise-level, debt financing | `wacc` |
 
-### When to Use Each Standard
-- **ASC 350**: US GAAP reporting entities, SEC filers, US subsidiaries
-- **IAS 36**: IFRS reporting entities, non-US companies, international subsidiaries
+## Step-by-Step Workflow
 
-## Step-by-Step Impairment Testing
+### Step 1: Identify the Valuation Context
+Ask the user:
+- What are you valuing? (company, patent, brand, customer list, etc.)
+- Is the entity public or private?
+- What is the jurisdiction? (US, international, emerging market)
+- What is the purpose? (financial reporting, M&A, litigation, tax)
 
-### Step 1: Identify the Asset or Reporting Unit
-Determine what is being tested:
-- **Goodwill** — identify the reporting unit (ASC 350) or CGU (IAS 36)
-- **Indefinite-lived intangible** — identify the specific asset (trademark, brand)
-- **Finite-lived intangible** — only test if triggering events exist
+### Step 2: Select the Method
 
-**Triggering Events:**
-- Significant decline in market capitalization
-- Loss of key customers or contracts
-- Adverse regulatory changes
-- Technological obsolescence
-- Significant increase in competition
-- Deterioration in financial performance
-- Change in business strategy
-
-### Step 2: Gather Carrying Value
-Collect the current book value:
-- **Goodwill**: Carrying value of the reporting unit including allocated goodwill
-- **Intangible asset**: Net book value (cost less accumulated amortization)
-
-MCP Tool: None (obtain from accounting records)
-
-### Step 3: Estimate Fair Value
-Determine the fair value of the asset or reporting unit using:
-- Market approach (comparable companies, precedent transactions)
-- Income approach (DCF, relief from royalty, MPEEM)
-- Cost approach (replacement cost)
-
-MCP Tools for fair value estimation:
-- `market_approach_comparables` — for market-based FV
-- `relief_from_royalty` — for income-based FV of IP assets
-- `mpeem` — for income-based FV of primary intangibles
-- `royalty_capitalization` — for mature, stable assets
-- `discounted_cashflow` — use `present_value_of_series` from core
-
-### Step 4: Run Impairment Test
-
-**For Goodwill:**
 ```
-goodwill_impairment_test(
-    carrying_value=<reporting_unit_cv>,
-    fair_value=<reporting_unit_fv>,
-    reporting_unit="<name>",
-    standard="ASC350"  # or "IAS36"
+Is the entity publicly traded with available beta?
+├── YES → Use CAPM or WACC
+│   └── Does the entity use debt financing?
+│       ├── YES → Use WACC
+│       └── NO  → Use CAPM
+└── NO  → Use Build-Up Method
+```
+
+### Step 3: Gather Inputs for Selected Method
+
+**Build-Up Method:**
+- `risk_free_rate` — 10-year or 20-year government bond yield (e.g., 0.04 for 4%)
+- `equity_risk_premium` — Duff & Phelps/Ibbotson ERP (typically 5-7%)
+- `size_premium` — CRSP Decile size premium (0-6% depending on market cap)
+- `industry_risk_premium` — Industry-specific risk (0-5%)
+- `specific_risk_premium` — Company-specific risk factors (0-5%)
+
+```python
+# Calculate
+build_up_discount_rate(
+    risk_free_rate=0.04, equity_risk_premium=0.06,
+    size_premium=0.02, industry_risk_premium=0.01, specific_risk_premium=0.03,
 )
+# Result: 16.00%
 ```
 
-**For Intangible Asset (ASC 350):**
-```
-intangible_impairment_test(
-    carrying_value=<asset_cv>,
-    fair_value=<asset_fv>,
-    standard="ASC350"
-)
-```
+**CAPM:**
+- `risk_free_rate` — Government bond yield
+- `beta` — Unlevered industry beta, relevered for company's capital structure
+- `market_return` — Expected market return (typically Rf + ERP)
 
-**For Intangible Asset (IAS 36):**
-```
-intangible_impairment_test(
-    carrying_value=<asset_cv>,
-    recoverable_amount=<recoverable_amount>,
-    standard="IAS36"
-)
+```python
+capm_discount_rate(risk_free_rate=0.04, beta=1.2, market_return=0.10)
+# Result: 11.20%
 ```
 
-### Step 5: Report Results
-The tool returns:
-- `value` — impairment loss amount (0 if no impairment)
-- `method` — test methodology
-- `formula_reference` — standard reference
-- `steps` — calculation breakdown
-- `assumptions` — includes `impaired` boolean flag
+**WACC:**
+- `equity_value` — Market cap of equity
+- `debt_value` — Market value of debt
+- `cost_of_equity` — From CAPM or Build-Up
+- `cost_of_debt` — Yield on company's debt or borrowing rate
+- `tax_rate` — Marginal tax rate
 
-Report format:
-1. State the asset/reporting unit tested
-2. State the accounting standard applied
-3. Present carrying value vs fair value/recoverable amount
-4. State whether impairment exists
-5. If impaired, state the impairment loss amount
-6. Note any required disclosures
-
-## MCP Tools Used
-
-| Tool | Purpose |
-|---|---|
-| `goodwill_impairment_test` | Goodwill impairment per ASC 350 or IAS 36 |
-| `intangible_impairment_test` | Intangible asset impairment per ASC 350 or IAS 36 |
-| `market_approach_comparables` | Estimate fair value via market comparables |
-| `relief_from_royalty` | Estimate fair value via income approach |
-| `mpeem` | Estimate fair value for primary intangibles |
-| `build_up_discount_rate` | Construct discount rate for DCF |
-| `capm_discount_rate` | CAPM-based discount rate |
-
-## Example Impairment Scenario
-
-### Scenario: Goodwill Impairment Test
-
-**Context:** Tech Division reporting unit has carrying value of $50M (including $15M goodwill). Recent market conditions suggest fair value may be $40M.
-
-**Step 1:** Identify — Goodwill impairment test for "Tech Division" reporting unit
-**Step 2:** Carrying value = $50,000,000
-**Step 3:** Fair value = $40,000,000 (estimated via DCF and market comparables)
-**Step 4:** Run test:
-
-```
-goodwill_impairment_test(
-    carrying_value=50000000,
-    fair_value=40000000,
-    reporting_unit="Tech Division",
-    standard="ASC350"
-)
+```python
+wacc(equity_value=700, debt_value=300, cost_of_equity=0.12, cost_of_debt=0.06, tax_rate=0.25)
+# Result: 9.75%
 ```
 
-**Result:** Impairment loss of $10,000,000. The reporting unit is impaired.
+### Step 4: Apply Adjustments
 
-### Scenario: Trademark Impairment Test (IAS 36)
+**Tax Amortization Benefit (TAB):**
+For intangible asset valuations, TAB adjusts the discount rate to account for tax savings from asset amortization.
 
-**Context:** A brand acquired in a PPA has carrying value of $20M. Due to reputational damage, recoverable amount is estimated at $15M.
-
-**Step 1:** Identify — Indefinite-lived intangible (trademark)
-**Step 2:** Carrying value = $20,000,000
-**Step 3:** Recoverable amount = $15,000,000 (higher of FV less costs to sell and value in use)
-**Step 4:** Run test:
-
-```
-intangible_impairment_test(
-    carrying_value=20000000,
-    recoverable_amount=15000000,
-    standard="IAS36"
-)
+```python
+tax_amortization_benefit(discount_rate=0.16, useful_life=10, tax_rate=0.25, asset_value=1_000_000)
 ```
 
-**Result:** Impairment loss of $5,000,000. Under IAS 36, this impairment could be reversed in future periods if conditions improve (unlike ASC 350).
+**Discount for Lack of Marketability (DLOM):**
+Finnerty average-strike put option model for restricted stock.
 
-### Scenario: No Impairment
-
-**Context:** Patent carrying value $8M, fair value estimated at $12M.
-
-```
-intangible_impairment_test(
-    carrying_value=8000000,
-    fair_value=12000000,
-    standard="ASC350"
-)
+```python
+dlom_finnerty(restricted_period=1.0, volatility=0.35, risk_free_rate=0.04)
 ```
 
-**Result:** No impairment (fair value exceeds carrying value). Impairment loss = $0.
+**Control Premium:**
+Adjustment when valuing controlling vs minority interests.
+
+```python
+control_premium(minority_price=85, control_price=100)
+# Result: 17.65%
+```
+
+**Currency & Country Risk:**
+For cross-border valuations.
+
+```python
+currency_adjusted_discount_rate(base_rate=0.12, currency_risk_premium=0.02, country_risk_premium=0.03)
+# Result: 17.00%
+```
+
+### Step 5: Validate the Rate
+
+**Sanity Checks:**
+- Discount rate should exceed risk-free rate (no negative risk premiums)
+- Discount rate should exceed long-term GDP growth rate
+- Discount rate for intangibles > WACC (intangibles are riskier than the enterprise)
+- TAB-adjusted rate < unadjusted rate (tax benefit reduces effective cost)
+
+**Typical Ranges by Asset Type:**
+
+| Asset Type | Discount Rate Range | Notes |
+|------------|-------------------|-------|
+| Core deposit intangible | 8-12% | Lower risk, stable cash flows |
+| Customer relationships | 12-18% | Attrition risk increases rate |
+| Trademarks/Brands | 10-16% | Depends on brand strength |
+| Patents | 14-25% | Higher technology/obsolescence risk |
+| Software | 15-25% | Rapid obsolescence |
+| In-process R&D | 18-30% | Highest risk, uncertain outcomes |
+| Goodwill (WACC) | 8-15% | Enterprise-level rate |
+
+## MCP Tools Reference
+
+| Tool | Category | Key Parameters |
+|------|----------|---------------|
+| `build_up_discount_rate` | Core | risk_free_rate, equity_risk_premium, size_premium, industry_risk_premium, specific_risk_premium |
+| `capm_discount_rate` | Core | risk_free_rate, beta, market_return |
+| `wacc` | Core | equity_value, debt_value, cost_of_equity, cost_of_debt, tax_rate |
+| `tax_amortization_benefit` | Core | discount_rate, useful_life, tax_rate, asset_value |
+| `dlom_finnerty` | Core | restricted_period, volatility, risk_free_rate |
+| `control_premium` | Core | minority_price, control_price |
+| `currency_adjusted_discount_rate` | Core | base_rate, currency_risk_premium, country_risk_premium |
+
+## References
+- Chapter 2: Core Mathematics — Discount Rates
+- Duff & Phelps Valuation Handbook (size premiums)
+- Ibbotson SBBI Yearbook (equity risk premiums)
+- IRS Rev. Rul. 59-60 (valuation standards)
+- Mandelbaum factors (DLOM considerations)

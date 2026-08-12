@@ -91,6 +91,7 @@ Copy the `skills/` directory to your agent's skills folder. Available skills:
 - `asset-valuation` — Patents, trademarks, technology, customer relationships, human capital
 - `discount-rate-construction` — Build-up, CAPM, WACC, risk premiums, adjustments
 - `purchase-price-allocation` — Full PPA workflow, goodwill calculation, impairment testing
+- `impairment-testing` — ASC 350, IAS 36 goodwill and intangible impairment
 
 ## Development
 
