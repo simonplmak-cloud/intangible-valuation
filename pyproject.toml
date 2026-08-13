@@ -133,6 +133,9 @@ ignore = [
     "E501",     # line too long (ValuationResult calls are long by nature)
 ]
 
+[tool.ruff.lint.isort]
+known-first-party = ["api", "mcp_server"]
+
 [tool.mypy]
 python_version = "3.12"
 warn_return_any = true
