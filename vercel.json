@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "cd webapp && pnpm build",
+  "buildCommand": "cd webapp && npm run build",
   "outputDirectory": "webapp/.next",
-  "installCommand": "cd webapp && pnpm install",
+  "installCommand": "cd webapp && npm install",
   "functions": {
     "api/index.py": {
       "memory": 512,
