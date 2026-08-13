@@ -6,7 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider>
+    <SessionProvider basePath="/v1/auth">
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />

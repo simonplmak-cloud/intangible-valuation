@@ -14,11 +14,11 @@ const publicPaths = [
   "/privacy",
   "/sign-in",
   "/sign-up",
-  "/api/valuation",
-  "/api/mcp",
-  "/api/benchmarks",
-  "/api/billing/webhook",
-  "/api/auth",
+  "/v1/valuation",
+  "/v1/mcp",
+  "/v1/benchmarks",
+  "/v1/billing/webhook",
+  "/v1/auth",
   "/favicon.ico",
 ];
 

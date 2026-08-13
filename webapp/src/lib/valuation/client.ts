@@ -1,6 +1,6 @@
 import type { ValuationResult, ApiError, MethodDefinition, Benchmark, BusinessStage } from "./types";
 
-const API_BASE = "/api/valuation";
+const API_BASE = "/v1/valuation";
 
 async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(url, {
@@ -54,11 +54,11 @@ export async function getDashboardValuations(params?: {
       if (value !== undefined) searchParams.set(key, String(value));
     });
   }
-  return apiFetch<unknown>(`/api/dashboard/valuations?${searchParams.toString()}`);
+  return apiFetch<unknown>(`/v1/dashboard/valuations?${searchParams.toString()}`);
 }
 
 export async function getDashboardValuationDetail(id: string) {
-  return apiFetch<unknown>(`/api/dashboard/valuations/${id}`);
+  return apiFetch<unknown>(`/v1/dashboard/valuations/${id}`);
 }
 
 export async function getBenchmarks(params: {
@@ -72,7 +72,7 @@ export async function getBenchmarks(params: {
     if (value !== undefined) searchParams.set(key, String(value));
   });
   return apiFetch<{ benchmarks: Benchmark[]; count: number }>(
-    `/api/benchmarks?${searchParams.toString()}`
+    `/v1/benchmarks?${searchParams.toString()}`
   );
 }
 
