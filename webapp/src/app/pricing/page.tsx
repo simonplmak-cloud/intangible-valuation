@@ -41,7 +41,7 @@ export default function PricingPage() {
     setLoading(true);
     trackEvent("checkout_started", { plan_id: planId });
     try {
-      const res = await fetch("/api/billing/checkout", {
+      const res = await fetch("/v1/billing/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan_id: planId }),
