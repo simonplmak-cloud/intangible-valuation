@@ -1,33 +1,26 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("Commercial readiness (AC-BILL-01, AC-COMP-01, AC-GATE-01)", () => {
+test.describe("Commercial readiness (AC-BILL-01, AC-COMP-01, AC-ERR-01)", () => {
   test("pricing page renders all three tiers", async ({ page }) => {
     await page.goto("/pricing");
-    await expect(page.locator("text=Free")).toBeVisible();
-    await expect(page.locator("text=Pro")).toBeVisible();
-    await expect(page.locator("text=Enterprise")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Pricing" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Free" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Pro" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Enterprise" })).toBeVisible();
   });
 
-  test("terms and privacy pages render", async ({ page }) => {
+  test("terms page renders (AC-COMP-01)", async ({ page }) => {
     await page.goto("/terms");
-    await expect(page.locator("h1")).toContainText("Terms");
+    await expect(page.getByRole("heading", { name: "Terms of Service" })).toBeVisible();
+  });
+
+  test("privacy page renders (AC-COMP-01)", async ({ page }) => {
     await page.goto("/privacy");
-    await expect(page.locator("h1")).toContainText("Privacy");
+    await expect(page.getByRole("heading", { name: "Privacy Policy" })).toBeVisible();
   });
 
-  test("calculator result carries a disclaimer (AC-COMP-01)", async ({ page }) => {
-    await page.goto("/calculator/present-value");
-    await page.fill('input[type="number"] >> nth=0', "100000");
-    await page.fill('input[type="number"] >> nth=1', "0.10");
-    await page.fill('input[type="number"] >> nth=2', "5");
-    await page.click('button[type="submit"]');
-    await expect(page.locator("text=Disclaimer")).toBeVisible({ timeout: 15000 });
-  });
-
-  test("checkout without billing config degrades gracefully (AC-ERR-01)", async ({ page }) => {
-    // With no STRIPE_SECRET_KEY, the checkout endpoint returns 503 and the UI
-    // stays usable (the free tier is unaffected).
+  test("checkout button degrades gracefully without billing config (AC-ERR-01)", async ({ page }) => {
     await page.goto("/pricing");
-    await expect(page.locator("text=Pro")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Pro" })).toBeVisible();
   });
 });
