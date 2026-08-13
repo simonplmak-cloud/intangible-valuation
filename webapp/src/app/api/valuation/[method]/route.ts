@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { method: string } }
+  { params }: { params: Promise<{ method: string }> }
 ) {
-  const { method } = params;
+  const { method } = await params;
 
   try {
     const body = await request.json();
@@ -47,9 +47,9 @@ export async function POST(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { method: string } }
+  { params }: { params: Promise<{ method: string }> }
 ) {
-  const { method } = params;
+  const { method } = await params;
   return NextResponse.json({
     endpoint: method,
     description: `POST /api/valuation/${method} — Execute the ${method} valuation method`,

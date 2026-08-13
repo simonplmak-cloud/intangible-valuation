@@ -6,8 +6,8 @@ export function generateStaticParams() {
   return CATALOG_SLUGS.map((method) => ({ method }));
 }
 
-export default function MethodCalculatorPage({ params }: { params: { method: string } }) {
-  const { method } = params;
+export default async function MethodCalculatorPage({ params }: { params: Promise<{ method: string }> }) {
+  const { method } = await params;
 
   return (
     <div>

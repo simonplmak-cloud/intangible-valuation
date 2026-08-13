@@ -103,8 +103,9 @@ print(f"TAB Factor: {result.tab_factor:.4f}")`,
   },
 };
 
-export default function MethodDocPage({ params }: { params: { slug: string } }) {
-  const method = METHODS[params.slug];
+export default async function MethodDocPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const method = METHODS[slug];
   if (!method) notFound();
 
   return (
