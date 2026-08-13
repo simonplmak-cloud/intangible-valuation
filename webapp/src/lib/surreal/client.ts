@@ -54,7 +54,7 @@ export async function healthCheck(): Promise<{ status: string; namespace: string
     const latency = Date.now() - start;
     const { namespace, database } = getConfig();
     return { status: "ok", namespace, database, latency_ms: latency };
-  } catch (error) {
+  } catch {
     const latency = Date.now() - start;
     return { status: "error", namespace: getConfig().namespace, database: getConfig().database, latency_ms: latency };
   }

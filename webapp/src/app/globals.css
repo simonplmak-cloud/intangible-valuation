@@ -16,9 +16,9 @@
   --color-accent-500: #F5A623;
   --color-accent-600: #D4891A;
 
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
   --font-serif: 'Georgia', 'Times New Roman', serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-mono: var(--font-jetbrains-mono), 'Fira Code', monospace;
 }
 
 @layer base {

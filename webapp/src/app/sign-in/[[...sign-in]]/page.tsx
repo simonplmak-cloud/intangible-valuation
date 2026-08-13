@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { signIn, getProviders } from "next-auth/react";
 import { useState, useEffect } from "react";
 
@@ -135,9 +136,9 @@ export default function SignInPage() {
 
         <p className="text-center text-sm text-neutral-400 mt-6">
           Don&apos;t have an account?{" "}
-          <a href="/sign-up" className="text-primary-500 hover:text-primary-600 font-medium">
+          <Link href="/sign-up" className="text-primary-500 hover:text-primary-600 font-medium">
             Sign up
-          </a>
+          </Link>
         </p>
       </div>
     </div>

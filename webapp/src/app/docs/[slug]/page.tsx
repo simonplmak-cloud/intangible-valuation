@@ -1,7 +1,7 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { FormulaDisplay } from "@/components/valuation/FormulaDisplay";
-import { ParameterGuide } from "@/components/valuation/ParameterGuide";
 
 const METHODS: Record<string, {
   slug: string; name: string; category: string; description: string;
@@ -178,12 +178,12 @@ export default async function MethodDocPage({ params }: { params: Promise<{ slug
           <p className="text-sm text-neutral-500 mb-4">
             Use the interactive calculator to run this method with your own data and see the step-by-step proof.
           </p>
-          <a
+          <Link
             href={`/calculator/${method.slug}`}
             className="inline-flex items-center justify-center rounded-lg bg-primary-500 text-white px-6 py-3 text-sm font-semibold hover:bg-primary-600 transition-colors"
           >
             Open Calculator
-          </a>
+          </Link>
         </section>
       </div>
     </div>

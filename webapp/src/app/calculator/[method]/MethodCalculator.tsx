@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { CalculatorForm } from "@/components/valuation/CalculatorForm";
 import { FormulaDisplay } from "@/components/valuation/FormulaDisplay";
 import { ParameterGuide } from "@/components/valuation/ParameterGuide";
@@ -25,9 +26,9 @@ export function MethodCalculator({ slug }: MethodCalculatorProps) {
       <div className="card p-8 text-center">
         <h2 className="text-xl font-serif font-semibold text-neutral-900 dark:text-white mb-3">Method Not Found</h2>
         <p className="text-neutral-500">No method found for &quot;{slug}&quot;</p>
-        <a href="/calculator" className="inline-block mt-4 text-primary-500 hover:text-primary-600 font-medium text-sm">
+        <Link href="/calculator" className="inline-block mt-4 text-primary-500 hover:text-primary-600 font-medium text-sm">
           Browse all methods
-        </a>
+        </Link>
       </div>
     );
   }

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { signIn, getProviders } from "next-auth/react";
 import { useState, useEffect } from "react";
 
@@ -66,12 +67,12 @@ export default function SignUpPage() {
               <p className="text-sm text-neutral-500 mb-4">
                 Sign in with the demo account to get started.
               </p>
-              <a
+              <Link
                 href="/sign-in"
                 className="inline-flex items-center justify-center rounded-lg bg-primary-500 text-white px-6 py-3 text-sm font-semibold hover:bg-primary-600 transition-colors"
               >
                 Go to Sign In
-              </a>
+              </Link>
             </div>
           )}
         </div>
@@ -80,7 +81,7 @@ export default function SignUpPage() {
           <div className="flex items-start gap-3 p-3 rounded-lg bg-neutral-50 dark:bg-neutral-900">
             <span className="text-primary-500 mt-0.5">&#10003;</span>
             <p className="text-sm text-neutral-600 dark:text-neutral-400">
-              <strong>Free tier:</strong> All 73 valuation methods, step-by-step proofs, MCP gateway
+              <strong>Free tier:</strong> All 68 valuation methods, step-by-step proofs, MCP gateway
             </p>
           </div>
           <div className="flex items-start gap-3 p-3 rounded-lg bg-neutral-50 dark:bg-neutral-900">
@@ -99,9 +100,9 @@ export default function SignUpPage() {
 
         <p className="text-center text-sm text-neutral-400 mt-6">
           Already have an account?{" "}
-          <a href="/sign-in" className="text-primary-500 hover:text-primary-600 font-medium">
+          <Link href="/sign-in" className="text-primary-500 hover:text-primary-600 font-medium">
             Sign in
-          </a>
+          </Link>
         </p>
       </div>
     </div>

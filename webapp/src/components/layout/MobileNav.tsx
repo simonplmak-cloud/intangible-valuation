@@ -1,8 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
-import { cn } from "@/lib/utils/cn";
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -20,49 +20,49 @@ export function MobileNav() {
       {open && (
         <div className="absolute top-16 left-0 right-0 bg-white dark:bg-neutral-950 border-b border-neutral-200 dark:border-neutral-800 shadow-modal p-4">
           <nav className="flex flex-col gap-3">
-            <a
+            <Link
               href="/calculator"
               className="px-3 py-2 rounded-lg text-sm font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800"
               onClick={() => setOpen(false)}
             >
               Calculator
-            </a>
-            <a
+            </Link>
+            <Link
               href="/docs"
               className="px-3 py-2 rounded-lg text-sm font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800"
               onClick={() => setOpen(false)}
             >
               Docs
-            </a>
-            <a
+            </Link>
+            <Link
               href="/mcp"
               className="px-3 py-2 rounded-lg text-sm font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800"
               onClick={() => setOpen(false)}
             >
               MCP Gateway
-            </a>
-            <a
+            </Link>
+            <Link
               href="/skills"
               className="px-3 py-2 rounded-lg text-sm font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800"
               onClick={() => setOpen(false)}
             >
               AI Skills
-            </a>
+            </Link>
             <div className="border-t border-neutral-200 dark:border-neutral-800 pt-3">
-              <a
+              <Link
                 href="/dashboard"
                 className="px-3 py-2 rounded-lg text-sm font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800"
                 onClick={() => setOpen(false)}
               >
                 Dashboard
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/about"
                 className="px-3 py-2 rounded-lg text-sm font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800"
                 onClick={() => setOpen(false)}
               >
                 About
-              </a>
+              </Link>
             </div>
           </nav>
         </div>

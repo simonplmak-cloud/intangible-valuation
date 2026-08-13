@@ -3,6 +3,7 @@ import type { Adapter } from "next-auth/adapters";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { SurrealDBAdapter } from "@/lib/auth/surreal-adapter";
 
 const providers: NextAuthOptions["providers"] = [];
 
@@ -64,12 +65,9 @@ providers.push(
   })
 );
 
-let adapter: Adapter | undefined;
-
 function initAdapter(): Adapter | undefined {
   if (!process.env.SURREALDB_URL) return undefined;
   try {
-    const { SurrealDBAdapter } = require("@/lib/auth/surreal-adapter");
     return SurrealDBAdapter();
   } catch {
     return undefined;
@@ -86,7 +84,7 @@ export const authOptions: NextAuthOptions = {
     newUser: "/calculator",
   },
   callbacks: {
-    async jwt({ token, user, account, trigger }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
         token.role = (user as { role?: string }).role ?? "public";
@@ -104,7 +102,7 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    async signIn({ account }) {
+    async signIn() {
       return true;
     },
   },

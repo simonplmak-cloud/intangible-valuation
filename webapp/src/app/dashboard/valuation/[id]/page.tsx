@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
-import { DashboardSidebar } from "@/components/layout/DashboardSidebar";
 import { ValuationResultCard } from "@/components/valuation/ValuationResultCard";
 import { getDashboardValuationDetail } from "@/lib/valuation/client";
 import type { SavedValuationDetail } from "@/lib/valuation/types";
@@ -35,7 +35,7 @@ export default function ValuationDetailPage() {
         <div className="card p-8 text-center">
           <h2 className="text-lg font-serif font-semibold mb-3">Valuation Not Found</h2>
           <p className="text-neutral-500 mb-4">{error}</p>
-          <a href="/dashboard" className="text-primary-500 font-medium text-sm">Back to Dashboard</a>
+          <Link href="/dashboard" className="text-primary-500 font-medium text-sm">Back to Dashboard</Link>
         </div>
       </div>
     );
@@ -54,9 +54,9 @@ export default function ValuationDetailPage() {
 
   return (
     <div className="container-page py-8">
-      <a href="/dashboard" className="text-sm text-primary-500 hover:text-primary-600 mb-4 inline-block">
+      <Link href="/dashboard" className="text-sm text-primary-500 hover:text-primary-600 mb-4 inline-block">
         &larr; Back to Dashboard
-      </a>
+      </Link>
       <div className="mb-6">
         <p className="text-xs text-neutral-400">
           Saved on {new Date(valuation.created_at).toLocaleString()}

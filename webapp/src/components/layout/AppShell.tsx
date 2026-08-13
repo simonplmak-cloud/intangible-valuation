@@ -3,7 +3,6 @@
 import { SessionProvider } from "next-auth/react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { Analytics } from "@vercel/analytics/react";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (

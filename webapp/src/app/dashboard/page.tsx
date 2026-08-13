@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { DashboardSidebar } from "@/components/layout/DashboardSidebar";
 import { getDashboardValuations } from "@/lib/valuation/client";
 import { getCatalogMethod } from "@/lib/valuation/catalog";
@@ -53,12 +54,12 @@ export default function DashboardPage() {
               <p className="text-neutral-500 mb-6">
                 Run a valuation calculation to see it saved here. All results are stored with full audit trail.
               </p>
-              <a
+              <Link
                 href="/calculator"
                 className="inline-flex items-center justify-center rounded-lg bg-primary-500 text-white px-6 py-3 text-sm font-semibold hover:bg-primary-600 transition-colors"
               >
                 Start Valuing
-              </a>
+              </Link>
             </div>
           ) : (
             <div className="card overflow-hidden">
@@ -75,12 +76,12 @@ export default function DashboardPage() {
                   {valuations.map((v) => (
                     <tr key={v.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors">
                       <td className="px-4 py-3">
-                        <a
+                        <Link
                           href={`/dashboard/valuation/${v.id}`}
                           className="text-sm font-medium text-primary-500 hover:text-primary-600"
                         >
                           {v.name || getCatalogMethod(v.method)?.name || v.method}
-                        </a>
+                        </Link>
                       </td>
                       <td className="px-4 py-3 text-sm text-neutral-500">{v.category}</td>
                       <td className="px-4 py-3 text-sm text-right font-mono text-neutral-900 dark:text-white">

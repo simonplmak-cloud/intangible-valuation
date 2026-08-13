@@ -59,7 +59,6 @@ export async function getUserValuations(
   }
 ): Promise<{ valuations: SavedValuation[]; total: number }> {
   const db = await getSurrealClient();
-  const page = options?.page ?? 1;
   const limit = options?.limit ?? 20;
   const sort = options?.sort ?? "created_at";
   const order = options?.order ?? "desc";

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { DashboardSidebar } from "@/components/layout/DashboardSidebar";
 
 export default function AdminPage() {
-  const [stats, setStats] = useState({ users: 0, valuations: 0, methods: 73, benchmarks: 27 });
+  const [stats] = useState({ users: 0, valuations: 0, methods: 68, benchmarks: 27 });
 
   return (
     <div className="container-page py-8">

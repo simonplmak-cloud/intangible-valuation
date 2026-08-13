@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { LogIn, LogOut, User } from "lucide-react";
 
@@ -11,29 +12,29 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-neutral-200 dark:border-neutral-800 bg-white/95 dark:bg-neutral-950/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:supports-[backdrop-filter]:bg-neutral-950/80">
       <div className="container-page flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
-          <a href="/" className="flex items-center gap-2 group" aria-label="Home">
+          <Link href="/" className="flex items-center gap-2 group" aria-label="Home">
             <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center text-white font-bold text-sm">
               IV
             </div>
             <span className="font-serif font-semibold text-lg text-neutral-900 dark:text-white">
               Intangible Valuation
             </span>
-          </a>
+          </Link>
         </div>
 
         <nav className="hidden md:flex items-center gap-6">
-          <a href="/calculator" className="text-sm font-medium text-neutral-600 hover:text-primary-500 transition-colors">
+          <Link href="/calculator" className="text-sm font-medium text-neutral-600 hover:text-primary-500 transition-colors">
             Calculator
-          </a>
-          <a href="/docs" className="text-sm font-medium text-neutral-600 hover:text-primary-500 transition-colors">
+          </Link>
+          <Link href="/docs" className="text-sm font-medium text-neutral-600 hover:text-primary-500 transition-colors">
             Docs
-          </a>
-          <a href="/mcp" className="text-sm font-medium text-neutral-600 hover:text-primary-500 transition-colors">
+          </Link>
+          <Link href="/mcp" className="text-sm font-medium text-neutral-600 hover:text-primary-500 transition-colors">
             MCP
-          </a>
-          <a href="/skills" className="text-sm font-medium text-neutral-600 hover:text-primary-500 transition-colors">
+          </Link>
+          <Link href="/skills" className="text-sm font-medium text-neutral-600 hover:text-primary-500 transition-colors">
             Skills
-          </a>
+          </Link>
         </nav>
 
         <div className="flex items-center gap-3">
@@ -41,12 +42,12 @@ export function Header() {
             <div className="w-8 h-8 rounded-full bg-neutral-200 dark:bg-neutral-700 animate-pulse" />
           ) : isAuthenticated ? (
             <>
-              <a
+              <Link
                 href="/dashboard"
                 className="hidden md:inline-flex text-sm font-medium text-neutral-600 hover:text-primary-500 transition-colors"
               >
                 Dashboard
-              </a>
+              </Link>
               <button
                 onClick={() => signOut({ callbackUrl: "/" })}
                 className="hidden md:inline-flex items-center gap-1.5 text-sm font-medium text-neutral-500 hover:text-red-500 transition-colors"
@@ -69,12 +70,12 @@ export function Header() {
               Sign In
             </button>
           )}
-          <a
+          <Link
             href="/calculator"
             className="inline-flex items-center justify-center rounded-lg bg-primary-500 text-white px-4 py-2 text-sm font-semibold hover:bg-primary-600 transition-colors"
           >
             Try Calculator
-          </a>
+          </Link>
         </div>
       </div>
     </header>
