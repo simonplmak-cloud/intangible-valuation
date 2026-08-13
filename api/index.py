@@ -22,8 +22,8 @@ try:
         terminal_value as _tv,
     )
     from intangible_valuation.core.discount_rates import (
-        build_up_method as _build_up,
-        capm as _capm,
+        build_up_discount_rate as _build_up,
+        capm_discount_rate as _capm,
         wacc as _wacc,
         tax_amortization_benefit as _tab,
         control_premium as _cp,
