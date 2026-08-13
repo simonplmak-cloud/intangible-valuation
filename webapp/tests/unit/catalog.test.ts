@@ -46,7 +46,7 @@ describe("Valuation method catalog", () => {
   it("declares a pythonFunction and textbookReference for every method", () => {
     for (const method of CATALOG) {
       expect(method.pythonFunction).toMatch(/^intangible_valuation\.[a-z0-9_.]+$/);
-      expect(method.textbookReference).toMatch(/^Ch \d+/);
+      expect(method.textbookReference).toMatch(/^(Ch \d+|Appendix [A-Z])/);
     }
   });
 

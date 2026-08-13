@@ -26,7 +26,7 @@ function auditCatalog(): AuditResult {
     if (!method.description?.trim()) result.missingDescription.push(method.slug);
     else ok.push(true);
 
-    if (!/^Ch \d+/.test(method.textbookReference)) result.missingReference.push(method.slug);
+    if (!/^(Ch \d+|Appendix [A-Z])/.test(method.textbookReference)) result.missingReference.push(method.slug);
     else ok.push(true);
 
     if (!method.parameters?.length) result.missingParameters.push(method.slug);
