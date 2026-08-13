@@ -7,6 +7,8 @@ export type AnalyticsEvent =
   | "checkout_completed"
   | "signup";
 
-export function trackEvent(name: AnalyticsEvent, properties?: Record<string, unknown>): void {
+export type AnalyticsProperties = Record<string, string | number | boolean | null>;
+
+export function trackEvent(name: AnalyticsEvent, properties?: AnalyticsProperties): void {
   track(name, properties);
 }

@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
     customer: customerId,
     success_url: `${origin}/dashboard?checkout=success`,
     cancel_url: `${origin}/calculator?checkout=cancelled`,
+    metadata: { user_id: userId, plan_id: planId },
     subscription_data: { metadata: { user_id: userId, plan_id: planId } },
   });
 

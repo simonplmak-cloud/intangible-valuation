@@ -45,8 +45,8 @@ export async function POST(request: NextRequest) {
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
-      const userId = session.subscription_data?.metadata?.user_id ?? session.metadata?.user_id ?? "";
-      const planId = session.subscription_data?.metadata?.plan_id ?? session.metadata?.plan_id ?? "plans:pro";
+      const userId = session.metadata?.user_id ?? "";
+      const planId = session.metadata?.plan_id ?? "plans:pro";
       const customerId = typeof session.customer === "string" ? session.customer : "";
       if (userId && customerId) {
         await db.merge(`subscriptions:${userId}`, {
