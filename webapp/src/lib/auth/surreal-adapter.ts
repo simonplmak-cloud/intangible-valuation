@@ -160,11 +160,11 @@ export function SurrealDBAdapter(): Adapter {
       return { session: { sessionToken: s.sessionToken, userId: s.userId, expires: new Date(s.expires) }, user };
     },
 
-    async updateSession(session: { sessionToken: string; userId: string; expires: Date }): Promise<AdapterSession> {
+    async updateSession(session: Partial<AdapterSession> & Pick<AdapterSession, "sessionToken">): Promise<AdapterSession> {
       const db = await getSurrealClient();
       await db.query("UPDATE sessions SET expires = $expires WHERE sessionToken = $token", {
         token: session.sessionToken,
-        expires: session.expires.toISOString(),
+        expires: session.expires?.toISOString(),
       });
       return session as AdapterSession;
     },
