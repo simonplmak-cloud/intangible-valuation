@@ -1,0 +1,236 @@
+[
+  {
+    "category": "discount_rate",
+    "business_stage": "startup",
+    "asset_type": "all",
+    "industry": "all",
+    "metric_name": "median_wacc",
+    "value": 0.25,
+    "unit": "percentage",
+    "p25": 0.18,
+    "p75": 0.35,
+    "citation": {
+      "source": "Damodaran Online — Cost of Capital by Industry",
+      "author": "Aswath Damodaran (NYU Stern)",
+      "date": "2025",
+      "url": "https://pages.stern.nyu.edu/~adamodar/",
+      "ref": "Cost of Capital by Industry Sector, annual update"
+    }
+  },
+  {
+    "category": "discount_rate",
+    "business_stage": "growth",
+    "asset_type": "all",
+    "industry": "all",
+    "metric_name": "median_wacc",
+    "value": 0.15,
+    "unit": "percentage",
+    "p25": 0.1,
+    "p75": 0.2,
+    "citation": {
+      "source": "Damodaran Online — Cost of Capital by Industry",
+      "author": "Aswath Damodaran (NYU Stern)",
+      "date": "2025",
+      "url": "https://pages.stern.nyu.edu/~adamodar/",
+      "ref": "Cost of Capital by Industry Sector, annual update"
+    }
+  },
+  {
+    "category": "discount_rate",
+    "business_stage": "mature",
+    "asset_type": "all",
+    "industry": "all",
+    "metric_name": "median_wacc",
+    "value": 0.08,
+    "unit": "percentage",
+    "p25": 0.06,
+    "p75": 0.12,
+    "citation": {
+      "source": "Damodaran Online — Cost of Capital by Industry",
+      "author": "Aswath Damodaran (NYU Stern)",
+      "date": "2025",
+      "url": "https://pages.stern.nyu.edu/~adamodar/",
+      "ref": "Cost of Capital by Industry Sector, annual update"
+    }
+  },
+  {
+    "category": "royalty_rate",
+    "business_stage": "startup",
+    "asset_type": "patent",
+    "industry": "all",
+    "metric_name": "median_royalty_rate",
+    "value": 0.06,
+    "unit": "percentage",
+    "p25": 0.03,
+    "p75": 0.1,
+    "citation": {
+      "source": "RoyaltySource Royalty Rate Benchmarking Study",
+      "author": "RoyaltySource (ktMINE)",
+      "date": "2024",
+      "url": "https://www.royaltysource.com/",
+      "ref": "Patent licensing royalty rates by stage"
+    }
+  },
+  {
+    "category": "royalty_rate",
+    "business_stage": "growth",
+    "asset_type": "patent",
+    "industry": "all",
+    "metric_name": "median_royalty_rate",
+    "value": 0.05,
+    "unit": "percentage",
+    "p25": 0.02,
+    "p75": 0.08,
+    "citation": {
+      "source": "RoyaltySource Royalty Rate Benchmarking Study",
+      "author": "RoyaltySource (ktMINE)",
+      "date": "2024",
+      "url": "https://www.royaltysource.com/",
+      "ref": "Patent licensing royalty rates by stage"
+    }
+  },
+  {
+    "category": "royalty_rate",
+    "business_stage": "mature",
+    "asset_type": "patent",
+    "industry": "all",
+    "metric_name": "median_royalty_rate",
+    "value": 0.04,
+    "unit": "percentage",
+    "p25": 0.02,
+    "p75": 0.07,
+    "citation": {
+      "source": "RoyaltySource Royalty Rate Benchmarking Study",
+      "author": "RoyaltySource (ktMINE)",
+      "date": "2024",
+      "url": "https://www.royaltysource.com/",
+      "ref": "Patent licensing royalty rates by stage"
+    }
+  },
+  {
+    "category": "royalty_rate",
+    "business_stage": "all",
+    "asset_type": "brand",
+    "industry": "all",
+    "metric_name": "median_royalty_rate",
+    "value": 0.05,
+    "unit": "percentage",
+    "p25": 0.02,
+    "p75": 0.1,
+    "citation": {
+      "source": "ktMINE Royalty Rate Database",
+      "author": "ktMINE",
+      "date": "2024",
+      "url": "https://www.ktmine.com/",
+      "ref": "Brand/trademark licensing royalty rates"
+    }
+  },
+  {
+    "category": "royalty_rate",
+    "business_stage": "all",
+    "asset_type": "software",
+    "industry": "all",
+    "metric_name": "median_royalty_rate",
+    "value": 0.06,
+    "unit": "percentage",
+    "p25": 0.04,
+    "p75": 0.1,
+    "citation": {
+      "source": "RoyaltySource Royalty Rate Benchmarking Study",
+      "author": "RoyaltySource (ktMINE)",
+      "date": "2024",
+      "url": "https://www.royaltysource.com/",
+      "ref": "Software licensing royalty rates"
+    }
+  },
+  {
+    "category": "useful_life",
+    "business_stage": "startup",
+    "asset_type": "patent",
+    "industry": "all",
+    "metric_name": "median_useful_life",
+    "value": 7,
+    "unit": "years",
+    "p25": 3,
+    "p75": 12,
+    "citation": {
+      "source": "Intangible Asset Valuation (Valuation in Practice Series)",
+      "author": "Mak, Yuen, Wu & Hu — Ascent Partners",
+      "date": "2025",
+      "url": "https://www.amazon.com/Intangible-Asset-Valuation-Comprehensive-Technology/dp/B0FZ8742R1",
+      "ref": "Ch 5: Useful-life estimation by asset type and stage"
+    }
+  },
+  {
+    "category": "useful_life",
+    "business_stage": "mature",
+    "asset_type": "patent",
+    "industry": "all",
+    "metric_name": "median_useful_life",
+    "value": 12,
+    "unit": "years",
+    "p25": 7,
+    "p75": 17,
+    "citation": {
+      "source": "Intangible Asset Valuation (Valuation in Practice Series)",
+      "author": "Mak, Yuen, Wu & Hu — Ascent Partners",
+      "date": "2025",
+      "url": "https://www.amazon.com/Intangible-Asset-Valuation-Comprehensive-Technology/dp/B0FZ8742R1",
+      "ref": "Ch 5: Useful-life estimation by asset type and stage"
+    }
+  },
+  {
+    "category": "useful_life",
+    "business_stage": "all",
+    "asset_type": "technology",
+    "industry": "all",
+    "metric_name": "median_useful_life",
+    "value": 5,
+    "unit": "years",
+    "p25": 2,
+    "p75": 8,
+    "citation": {
+      "source": "Intangible Asset Valuation (Valuation in Practice Series)",
+      "author": "Mak, Yuen, Wu & Hu — Ascent Partners",
+      "date": "2025",
+      "url": "https://www.amazon.com/Intangible-Asset-Valuation-Comprehensive-Technology/dp/B0FZ8742R1",
+      "ref": "Ch 7: Technology useful-life estimation"
+    }
+  },
+  {
+    "category": "growth_rate",
+    "business_stage": "startup",
+    "asset_type": "all",
+    "industry": "technology",
+    "metric_name": "median_revenue_growth",
+    "value": 0.5,
+    "unit": "percentage",
+    "p25": 0.2,
+    "p75": 1.0,
+    "citation": {
+      "source": "Damodaran Online — Historical Growth in Revenues",
+      "author": "Aswath Damodaran (NYU Stern)",
+      "date": "2025",
+      "url": "https://pages.stern.nyu.edu/~adamodar/",
+      "ref": "Revenue growth by industry, annual update"
+    }
+  },
+  {
+    "category": "growth_rate",
+    "business_stage": "mature",
+    "asset_type": "all",
+    "industry": "all",
+    "metric_name": "perpetual_growth_rate",
+    "value": 0.03,
+    "unit": "percentage",
+    "p25": 0.02,
+    "p75": 0.04,
+    "citation": {
+      "source": "Damodaran Online — Historical Growth in Revenues",
+      "author": "Aswath Damodaran (NYU Stern)",
+      "date": "2025",
+      "url": "https://pages.stern.nyu.edu/~adamodar/",
+      "ref": "Perpetual growth rate guidance"
+    }
+  }
+]

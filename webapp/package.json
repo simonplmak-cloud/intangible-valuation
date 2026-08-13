@@ -15,7 +15,8 @@
     "test:coverage": "vitest run --coverage",
     "db:migrate": "tsx src/db/migrate.ts",
     "db:rollback": "tsx src/db/migrate.ts --rollback",
-    "db:seed": "tsx src/db/seed/index.ts",
+    "db:seed": "tsx src/lib/etl/import.ts",
+    "db:sync-plans": "tsx src/lib/billing/sync-plans.ts",
     "check": "pnpm typecheck && pnpm lint && pnpm test"
   },
   "dependencies": {
@@ -28,7 +29,8 @@
     "zod": "^3.23.0",
     "ulid": "^2.3.0",
     "sonner": "^1.7.0",
-    "lucide-react": "^0.460.0"
+    "lucide-react": "^0.460.0",
+    "stripe": "^16.0.0"
   },
   "devDependencies": {
     "typescript": "^5.7.0",
@@ -44,6 +46,8 @@
     "vitest": "^2.0.0",
     "@vitejs/plugin-react": "^4.3.0",
     "@playwright/test": "^1.48.0",
+    "@axe-core/playwright": "^4.10.0",
+    "axe-core": "^4.10.0",
     "@sentry/nextjs": "^8.0.0",
     "@vercel/analytics": "^1.4.0",
     "class-variance-authority": "^0.7.0",

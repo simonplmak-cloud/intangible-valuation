@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ValuationResult } from "@/lib/valuation/types";
 import { StepByStepProof } from "./StepByStepProof";
 import { ExportButton } from "./ExportButton";
@@ -58,6 +59,13 @@ export function ValuationResultCard({ result, isLoading, error }: ValuationResul
       </div>
 
       <StepByStepProof result={result} />
+
+      <p className="text-xs text-neutral-400 px-1">
+        Disclaimer: this result is an estimate based on published valuation methodologies and is provided for
+        informational purposes only — it is not financial, investment, tax, or legal advice. Verify independently before
+        use. See <Link href="/terms" className="underline hover:text-primary-500">Terms</Link> and{" "}
+        <Link href="/privacy" className="underline hover:text-primary-500">Privacy</Link>.
+      </p>
     </div>
   );
 }
