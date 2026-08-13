@@ -68,16 +68,16 @@ export async function closeSurrealClient(): Promise<void> {
   }
 }
 
-export async function query<T = unknown>(surrealql: string, params?: Record<string, unknown>): Promise<T> {
+export async function query<T extends unknown[] = unknown[]>(surrealql: string, params?: Record<string, unknown>): Promise<T> {
   const db = await getSurrealClient();
   const result = await db.query<T>(surrealql, params);
   return result as unknown as T;
 }
 
 export async function queryOne<T = unknown>(surrealql: string, params?: Record<string, unknown>): Promise<T | null> {
-  const results = await query<T>(surrealql, params);
+  const results = await query(surrealql, params);
   const arr = results as unknown[];
-  return arr?.[0] ?? null;
+  return (arr?.[0] as T | undefined) ?? null;
 }
 
 export type SurrealRecord<T = Record<string, unknown>> = T & { id: string };
