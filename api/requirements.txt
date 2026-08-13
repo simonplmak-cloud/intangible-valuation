@@ -1,0 +1,1 @@
+intangible-valuation>=1.0.3

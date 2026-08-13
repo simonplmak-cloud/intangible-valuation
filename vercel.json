@@ -1,7 +1,19 @@
 {
   "version": 2,
-  "outputDirectory": "site",
-  "framework": null,
-  "installCommand": "echo 'pre-built'",
-  "buildCommand": "echo 'ready'"
+  "buildCommand": "cd webapp && pnpm build",
+  "outputDirectory": "webapp/.next",
+  "installCommand": "cd webapp && pnpm install",
+  "functions": {
+    "api/index.py": {
+      "memory": 512,
+      "maxDuration": 30
+    },
+    "api/mcp.py": {
+      "memory": 512,
+      "maxDuration": 30
+    }
+  },
+  "redirects": [
+    { "source": "/docs", "destination": "https://intangible-valuation.simonmak.com", "permanent": false }
+  ]
 }

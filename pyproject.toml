@@ -151,4 +151,5 @@ strict_optional = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = "test_*.py"
+pythonpath = ["."]
 addopts = "--cov=src --cov-report=term-missing -v"

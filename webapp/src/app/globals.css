@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-50: #E6F4F7;
+  --color-primary-100: #CCE9EF;
+  --color-primary-200: #99D3DF;
+  --color-primary-300: #66BDCF;
+  --color-primary-400: #33A7BF;
+  --color-primary-500: #0083AB;
+  --color-primary-600: #006E8F;
+  --color-primary-700: #005973;
+  --color-primary-800: #004457;
+  --color-primary-900: #002F3B;
+  --color-primary-950: #001A21;
+
+  --color-accent-500: #F5A623;
+  --color-accent-600: #D4891A;
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Georgia', 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-white text-neutral-900 font-sans dark:bg-neutral-950 dark:text-neutral-100;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-serif tracking-tight;
+  }
+}
+
+.gradient-primary {
+  background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-700) 50%, var(--color-primary-900) 100%);
+}
+
+.gradient-primary-subtle {
+  background: linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-primary-100) 100%);
+}
+
+.gradient-dark {
+  background: linear-gradient(135deg, #0A0A0A 0%, #171717 50%, #262626 100%);
+}
+
+@utility container-page {
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  @media (width >= 40rem) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  @media (width >= 64rem) {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@utility container-narrow {
+  max-width: 48rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  @media (width >= 40rem) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@utility card {
+  background-color: white;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  @media (prefers-color-scheme: dark) {
+    background-color: var(--color-neutral-900);
+    border-color: var(--color-neutral-800);
+  }
+}
+
+@utility card-elevated {
+  background-color: white;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px 0 rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.04);
+  @media (prefers-color-scheme: dark) {
+    background-color: var(--color-neutral-900);
+    border-color: var(--color-neutral-800);
+  }
+}
