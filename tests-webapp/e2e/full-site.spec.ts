@@ -88,13 +88,106 @@ function valueFor(param: MethodParameter, v: number): unknown {
     n.includes("retention") || n.includes("churn") || n.includes("factor") || n.includes("attrition") ||
     n.includes("secrecy") || n.includes("enforcement") || n.includes("completion") || n.includes("return") ||
     n.includes("cost_of") || n.includes("yield") || n.includes("growth") || n.includes("role_of") ||
-    n.includes("quality") || n.includes("coefficient") || n.includes("diversification");
+    n.includes("quality") || n.includes("coefficient") || n.includes("diversification") || n.includes("level") ||
+    n.includes("contribution") || n.includes("attribution");
   if (rateish) return [0.1, 0.15, 0.2, 0.08, 0.12][v];
   if (n.includes("beta")) return [1.2, 1.5, 0.8, 1.0, 1.4][v];
   return [1000000, 500000, 2000000, 750000, 1500000][v];
 }
 
+const METHOD_OVERRIDES: Record<string, () => Record<string, unknown>[]> = {
+  "backlog-valuation": () => [0, 1, 2, 3, 4].map((v) => ({
+    contract_backlog: [{ value: 1000000 + v * 100000, period: 1 + v }],
+    probability_of_completion: [0.8, 0.9, 0.7, 0.85, 0.95][v],
+    discount_rate: 0.1,
+  })),
+  "bargain-purchase-analysis": () => [0, 1, 2, 3, 4].map((v) => ({
+    purchase_price: [500000, 400000, 600000, 450000, 550000][v],
+    fair_value_net_assets: [1000000, 900000, 1200000, 950000, 1100000][v],
+  })),
+  "cash-generating-unit-impairment": () => [0, 1, 2, 3, 4].map((v) => ({
+    cgu_carrying_value: 1000000,
+    cgu_recoverable_amount: [800000, 700000, 900000, 600000, 950000][v],
+    goodwill_allocated: 200000,
+    other_assets: [{ name: "asset", carrying_value: 100000 + v * 10000 }],
+  })),
+  "contingent-consideration-valuation": () => [0, 1, 2, 3, 4].map((v) => ({
+    scenarios: [{ probability: [0.7, 0.6, 0.8, 0.5, 0.9][v], payment: 1000000 }],
+    discount_rate: 0.1,
+  })),
+  "contributory-asset-charges": () => [0, 1, 2, 3, 4].map((v) => ({
+    assets: [{ type: "working_capital", value: 100000 + v * 10000, return_rate: 0.05 }],
+  })),
+  "deferred-tax-liability-ppa": () => [0, 1, 2, 3, 4].map(() => ({
+    identified_intangibles: [{ name: "patent", value: 1000000, method: "relief-from-royalty" }],
+    tax_basis: 0,
+    statutory_rate: 0.21,
+  })),
+  "intangible-impairment-test": () => [0, 1, 2, 3, 4].map((v) => ({
+    carrying_value: 1000000,
+    fair_value: [800000, 700000, 900000, 600000, 950000][v],
+    standard: "ASC350",
+  })),
+  "mpeem": () => [0, 1, 2, 3, 4].map(() => {
+    const n = 5;
+    return {
+      cash_flow_projections: Array.from({ length: n }, (_, i) => 1000000 + i * 100000),
+      contributory_asset_charges: Array.from({ length: n }, () => ({ type: "working_capital", value: 100000, return_rate: 0.05 })),
+      discount_rate: 0.1,
+      tax_rate: 0.21,
+    };
+  }),
+  "purchase-price-allocation": () => [0, 1, 2, 3, 4].map(() => ({
+    purchase_price: 1000000,
+    tangible_assets_fv: 500000,
+    identified_intangibles: [{ name: "patent", value: 1000000, method: "relief-from-royalty" }],
+  })),
+  "scenario-analysis": () => [0, 1, 2, 3, 4].map((v) => ({
+    scenarios: [
+      { name: "base", probability: [0.6, 0.7, 0.5, 0.8, 0.65][v], function_name: "present_value", params: { future_value: 100000, discount_rate: 0.1, periods: 5 } },
+      { name: "alt", probability: [0.4, 0.3, 0.5, 0.2, 0.35][v], function_name: "present_value", params: { future_value: 120000, discount_rate: 0.1, periods: 5 } },
+    ],
+  })),
+  "software-valuation": () => [0, 1, 2, 3, 4].map((v) => ({
+    development_cost: [1000000, 800000, 1200000, 900000, 1100000][v],
+    maintenance_cost: 100000,
+    user_base: [10000, 5000, 20000, 8000, 15000][v],
+    revenue_model: { type: "subscription", revenue_per_user: 500 },
+    useful_life: 5,
+    discount_rate: 0.1,
+  })),
+  "monte-carlo-valuation": () => [0, 1, 2, 3, 4].map(() => ({
+    valuation_fn: "present_value",
+    input_distributions: [
+      { name: "future_value", distribution: "normal", params: { mean: 100000, std: 10000 } },
+      { name: "discount_rate", distribution: "uniform", params: { low: 0.08, high: 0.12 } },
+      { name: "periods", distribution: "uniform", params: { low: 3, high: 7 } },
+    ],
+    iterations: 100,
+    seed: 42,
+  })),
+  "monte-carlo-sensitivity": () => [0, 1, 2, 3, 4].map(() => ({
+    valuation_fn: "present_value",
+    base_params: { future_value: 100000, discount_rate: 0.1, periods: 5 },
+    distributions: { discount_rate: { distribution: "uniform", params: { low: 0.08, high: 0.12 } } },
+    iterations: 100,
+    seed: 42,
+  })),
+  "monte-carlo-with-correlation": () => [0, 1, 2, 3, 4].map(() => ({
+    valuation_fn: "present_value",
+    distributions: [
+      { name: "future_value", distribution: "normal", params: { mean: 100000, std: 10000 } },
+      { name: "discount_rate", distribution: "uniform", params: { low: 0.08, high: 0.12 } },
+      { name: "periods", distribution: "uniform", params: { low: 3, high: 7 } },
+    ],
+    correlation_matrix: [[1, 0.2, 0.1], [0.2, 1, 0.1], [0.1, 0.1, 1]],
+    iterations: 100,
+    seed: 42,
+  })),
+};
+
 function genCases(m: MethodDefinition): Record<string, unknown>[] {
+  if (METHOD_OVERRIDES[m.slug]) return METHOD_OVERRIDES[m.slug]().slice(0, 5);
   const cases: Record<string, unknown>[] = [];
   for (let v = 0; v < 5; v++) {
     const inputs: Record<string, unknown> = {};
