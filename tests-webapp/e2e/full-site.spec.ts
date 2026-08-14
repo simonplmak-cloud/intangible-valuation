@@ -15,15 +15,58 @@ function flush() {
   buf = [];
 }
 
+const JSON_EXAMPLES: Record<string, unknown> = {
+  development_costs: { labor: 100000, materials: 50000, overhead: 20000 },
+  obsolescence_factors: { functional: 0.1, technological: 0.2, economic: 0.1 },
+  comparables: [
+    { sale_price: 5000000, revenue: 1000000, asset_type: "patent" },
+    { sale_price: 3000000, revenue: 800000, asset_type: "patent" },
+  ],
+  adjustments: {},
+  assets: [{ name: "working_capital", value: 100000, rate: 0.05 }],
+  contributory_asset_charges: [{ name: "working_capital", value: 100000, rate: 0.05 }],
+  identified_intangibles: [{ name: "patent", value: 1000000 }],
+  patents: [{ value: 1000000, category: "technology" }],
+  contract_backlog: [{ revenue: 1000000, probability: 0.9 }],
+  revenue_model: { type: "subscription" },
+  scenarios: [{ name: "base", probability: 1.0, payout: 1000000 }],
+  other_assets: [{ name: "asset", value: 100000 }],
+  base_params: { future_value: 100000, discount_rate: 0.1, periods: 5 },
+  distributions: { discount_rate: { distribution: "uniform", params: { low: 0.08, high: 0.12 } } },
+  input_distributions: [{ name: "future_value", distribution: "normal", params: { mean: 100000, std: 10000 } }],
+  correlation_matrix: [[1, 0.5], [0.5, 1]],
+  tree: {
+    nodes: [
+      { id: "root", type: "chance", label: "root" },
+      { id: "win", type: "terminal", label: "win", value: 1000000 },
+    ],
+    edges: [{ from: "root", to: "win", probability: 1.0 }],
+  },
+  parameter_ranges: { discount_rate: [0.08, 0.1, 0.12] },
+  adjustment_factors: { profit_margin: 1.1 },
+};
+
+const STRING_ENUMS: Record<string, string> = {
+  standard: "ASC350",
+  ip_type: "patent",
+  industry: "technology",
+  life_cycle_stage: "growth",
+  function_name: "present_value",
+  valuation_fn: "present_value",
+};
+
 function valueFor(param: MethodParameter, v: number): unknown {
   const n = param.name.toLowerCase();
+  if (param.type === "json") return JSON_EXAMPLES[n] ?? {};
+  if (param.type === "string") return STRING_ENUMS[n] ?? ["technology", "saas", "pharma", "all", "retail"][v];
   if (param.type === "number[]") {
+    if (n.includes("price")) return [100, 120, 150, 110, 130];
     const sets = [
       [1000000, 1100000, 1200000, 1300000, 1400000],
-      [500000, 600000, 700000],
-      [2000000, 2100000, 2200000, 2300000],
+      [500000, 600000, 700000, 800000, 900000],
+      [2000000, 2100000, 2200000, 2300000, 2400000],
       [750000, 800000, 850000, 900000, 950000],
-      [1500000, 1600000, 1700000],
+      [1500000, 1600000, 1700000, 1800000, 1900000],
     ];
     return sets[v % sets.length];
   }
@@ -31,20 +74,21 @@ function valueFor(param: MethodParameter, v: number): unknown {
     if (n.includes("life") || n.includes("period") || n.includes("year") || n.includes("term")) {
       return [5, 7, 10, 3, 15][v];
     }
-    if (n.includes("count") || n.includes("size") || n.includes("base") || n.includes("user")) {
+    if (n.includes("count") || n.includes("size") || n.includes("base") || n.includes("user") || n.includes("channel")) {
       return [1000, 5000, 10000, 20000, 50000][v];
     }
     return [5, 10, 3, 8, 12][v];
   }
   if (param.type === "boolean") return [true, false, true, false, true][v];
-  if (param.type === "string") return ["technology", "saas", "pharma", "all", "retail"][v];
-  if (param.type === "json") return {};
+  if (n.includes("period") || n.includes("time") || n.includes("expiry")) return [5, 7, 10, 3, 15][v];
   const rateish =
     n.includes("rate") || n.includes("premium") || n.includes("margin") || n.includes("probability") ||
     n.includes("volatility") || n.includes("index") || n.includes("score") || n.includes("strength") ||
     n.includes("loyalty") || n.includes("reach") || n.includes("stability") || n.includes("share") ||
     n.includes("retention") || n.includes("churn") || n.includes("factor") || n.includes("attrition") ||
-    n.includes("secrecy") || n.includes("enforcement") || n.includes("completion");
+    n.includes("secrecy") || n.includes("enforcement") || n.includes("completion") || n.includes("return") ||
+    n.includes("cost_of") || n.includes("yield") || n.includes("growth") || n.includes("role_of") ||
+    n.includes("quality") || n.includes("coefficient") || n.includes("diversification");
   if (rateish) return [0.1, 0.15, 0.2, 0.08, 0.12][v];
   if (n.includes("beta")) return [1.2, 1.5, 0.8, 1.0, 1.4][v];
   return [1000000, 500000, 2000000, 750000, 1500000][v];
@@ -57,6 +101,25 @@ function genCases(m: MethodDefinition): Record<string, unknown>[] {
     for (const p of m.parameters) {
       if (!p.required && v === 0) continue;
       inputs[p.name] = valueFor(p, v);
+    }
+    // cross-param constraints
+    const dr = inputs.discount_rate as number | undefined;
+    if (dr !== undefined) {
+      for (const gk of ["growth_rate", "perpetual_growth_rate", "terminal_growth_rate"]) {
+        const g = inputs[gk] as number | undefined;
+        if (g !== undefined && g >= dr) inputs[gk] = dr / 2;
+      }
+    }
+    if (Array.isArray(inputs.revenue_projections) && typeof inputs.useful_life === "number") {
+      const life = inputs.useful_life as number;
+      if ((inputs.revenue_projections as unknown[]).length !== life) {
+        inputs.revenue_projections = Array.from({ length: life }, (_, i) => 1000000 + i * 100000);
+      }
+    }
+    if (Array.isArray(inputs.cash_flows_with) && Array.isArray(inputs.cash_flows_without)) {
+      const n0 = (inputs.cash_flows_with as unknown[]).length;
+      const n1 = (inputs.cash_flows_without as unknown[]).length;
+      if (n0 !== n1) inputs.cash_flows_without = (inputs.cash_flows_with as unknown[]).map((x) => (x as number) * 0.8);
     }
     cases.push(inputs);
   }
