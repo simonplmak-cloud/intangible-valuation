@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getMethodCitations } from "@/lib/valuation/citations";
 
 export async function POST(
   request: NextRequest,
@@ -33,7 +34,7 @@ export async function POST(
     }
 
     const data = await response.json();
-    return NextResponse.json(data);
+    return NextResponse.json({ ...data, citations: getMethodCitations(method) });
   } catch (error) {
     return NextResponse.json(
       {

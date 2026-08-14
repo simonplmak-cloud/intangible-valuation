@@ -7,6 +7,7 @@ import { ParameterGuide } from "@/components/valuation/ParameterGuide";
 import type { ValuationResult, BusinessStage } from "@/lib/valuation/types";
 import { calculateValuation } from "@/lib/valuation/client";
 import { getCatalogMethod } from "@/lib/valuation/catalog";
+import { getMethodCitations } from "@/lib/valuation/citations";
 
 interface MethodCalculatorProps {
   slug: string;
@@ -37,6 +38,8 @@ export function MethodCalculator({ slug }: MethodCalculatorProps) {
     return calculateValuation(slug, params);
   };
 
+  const citations = getMethodCitations(slug);
+
   return (
     <div className="space-y-8">
       <div>
@@ -49,6 +52,33 @@ export function MethodCalculator({ slug }: MethodCalculatorProps) {
         formulaTex={method.formulaTex}
         formulaReference={method.textbookReference}
       />
+
+      {citations.length > 0 && (
+        <section aria-labelledby="sources-heading" className="card p-5">
+          <h2 id="sources-heading" className="text-sm font-semibold text-neutral-900 dark:text-white mb-3">
+            Sources &amp; references
+          </h2>
+          <ul className="space-y-2">
+            {citations.map((c) => (
+              <li key={c.id} className="text-sm text-neutral-600 dark:text-neutral-400">
+                <span className="font-medium text-neutral-700 dark:text-neutral-300">{c.title}</span>
+                {c.section ? <span className="text-neutral-400"> — {c.section}</span> : null}
+                {c.publisher ? <span className="text-neutral-400"> ({c.publisher})</span> : null}
+                {c.url ? (
+                  <a
+                    href={c.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ml-2 text-primary-500 hover:text-primary-600"
+                  >
+                    link
+                  </a>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
