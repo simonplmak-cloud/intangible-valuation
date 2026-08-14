@@ -262,6 +262,22 @@ class TestCGUImpairment:
         gw_alloc = next(a for a in allocation if a["asset"] == "Goodwill")
         assert gw_alloc["impairment"] == 10_000_000.0
 
+    def test_goodwill_absorbs_all_impairment_no_crash(self):
+        # Regression: goodwill absorbing the entire impairment left `proportion`
+        # unbound in the pro-rata step (UnboundLocalError). This case must not crash.
+        result = cash_generating_unit_impairment(
+            cgu_carrying_value=100_000_000,
+            cgu_recoverable_amount=90_000_000,  # impairment = 10M
+            goodwill_allocated=10_000_000,  # goodwill absorbs all 10M
+            other_assets=[
+                {"name": "Patents", "carrying_value": 40_000_000},
+            ],
+        )
+        assert result.value == 10_000_000.0
+        allocation = result.assumptions["allocation"]
+        patents = next(a for a in allocation if a["asset"] == "Patents")
+        assert patents["impairment"] == 0.0
+
     def test_error_empty_assets(self):
         with pytest.raises(ValueError):
             cash_generating_unit_impairment(

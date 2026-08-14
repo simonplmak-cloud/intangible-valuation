@@ -112,14 +112,17 @@ const METHOD_OVERRIDES: Record<string, () => Record<string, unknown>[]> = {
     other_assets: [{ name: "asset", carrying_value: 100000 + v * 10000 }],
   })),
   "contingent-consideration-valuation": () => [0, 1, 2, 3, 4].map((v) => ({
-    scenarios: [{ probability: [0.7, 0.6, 0.8, 0.5, 0.9][v], payment: 1000000 }],
+    scenarios: [
+      { probability: [0.6, 0.7, 0.5, 0.8, 0.65][v], payment: 1000000 },
+      { probability: [0.4, 0.3, 0.5, 0.2, 0.35][v], payment: 500000 },
+    ],
     discount_rate: 0.1,
   })),
   "contributory-asset-charges": () => [0, 1, 2, 3, 4].map((v) => ({
     assets: [{ type: "working_capital", value: 100000 + v * 10000, return_rate: 0.05 }],
   })),
   "deferred-tax-liability-ppa": () => [0, 1, 2, 3, 4].map(() => ({
-    identified_intangibles: [{ name: "patent", value: 1000000, method: "relief-from-royalty" }],
+    identified_intangibles: [{ name: "patent", fair_value: 1000000 }],
     tax_basis: 0,
     statutory_rate: 0.21,
   })),
@@ -138,7 +141,7 @@ const METHOD_OVERRIDES: Record<string, () => Record<string, unknown>[]> = {
     };
   }),
   "purchase-price-allocation": () => [0, 1, 2, 3, 4].map(() => ({
-    purchase_price: 1000000,
+    purchase_price: 2000000,
     tangible_assets_fv: 500000,
     identified_intangibles: [{ name: "patent", value: 1000000, method: "relief-from-royalty" }],
   })),
@@ -157,30 +160,28 @@ const METHOD_OVERRIDES: Record<string, () => Record<string, unknown>[]> = {
     discount_rate: 0.1,
   })),
   "monte-carlo-valuation": () => [0, 1, 2, 3, 4].map(() => ({
-    valuation_fn: "present_value",
+    valuation_fn: "perpetuity_pv",
     input_distributions: [
-      { name: "future_value", distribution: "normal", params: { mean: 100000, std: 10000 } },
+      { name: "payment", distribution: "normal", params: { mean: 100000, std: 10000 } },
       { name: "discount_rate", distribution: "uniform", params: { low: 0.08, high: 0.12 } },
-      { name: "periods", distribution: "uniform", params: { low: 3, high: 7 } },
     ],
     iterations: 100,
     seed: 42,
   })),
   "monte-carlo-sensitivity": () => [0, 1, 2, 3, 4].map(() => ({
-    valuation_fn: "present_value",
-    base_params: { future_value: 100000, discount_rate: 0.1, periods: 5 },
+    valuation_fn: "perpetuity_pv",
+    base_params: { payment: 100000, discount_rate: 0.1 },
     distributions: { discount_rate: { distribution: "uniform", params: { low: 0.08, high: 0.12 } } },
     iterations: 100,
     seed: 42,
   })),
   "monte-carlo-with-correlation": () => [0, 1, 2, 3, 4].map(() => ({
-    valuation_fn: "present_value",
+    valuation_fn: "perpetuity_pv",
     distributions: [
-      { name: "future_value", distribution: "normal", params: { mean: 100000, std: 10000 } },
+      { name: "payment", distribution: "normal", params: { mean: 100000, std: 10000 } },
       { name: "discount_rate", distribution: "uniform", params: { low: 0.08, high: 0.12 } },
-      { name: "periods", distribution: "uniform", params: { low: 3, high: 7 } },
     ],
-    correlation_matrix: [[1, 0.2, 0.1], [0.2, 1, 0.1], [0.1, 0.1, 1]],
+    correlation_matrix: [[1, 0.3], [0.3, 1]],
     iterations: 100,
     seed: 42,
   })),

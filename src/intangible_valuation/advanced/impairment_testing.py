@@ -78,8 +78,7 @@ def goodwill_impairment_test(
         steps = [
             {
                 "step": 1,
-                "description": "Standard: ASC 350 (US GAAP) - "
-                               "One-step goodwill impairment test",
+                "description": "Standard: ASC 350 (US GAAP) - One-step goodwill impairment test",
             },
             {"step": 2, "description": f"Reporting Unit: {reporting_unit or 'N/A'}"},
             {"step": 3, "description": "Carrying Value", "value": carrying_value},
@@ -195,8 +194,7 @@ def intangible_impairment_test(
         steps = [
             {
                 "step": 1,
-                "description": "Standard: ASC 350 - "
-                               "Indefinite-lived intangible impairment test",
+                "description": "Standard: ASC 350 - Indefinite-lived intangible impairment test",
             },
             {"step": 2, "description": "Carrying Value", "value": carrying_value},
             {"step": 3, "description": "Fair Value", "value": fair_value},
@@ -256,12 +254,8 @@ def intangible_impairment_test(
 class ValueInUseInputs(BaseModel):
     """Inputs for IAS 36 value in use calculation."""
 
-    cash_flow_projections: list[float] = Field(
-        min_length=1, description="Projected future cash flows"
-    )
-    terminal_growth_rate: float = Field(
-        description="Perpetual growth rate for terminal value (decimal)"
-    )
+    cash_flow_projections: list[float] = Field(min_length=1, description="Projected future cash flows")
+    terminal_growth_rate: float = Field(description="Perpetual growth rate for terminal value (decimal)")
     discount_rate: float = Field(gt=0, description="Pre-tax discount rate (decimal)")
 
     @field_validator("cash_flow_projections")
@@ -340,12 +334,14 @@ def value_in_use(
     for t, cf in enumerate(inputs.cash_flow_projections, start=1):
         pv = present_value(cf, inputs.discount_rate, t)
         pv_explicit += pv
-        steps.append({
-            "step": t + 4,
-            "description": f"Year {t} cash flow",
-            "value": cf,
-            "pv": round(pv, 2),
-        })
+        steps.append(
+            {
+                "step": t + 4,
+                "description": f"Year {t} cash flow",
+                "value": cf,
+                "pv": round(pv, 2),
+            }
+        )
 
     # Terminal value using Gordon Growth Model
     final_cf = inputs.cash_flow_projections[-1]
@@ -353,22 +349,26 @@ def value_in_use(
     pv_terminal = present_value(terminal_val, inputs.discount_rate, n)
 
     calc = f"{final_cf} x (1+{inputs.terminal_growth_rate}) / ({inputs.discount_rate} - {inputs.terminal_growth_rate})"
-    steps.append({
-        "step": n + 5,
-        "description": "Terminal Value (Gordon Growth)",
-        "calculation": calc,
-        "value": round(terminal_val, 2),
-        "pv": round(pv_terminal, 2),
-    })
+    steps.append(
+        {
+            "step": n + 5,
+            "description": "Terminal Value (Gordon Growth)",
+            "calculation": calc,
+            "value": round(terminal_val, 2),
+            "pv": round(pv_terminal, 2),
+        }
+    )
 
     viu = pv_explicit + pv_terminal
 
-    steps.append({
-        "step": n + 6,
-        "description": "Value in Use",
-        "calculation": f"PV(explicit) + PV(terminal) = {pv_explicit:,.0f} + {pv_terminal:,.0f}",
-        "value": round(viu, 2),
-    })
+    steps.append(
+        {
+            "step": n + 6,
+            "description": "Value in Use",
+            "calculation": f"PV(explicit) + PV(terminal) = {pv_explicit:,.0f} + {pv_terminal:,.0f}",
+            "value": round(viu, 2),
+        }
+    )
 
     return ValuationResult(
         value=round(viu, 2),
@@ -433,8 +433,11 @@ def fair_value_less_costs_to_sell(
         {"step": 1, "description": "IAS 36 Fair Value Less Costs to Sell"},
         {"step": 2, "description": "Fair Value", "value": inputs.fair_value},
         {"step": 3, "description": "Costs to Sell", "value": inputs.disposal_costs},
-        {"step": 4, "description": "FVLCTS = Fair Value - Costs to Sell",
-         "calculation": f"{inputs.fair_value} - {inputs.disposal_costs}"},
+        {
+            "step": 4,
+            "description": "FVLCTS = Fair Value - Costs to Sell",
+            "calculation": f"{inputs.fair_value} - {inputs.disposal_costs}",
+        },
         {"step": 5, "description": "FVLCTS", "value": round(fvlcts, 2)},
     ]
 
@@ -453,14 +456,10 @@ def fair_value_less_costs_to_sell(
 class CGUImpairmentInputs(BaseModel):
     """Inputs for CGU-level impairment allocation."""
 
-    cgu_carrying_value: float = Field(
-        gt=0, description="CGU carrying value including goodwill"
-    )
+    cgu_carrying_value: float = Field(gt=0, description="CGU carrying value including goodwill")
     cgu_recoverable_amount: float = Field(ge=0, description="CGU recoverable amount")
     goodwill_allocated: float = Field(ge=0, description="Goodwill allocated to CGU")
-    other_assets: list[dict] = Field(
-        description="Other assets in CGU with 'name' and 'carrying_value'"
-    )
+    other_assets: list[dict] = Field(description="Other assets in CGU with 'name' and 'carrying_value'")
 
 
 def cash_generating_unit_impairment(
@@ -534,49 +533,63 @@ def cash_generating_unit_impairment(
     remaining_impairment = total_impairment
 
     steps.append({"step": 1, "description": "IAS 36 CGU Impairment Allocation"})
-    steps.append({
-        "step": 2, "description": "CGU Carrying Value",
-        "value": inputs.cgu_carrying_value,
-    })
-    steps.append({
-        "step": 3, "description": "CGU Recoverable Amount",
-        "value": inputs.cgu_recoverable_amount,
-    })
-    steps.append({
-        "step": 4, "description": "Total Impairment Loss",
-        "value": round(total_impairment, 2),
-    })
+    steps.append(
+        {
+            "step": 2,
+            "description": "CGU Carrying Value",
+            "value": inputs.cgu_carrying_value,
+        }
+    )
+    steps.append(
+        {
+            "step": 3,
+            "description": "CGU Recoverable Amount",
+            "value": inputs.cgu_recoverable_amount,
+        }
+    )
+    steps.append(
+        {
+            "step": 4,
+            "description": "Total Impairment Loss",
+            "value": round(total_impairment, 2),
+        }
+    )
 
     allocation_details: list[dict] = []
     if total_impairment == 0:
-        steps.append({
-            "step": 5,
-            "description": "No impairment - recoverable amount "
-                           "exceeds carrying value",
-        })
+        steps.append(
+            {
+                "step": 5,
+                "description": "No impairment - recoverable amount exceeds carrying value",
+            }
+        )
     else:
-
         # Step 1: Allocate to goodwill first
         gw_impairment = min(remaining_impairment, inputs.goodwill_allocated)
         remaining_impairment -= gw_impairment
         remaining_goodwill = inputs.goodwill_allocated - gw_impairment
 
-        allocation_details.append({
-            "asset": "Goodwill",
-            "carrying_value": inputs.goodwill_allocated,
-            "impairment": round(gw_impairment, 2),
-            "post_impairment": round(remaining_goodwill, 2),
-        })
-        steps.append({
-            "step": 5,
-            "description": "Allocate to goodwill",
-            "impairment": round(gw_impairment, 2),
-            "remaining": round(remaining_goodwill, 2),
-        })
+        allocation_details.append(
+            {
+                "asset": "Goodwill",
+                "carrying_value": inputs.goodwill_allocated,
+                "impairment": round(gw_impairment, 2),
+                "post_impairment": round(remaining_goodwill, 2),
+            }
+        )
+        steps.append(
+            {
+                "step": 5,
+                "description": "Allocate to goodwill",
+                "impairment": round(gw_impairment, 2),
+                "remaining": round(remaining_goodwill, 2),
+            }
+        )
 
         # Step 2: Allocate remaining to other assets pro rata
         total_other_cv = sum(a["carrying_value"] for a in inputs.other_assets)
         for asset in inputs.other_assets:
+            proportion = 0.0
             if total_other_cv > 0 and remaining_impairment > 0:
                 proportion = asset["carrying_value"] / total_other_cv
                 asset_impairment = remaining_impairment * proportion
@@ -584,19 +597,23 @@ def cash_generating_unit_impairment(
                 asset_impairment = 0.0
 
             post_impairment = asset["carrying_value"] - asset_impairment
-            allocation_details.append({
-                "asset": asset["name"],
-                "carrying_value": asset["carrying_value"],
-                "impairment": round(asset_impairment, 2),
-                "post_impairment": round(post_impairment, 2),
-            })
-            steps.append({
-                "step": len(steps) + 1,
-                "description": f"Allocate to {asset['name']}",
-                "proportion": f"{proportion:.1%}" if total_other_cv > 0 else "0%",
-                "impairment": round(asset_impairment, 2),
-                "post_impairment": round(post_impairment, 2),
-            })
+            allocation_details.append(
+                {
+                    "asset": asset["name"],
+                    "carrying_value": asset["carrying_value"],
+                    "impairment": round(asset_impairment, 2),
+                    "post_impairment": round(post_impairment, 2),
+                }
+            )
+            steps.append(
+                {
+                    "step": len(steps) + 1,
+                    "description": f"Allocate to {asset['name']}",
+                    "proportion": f"{proportion:.1%}" if total_other_cv > 0 else "0%",
+                    "impairment": round(asset_impairment, 2),
+                    "post_impairment": round(post_impairment, 2),
+                }
+            )
 
     return ValuationResult(
         value=round(total_impairment, 2),
