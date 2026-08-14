@@ -1,6 +1,5 @@
-import { getToken } from "next-auth/jwt";
+import { auth } from "@/lib/auth/config";
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 
 const publicPaths = [
   "/",
@@ -36,45 +35,39 @@ function isDashboardPath(pathname: string): boolean {
   return pathname.startsWith("/dashboard");
 }
 
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+export default auth((req) => {
+  const { pathname } = req.nextUrl;
 
-  // Allow public paths, static assets
   if (isPublic(pathname) || pathname.startsWith("/_next") || pathname.includes(".")) {
     return NextResponse.next();
   }
 
-  const token = await getToken({
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
+  const session = req.auth;
+  const role = (session?.user as { role?: string } | undefined)?.role ?? "public";
 
-  // Admin routes require admin role
   if (isAdminPath(pathname)) {
-    if (!token) {
-      return NextResponse.redirect(new URL(`/sign-in?callbackUrl=${encodeURIComponent(pathname)}`, request.url));
+    if (!session) {
+      return NextResponse.redirect(new URL(`/sign-in?callbackUrl=${encodeURIComponent(pathname)}`, req.url));
     }
-    if (token.role !== "admin") {
-      return NextResponse.redirect(new URL("/", request.url));
+    if (role !== "admin") {
+      return NextResponse.redirect(new URL("/", req.url));
     }
     return NextResponse.next();
   }
 
-  // Dashboard routes require any auth
   if (isDashboardPath(pathname)) {
-    if (!token) {
-      return NextResponse.redirect(new URL(`/sign-in?callbackUrl=${encodeURIComponent(pathname)}`, request.url));
+    if (!session) {
+      return NextResponse.redirect(new URL(`/sign-in?callbackUrl=${encodeURIComponent(pathname)}`, req.url));
     }
     return NextResponse.next();
   }
 
-  // All other routes require auth
-  if (!token) {
-    return NextResponse.redirect(new URL(`/sign-in?callbackUrl=${encodeURIComponent(pathname)}`, request.url));
+  if (!session) {
+    return NextResponse.redirect(new URL(`/sign-in?callbackUrl=${encodeURIComponent(pathname)}`, req.url));
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],

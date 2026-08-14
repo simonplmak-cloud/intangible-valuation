@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/config";
+import { auth } from "@/lib/auth/config";
 import { getValuationById, deleteValuation, toggleFavorite } from "@/lib/valuation/store";
 import { logAuditTrail } from "@/lib/valuation/audit";
 
 async function getUserId(): Promise<string | null> {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session?.user?.email) return null;
   return (session.user as { id?: string }).id || session.user.email;
 }

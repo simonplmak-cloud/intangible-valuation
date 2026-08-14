@@ -1,27 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { signIn, getProviders } from "next-auth/react";
-import { useState, useEffect } from "react";
+import { signIn } from "next-auth/react";
+import { useState } from "react";
+
+const showGoogle = !!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+const showGitHub = !!process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
+const showOAuth = showGoogle || showGitHub;
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [oauthProviders, setOauthProviders] = useState<Record<string, { id: string; name: string }>>({});
-
-  useEffect(() => {
-    getProviders().then((p) => {
-      if (p) {
-        const oauth: Record<string, { id: string; name: string }> = {};
-        for (const [id, provider] of Object.entries(p)) {
-          if (id !== "credentials") oauth[id] = provider;
-        }
-        setOauthProviders(oauth);
-      }
-    });
-  }, []);
 
   const handleSignIn = async (provider: string) => {
     setLoading(true);
@@ -60,9 +51,9 @@ export default function SignInPage() {
         )}
 
         <div className="card p-6 mt-6 space-y-4">
-          {Object.keys(oauthProviders).length > 0 && (
+          {showOAuth && (
             <>
-              {oauthProviders.google && (
+              {showGoogle && (
                 <button
                   onClick={() => handleSignIn("google")}
                   disabled={loading}
@@ -73,7 +64,7 @@ export default function SignInPage() {
                 </button>
               )}
 
-              {oauthProviders.github && (
+              {showGitHub && (
                 <button
                   onClick={() => handleSignIn("github")}
                   disabled={loading}
