@@ -2,8 +2,9 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import GitHub from "next-auth/providers/github";
+import type { Provider } from "next-auth/providers";
 
-const providers = [
+const providers: Provider[] = [
   Credentials({
     credentials: { email: {}, password: {} },
     authorize: async (credentials) => {
