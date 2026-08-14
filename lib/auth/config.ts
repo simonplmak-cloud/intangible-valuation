@@ -1,9 +1,7 @@
 import type { NextAuthOptions } from "next-auth";
-import type { Adapter } from "next-auth/adapters";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { SurrealDBAdapter } from "@/lib/auth/surreal-adapter";
 
 const providers: NextAuthOptions["providers"] = [];
 
@@ -65,17 +63,7 @@ providers.push(
   })
 );
 
-function initAdapter(): Adapter | undefined {
-  if (!process.env.SURREALDB_URL) return undefined;
-  try {
-    return SurrealDBAdapter();
-  } catch {
-    return undefined;
-  }
-}
-
 export const authOptions: NextAuthOptions = {
-  adapter: initAdapter(),
   providers,
   session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
   pages: {
