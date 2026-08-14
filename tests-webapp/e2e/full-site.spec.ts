@@ -1,7 +1,7 @@
 import { test, expect, type APIRequestContext } from "@playwright/test";
 import { appendFileSync, writeFileSync } from "node:fs";
-import { CATALOG } from "@/lib/valuation/catalog";
-import type { MethodDefinition, MethodParameter } from "@/lib/valuation/types";
+import { CATALOG } from "../../lib/valuation/catalog";
+import type { MethodDefinition, MethodParameter } from "../../lib/valuation/types";
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? "https://intangible-valuation.ascent-partners.com";
 const LOG = process.env.TEST_LOG ?? `/tmp/test${process.pid}.log`;
