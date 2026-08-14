@@ -59,7 +59,7 @@ describe("Valuation method catalog", () => {
 
 describe("Catalog source-of-truth parity", () => {
   const routeFile = readFileSync(
-    join(process.cwd(), "src", "app", "v1", "valuation", "route.ts"),
+    join(process.cwd(), "app", "v1", "valuation", "route.ts"),
     "utf-8"
   );
 

@@ -5,7 +5,7 @@ import { getSurrealClient, closeSurrealClient } from "@/lib/surreal/client";
 import { assertSchemaNoReservedWords } from "@/lib/db/reserved-words";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const SCHEMA_DIR = join(__dirname, "..", "schema");
+const SCHEMA_DIR = join(__dirname, "schema");
 
 interface MigrationFile {
   name: string;

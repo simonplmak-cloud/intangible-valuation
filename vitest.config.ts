@@ -7,12 +7,12 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
-    setupFiles: ["./tests/setup.ts"],
-    include: ["tests/**/*.test.{ts,tsx}"],
+    setupFiles: ["./tests-webapp/setup.ts"],
+    include: ["tests-webapp/**/*.test.{ts,tsx}"],
     coverage: {
       provider: "v8",
-      include: ["src/**/*.{ts,tsx}"],
-      exclude: ["src/app/layout.tsx", "src/lib/utils/cn.ts", "**/*.d.ts"],
+      include: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}", "db/**/*.{ts,tsx}"],
+      exclude: ["app/layout.tsx", "lib/utils/cn.ts", "**/*.d.ts"],
       thresholds: {
         lines: 80,
         branches: 70,
@@ -23,7 +23,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(__dirname, "./"),
     },
   },
 });

@@ -15,8 +15,8 @@ import pytest
 from api.index import HARDCODED, ROUTES, _normalize_slug, _resolve_valuation_fn, resolve_method
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-CATALOG_PATH = REPO_ROOT / "webapp" / "src" / "lib" / "valuation" / "catalog.ts"
-MCP_PATH = REPO_ROOT / "webapp" / "src" / "app" / "v1" / "mcp" / "route.ts"
+CATALOG_PATH = REPO_ROOT / "lib" / "valuation" / "catalog.ts"
+MCP_PATH = REPO_ROOT / "app" / "v1" / "mcp" / "route.ts"
 
 
 def _catalog_slugs() -> list[str]:
