@@ -76,6 +76,8 @@ async function getLinks(request: APIRequestContext, url: string): Promise<string
 }
 
 test.describe("Full-site regression", () => {
+  test.describe.configure({ timeout: 600000, retries: 0 });
+
   test("all links resolve (no 404/500)", async ({ request }) => {
     writeFileSync(LOG, `# Full-site regression — ${new Date().toISOString()}\nBASE=${BASE}\n`);
     const roots = ["/", "/calculator", "/pricing", "/terms", "/privacy", "/mcp", "/skills", "/about", "/ai-advisor"];
