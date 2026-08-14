@@ -172,7 +172,7 @@ const METHOD_OVERRIDES: Record<string, () => Record<string, unknown>[]> = {
     valuation_fn: "perpetuity_pv",
     base_params: { payment: 100000, discount_rate: 0.1 },
     distributions: { discount_rate: { distribution: "uniform", params: { low: 0.08, high: 0.12 } } },
-    iterations: 100,
+    iterations: 1000,
     seed: 42,
   })),
   "monte-carlo-with-correlation": () => [0, 1, 2, 3, 4].map(() => ({
@@ -255,7 +255,10 @@ test.describe("Full-site regression", () => {
   });
 
   test("all 68 methods calculate — 5 cases each (no 500)", async ({ request }) => {
-    let ok = 0, validation = 0, crash = 0;
+    // Known deployed bug fixed in src/ but not yet republished to PyPI:
+    // cash_generating_unit_impairment's unbound `proportion` (UnboundLocalError).
+    const KNOWN_BUGS = ["cash-generating-unit-impairment"];
+    let ok = 0, validation = 0, crash = 0, knownBug = 0;
     for (const m of CATALOG) {
       const cases = genCases(m);
       for (let i = 0; i < cases.length; i++) {
@@ -267,17 +270,25 @@ test.describe("Full-site regression", () => {
           log(`  CALC ${m.slug} case${i} -> 200 value=${hasValue ? body.value : "MISSING"}`);
           if (hasValue) ok++; else crash++;
         } else if (status === 400) {
-          log(`  CALC ${m.slug} case${i} -> 400 (validation)`);
-          validation++;
+          const body = await res.json().catch(() => ({}));
+          const err = (body as { error?: string }).error ?? "unknown";
+          if (KNOWN_BUGS.includes(m.slug)) {
+            log(`  CALC ${m.slug} case${i} -> 400 KNOWN-ENGINE-BUG: ${err}`);
+            knownBug++;
+          } else {
+            log(`  CALC ${m.slug} case${i} -> 400 (validation): ${err}`);
+            validation++;
+          }
         } else {
           log(`  CALC ${m.slug} case${i} -> ${status} (UNEXPECTED)`);
           crash++;
         }
       }
     }
-    log(`SUMMARY: ok=${ok} validation=${validation} crash=${crash} total=${CATALOG.length * 5}`);
+    log(`SUMMARY: ok=${ok} validation=${validation} knownBug=${knownBug} crash=${crash} total=${CATALOG.length * 5}`);
     flush();
     expect(crash).toBe(0);
+    expect(validation).toBe(0);
   });
 
   test("core methods produce correct textbook values (5 cases each)", async ({ request }) => {
